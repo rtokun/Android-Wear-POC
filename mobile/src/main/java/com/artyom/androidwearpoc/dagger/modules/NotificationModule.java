@@ -3,7 +3,8 @@ package com.artyom.androidwearpoc.dagger.modules;
 import android.app.NotificationManager;
 import android.content.Context;
 
-import com.artyom.androidwearpoc.dagger.scopes.ForApplication;
+import com.artyom.androidwearpoc.shared.dagger.modules.ApplicationContextModule;
+import com.artyom.androidwearpoc.shared.dagger.scopes.ForApplication;
 import com.artyom.androidwearpoc.wear.connectivity.ConnectivityStatusNotificationController;
 import com.artyom.androidwearpoc.wear.connectivity.WearConnectivityServiceController;
 

@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MyApplication.getApplicationComponent().inject(this);
+        MyMobileApplication.getApplicationComponent().inject(this);
         setContentView(R.layout.activity_main);
         createGoogleClient();
         addCapabilityListener();

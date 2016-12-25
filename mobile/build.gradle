@@ -1,8 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
     defaultConfig {
         applicationId "com.artyom.androidwearpoc"
         minSdkVersion 19
@@ -27,6 +27,8 @@ dependencies {
     })
 
     wearApp project(':wear')
+
+    compile project(':shared')
 
     compile 'com.google.android.gms:play-services:10.0.1'
     compile 'com.android.support:appcompat-v7:25.1.0'

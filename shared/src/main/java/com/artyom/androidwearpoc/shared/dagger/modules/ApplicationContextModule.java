@@ -1,8 +1,9 @@
-package com.artyom.androidwearpoc.dagger.modules;
+package com.artyom.androidwearpoc.shared.dagger.modules;
 
 import android.content.Context;
 
-import com.artyom.androidwearpoc.dagger.scopes.ForApplication;
+
+import com.artyom.androidwearpoc.shared.dagger.scopes.ForApplication;
 
 import dagger.Module;
 import dagger.Provides;

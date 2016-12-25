@@ -3,7 +3,7 @@
     package="com.artyom.androidwearpoc">
 
   <application
-      android:name=".MyApplication"
+      android:name=".MyMobileApplication"
       android:allowBackup="true"
       android:icon="@mipmap/ic_launcher"
       android:label="@string/app_name"
@@ -20,13 +20,6 @@
 
     <!-- Wear connectivity service-->
     <service android:name=".wear.connectivity.WearConnectivityService">
-      <intent-filter>
-        <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
-        <data
-            android:host="*"
-            android:path="/start-activity"
-            android:scheme="wear" />
-      </intent-filter>
     </service>
 
   </application>

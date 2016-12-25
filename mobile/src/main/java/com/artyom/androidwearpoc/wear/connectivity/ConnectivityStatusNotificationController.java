@@ -6,7 +6,7 @@ import android.content.Context;
 import android.support.v4.app.NotificationCompat;
 
 import com.artyom.androidwearpoc.R;
-import com.artyom.androidwearpoc.dagger.scopes.ForApplication;
+import com.artyom.androidwearpoc.shared.dagger.scopes.ForApplication;
 
 import javax.inject.Inject;
 

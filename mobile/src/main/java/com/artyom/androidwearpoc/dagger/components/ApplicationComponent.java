@@ -1,9 +1,9 @@
 package com.artyom.androidwearpoc.dagger.components;
 
 import com.artyom.androidwearpoc.MainActivity;
-import com.artyom.androidwearpoc.MyApplication;
+import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.dagger.modules.NotificationModule;
-import com.artyom.androidwearpoc.dagger.scopes.ForApplication;
+import com.artyom.androidwearpoc.shared.dagger.scopes.ForApplication;
 import com.artyom.androidwearpoc.wear.connectivity.ConnectivityStatusNotificationController;
 
 import dagger.Component;
@@ -17,7 +17,7 @@ public interface ApplicationComponent {
 
     ConnectivityStatusNotificationController connectivityStatusNotificationController();
 
-    void inject(MyApplication myApplication);
+    void inject(MyMobileApplication myMobileApplication);
 
     void inject(MainActivity mainActivity);
 }

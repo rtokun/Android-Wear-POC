@@ -2,7 +2,7 @@ package com.artyom.androidwearpoc.dagger.components;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
+import com.artyom.androidwearpoc.shared.dagger.modules.GoogleApiModule;
 
 import dagger.Component;
 

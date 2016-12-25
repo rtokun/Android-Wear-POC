@@ -4,7 +4,7 @@ import android.app.Application;
 
 import com.artyom.androidwearpoc.dagger.components.ApplicationComponent;
 import com.artyom.androidwearpoc.dagger.components.DaggerApplicationComponent;
-import com.artyom.androidwearpoc.dagger.modules.ApplicationContextModule;
+import com.artyom.androidwearpoc.shared.dagger.modules.ApplicationContextModule;
 import com.artyom.androidwearpoc.wear.connectivity.WearConnectivityServiceController;
 
 import javax.inject.Inject;
@@ -15,7 +15,7 @@ import timber.log.Timber;
  * Created by Artyom on 23/12/2016.
  */
 
-public class MyApplication extends Application {
+public class MyMobileApplication extends Application {
 
     private static ApplicationComponent mApplicationComponent;
 

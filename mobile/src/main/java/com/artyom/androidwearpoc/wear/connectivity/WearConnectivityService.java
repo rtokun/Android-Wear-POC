@@ -16,9 +16,9 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.artyom.androidwearpoc.MyApplication;
+import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
-import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
+import com.artyom.androidwearpoc.shared.dagger.modules.GoogleApiModule;
 
 import java.util.Set;
 
@@ -53,7 +53,7 @@ public class WearConnectivityService extends Service
     public void onCreate() {
         super.onCreate();
 
-        mConnectivityStatusNotificationController = MyApplication
+        mConnectivityStatusNotificationController = MyMobileApplication
                 .getApplicationComponent()
                 .connectivityStatusNotificationController();
 
@@ -67,6 +67,12 @@ public class WearConnectivityService extends Service
 
         startForeground(ConnectivityStatusNotificationController.CONNECTIVITY_STATUS_NOTIFICATION_ID,
                 mConnectivityStatusNotificationController.getNotification(Unknown));
+    }
+
+    @Override
+    public void onDestroy() {
+        unRegisterCapabilityChangedCallbacks();
+        super.onDestroy();
     }
 
     @Override
@@ -91,6 +97,11 @@ public class WearConnectivityService extends Service
     private void registerCapabilityChangedCallbacks() {
         Wearable.CapabilityApi
                 .addCapabilityListener(mGoogleApiClient, this, WATCH_CAPABILITY);
+    }
+
+    private void unRegisterCapabilityChangedCallbacks() {
+        Wearable.CapabilityApi
+                .removeCapabilityListener(mGoogleApiClient, this, WATCH_CAPABILITY);
     }
 
     private void getNodes() {
