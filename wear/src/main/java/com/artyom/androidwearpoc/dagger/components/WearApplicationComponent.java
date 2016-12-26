@@ -1,7 +1,7 @@
 package com.artyom.androidwearpoc.dagger.components;
 
-import com.artyom.androidwearpoc.MeasurementService;
-import com.artyom.androidwearpoc.MeasurementServiceController;
+import com.artyom.androidwearpoc.measurement.MeasurementService;
+import com.artyom.androidwearpoc.measurement.MeasurementServiceController;
 import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.dagger.modules.MeasurementModule;
 import com.artyom.androidwearpoc.shared.dagger.scopes.ForApplication;

@@ -1,9 +1,11 @@
-package com.artyom.androidwearpoc;
+package com.artyom.androidwearpoc.ui;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
 import android.widget.TextView;
+
+import com.artyom.androidwearpoc.R;
 
 public class MainActivity extends Activity {
 

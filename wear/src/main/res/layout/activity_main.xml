@@ -7,6 +7,6 @@
     android:layout_height="match_parent"
     app:rectLayout="@layout/rect_activity_main"
     app:roundLayout="@layout/round_activity_main"
-    tools:context="com.artyom.androidwearpoc.MainActivity"
+    tools:context="com.artyom.androidwearpoc.ui.MainActivity"
     tools:deviceIds="wear"
     />

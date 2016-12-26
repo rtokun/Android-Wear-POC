@@ -1,4 +1,4 @@
-package com.artyom.androidwearpoc;
+package com.artyom.androidwearpoc.measurement;
 
 import android.content.Context;
 import android.content.Intent;
