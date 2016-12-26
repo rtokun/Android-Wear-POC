@@ -20,6 +20,9 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
+
+    <service android:name=".measurement.MeasurementService"/>
+    <service android:name=".data.processing.DataProcessingService"/>
   </application>
 
 </manifest>

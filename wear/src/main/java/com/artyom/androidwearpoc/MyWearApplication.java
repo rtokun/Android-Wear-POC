@@ -1,6 +1,7 @@
 package com.artyom.androidwearpoc;
 
 import android.app.Application;
+import android.os.Handler;
 
 import com.artyom.androidwearpoc.dagger.components.DaggerWearApplicationComponent;
 import com.artyom.androidwearpoc.dagger.components.WearApplicationComponent;
@@ -40,7 +41,15 @@ public class MyWearApplication extends Application {
     }
 
     private void startAppComponents() {
-        mMeasurementServiceController.startMeasurementService();
+        Timber.d("starting wear app components in 10 seconds delay");
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                mMeasurementServiceController.startMeasurementService();
+            }
+        }, 10000);
     }
 
     private void initTimber() {
@@ -49,7 +58,7 @@ public class MyWearApplication extends Application {
         }
     }
 
-    public static WearApplicationComponent getmApplicationComponent() {
+    public static WearApplicationComponent getApplicationComponent() {
         return mApplicationComponent;
     }
 }

@@ -10,11 +10,8 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import com.artyom.androidwearpoc.MyWearApplication;
-import com.artyom.androidwearpoc.dagger.qualifiers.AccelerometerSensor;
-import com.artyom.androidwearpoc.dagger.qualifiers.HeartRateSensor;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import timber.log.Timber;
 
@@ -26,37 +23,44 @@ public class MeasurementService extends Service implements SensorEventListener{
 
     public final static int SENS_ACCELEROMETER = Sensor.TYPE_ACCELEROMETER;
 
-    public final static int SENS_HEARTRATE = Sensor.TYPE_HEART_RATE;
-
     @Inject
     SensorManager mSensorManager;
 
-    @Inject
-    @AccelerometerSensor
-    Sensor mAccelerometerSensor;
+    private Sensor mAccelerometerSensor;
 
-    @Inject
-    @HeartRateSensor
-    Sensor mHeartRateSensor;
+    private SensorEvent mLastSensorEvent;
 
 
     @Override
     public void onCreate() {
         super.onCreate();
-        MyWearApplication.getmApplicationComponent().inject(this);
+        MyWearApplication.getApplicationComponent().inject(this);
+        initSensors();
         startMeasurement();
     }
 
+    private void initSensors() {
+        Timber.d("initiating sensors");
+
+        if (mAccelerometerSensor == null){
+            mAccelerometerSensor = mSensorManager.getDefaultSensor(SENS_ACCELEROMETER);
+        }
+
+    }
+
     private void startMeasurement() {
+        Timber.d("starting measurement");
         if (checkNotNull()){
+            Timber.d("sensors are valid, registering listeners");
             mSensorManager.registerListener(this, mAccelerometerSensor, 20000, 20000);
-            mSensorManager.registerListener(this, mHeartRateSensor, 20000, 20000);
+        } else {
+            Timber.w("sensors are null");
         }
     }
 
     private boolean checkNotNull() {
+        Timber.d("checking sensors validity");
         return mSensorManager != null
-                && mHeartRateSensor != null
                 && mAccelerometerSensor != null;
     }
 
@@ -77,9 +81,25 @@ public class MeasurementService extends Service implements SensorEventListener{
     }
 
     @Override
-    public void onSensorChanged(SensorEvent event) {
-//        client.sendSensorData(event.sensor.getType(), event.accuracy, event.timestamp, event.values);
-        Timber.d("");
+    public void onSensorChanged(SensorEvent newEvent) {
+
+        long diff = calculateTimeDiff(newEvent);
+
+        mLastSensorEvent = newEvent;
+
+        Timber.d("sensor event occurred, sensor type: %s, accuracy: %s, timestamp: %s, values: " +
+                "%s, time difference: %s", newEvent.sensor.getType(), newEvent.accuracy, newEvent.timestamp,
+                newEvent.values, diff);
+    }
+
+    private long calculateTimeDiff(SensorEvent newEvent) {
+
+        if (mLastSensorEvent == null){
+            return 0;
+        }
+
+        return (newEvent.timestamp - mLastSensorEvent.timestamp)*1000;
+
     }
 
     @Override

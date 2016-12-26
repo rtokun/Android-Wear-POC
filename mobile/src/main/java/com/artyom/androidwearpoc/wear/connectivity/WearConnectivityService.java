@@ -43,11 +43,9 @@ public class WearConnectivityService extends Service
 
     public static final String WATCH_CAPABILITY = "fox_watch_capability";
 
-    @Inject
-    ConnectivityStatusNotificationController mConnectivityStatusNotificationController;
+    private ConnectivityStatusNotificationController mConnectivityStatusNotificationController;
 
-    @Inject
-    GoogleApiClient mGoogleApiClient;
+    private GoogleApiClient mGoogleApiClient;
 
     @Override
     public void onCreate() {
