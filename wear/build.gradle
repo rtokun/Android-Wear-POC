@@ -30,4 +30,5 @@ dependencies {
     compile 'com.jakewharton.timber:timber:4.4.0'
 
     compile project(':shared')
+
 }

@@ -49,7 +49,7 @@ public class MyWearApplication extends Application {
             public void run() {
                 mMeasurementServiceController.startMeasurementService();
             }
-        }, 10000);
+        }, 5000);
     }
 
     private void initTimber() {

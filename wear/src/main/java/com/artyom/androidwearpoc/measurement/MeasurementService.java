@@ -2,14 +2,21 @@ package com.artyom.androidwearpoc.measurement;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.BatteryManager;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import com.artyom.androidwearpoc.MyWearApplication;
+import com.artyom.androidwearpoc.data.processing.DataProcessingService;
+import com.artyom.androidwearpoc.shared.models.SensorEventData;
+import com.artyom.androidwearpoc.shared.models.SensorEventsPackage;
+
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -19,30 +26,41 @@ import timber.log.Timber;
  * Created by Artyom-IDEO on 25-Dec-16.
  */
 
-public class MeasurementService extends Service implements SensorEventListener{
+public class MeasurementService extends Service implements SensorEventListener {
 
     public final static int SENS_ACCELEROMETER = Sensor.TYPE_ACCELEROMETER;
+
+    private static final int SAMPLES_PER_PACKAGE_LIMIT = 3125;
+
+    private static int mCounter;
+
+    private ArrayList<SensorEventData> mSensorEventList;
 
     @Inject
     SensorManager mSensorManager;
 
     private Sensor mAccelerometerSensor;
 
-    private SensorEvent mLastSensorEvent;
-
+    private SensorEventData mLastEventData;
 
     @Override
     public void onCreate() {
         super.onCreate();
         MyWearApplication.getApplicationComponent().inject(this);
         initSensors();
+        resetPackageValues();
         startMeasurement();
+    }
+
+    private void resetPackageValues() {
+        mCounter = 0;
+        mSensorEventList = new ArrayList<>();
     }
 
     private void initSensors() {
         Timber.d("initiating sensors");
 
-        if (mAccelerometerSensor == null){
+        if (mAccelerometerSensor == null) {
             mAccelerometerSensor = mSensorManager.getDefaultSensor(SENS_ACCELEROMETER);
         }
 
@@ -50,7 +68,7 @@ public class MeasurementService extends Service implements SensorEventListener{
 
     private void startMeasurement() {
         Timber.d("starting measurement");
-        if (checkNotNull()){
+        if (checkNotNull()) {
             Timber.d("sensors are valid, registering listeners");
             mSensorManager.registerListener(this, mAccelerometerSensor, 20000, 20000);
         } else {
@@ -83,22 +101,84 @@ public class MeasurementService extends Service implements SensorEventListener{
     @Override
     public void onSensorChanged(SensorEvent newEvent) {
 
-        long diff = calculateTimeDiff(newEvent);
+        SensorEventData newEventData = new SensorEventData(
+                newEvent.timestamp,
+                newEvent.sensor.getType(),
+                newEvent.accuracy,
+                newEvent.values);
 
-        mLastSensorEvent = newEvent;
+        logNewEventData(newEventData, calculateTimeDiff(newEventData));
 
-        Timber.d("sensor event occurred, sensor type: %s, accuracy: %s, timestamp: %s, values: " +
-                "%s, time difference: %s", newEvent.sensor.getType(), newEvent.accuracy, newEvent.timestamp,
-                newEvent.values, diff);
+        if (mCounter <= SAMPLES_PER_PACKAGE_LIMIT) {
+            addNewEventToPackage(newEventData);
+            updateCurrentValues(newEventData);
+        } else {
+            float batteryPercentage = getBatteryStatus();
+            SensorEventsPackage sensorEventsPackage = createSensorEventsPackage
+                    (batteryPercentage, mSensorEventList);
+            sendPackageToMobileDevice(sensorEventsPackage);
+            resetPackageValues();
+        }
     }
 
-    private long calculateTimeDiff(SensorEvent newEvent) {
+    private void sendPackageToMobileDevice(SensorEventsPackage sensorEventsPackage) {
+        Intent sendPackageIntent = new Intent(this, DataProcessingService.class);
+        sendPackageIntent.putExtra()
+    }
 
-        if (mLastSensorEvent == null){
+    private SensorEventsPackage createSensorEventsPackage(float batteryPercentage, ArrayList<SensorEventData> mSensorEventList) {
+        SensorEventsPackage sensorEventsPackage = new SensorEventsPackage();
+        sensorEventsPackage.setSensorEvents(mSensorEventList);
+        sensorEventsPackage.setBatteryLevel(batteryPercentage);
+        return sensorEventsPackage;
+    }
+
+    private float getBatteryStatus() {
+
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = this.registerReceiver(null, ifilter);
+
+        float batteryPercentage;
+        if (batteryStatus != null){
+            int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+            int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+            batteryPercentage = level / (float)scale;
+        } else {
+            Timber.w("failed to retrieve battery percentage");
+            batteryPercentage = -1;
+        }
+
+        return batteryPercentage;
+    }
+
+
+    private void addNewEventToPackage(SensorEventData newEventData) {
+        mSensorEventList.add(newEventData);
+    }
+
+
+    private void updateCurrentValues(SensorEventData newEventData) {
+        mLastEventData = newEventData;
+        mCounter++;
+    }
+
+    private void logNewEventData(SensorEventData newEventData, long diff) {
+        Timber.d("sensor event occurred, sensor type: %s, accuracy: %s, timestamp: %s, values: " +
+                        "%s, time difference: %s",
+                newEventData.getSensorType(),
+                newEventData.getAccuracy(),
+                newEventData.getTimestamp(),
+                newEventData.getValues(),
+                diff);
+    }
+
+    private long calculateTimeDiff(SensorEventData newEventData) {
+
+        if (mLastEventData == null) {
             return 0;
         }
 
-        return (newEvent.timestamp - mLastSensorEvent.timestamp)*1000;
+        return (newEventData.getTimestamp() - mLastEventData.getTimestamp());
 
     }
 
@@ -106,4 +186,5 @@ public class MeasurementService extends Service implements SensorEventListener{
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
+
 }
