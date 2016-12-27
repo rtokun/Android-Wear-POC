@@ -3,6 +3,7 @@ package com.artyom.androidwearpoc.data.processing;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
@@ -18,6 +19,7 @@ import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
 import com.artyom.androidwearpoc.data.DataTransferHolder;
 import com.artyom.androidwearpoc.measurement.MeasurementService;
+import com.artyom.androidwearpoc.shared.enums.DataTransferType;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
 
@@ -28,6 +30,7 @@ import javax.inject.Inject;
 import timber.log.Timber;
 
 import static com.artyom.androidwearpoc.shared.CommonConstants.SENSORS_MESSAGE;
+import static com.artyom.androidwearpoc.shared.Configuration.DATA_TRANSFER_TYPE;
 
 /**
  * Created by Artyom on 25/12/2016.
@@ -93,11 +96,34 @@ public class DataProcessingService extends IntentService {
 
     private void processData(MessagePackage messagePackage) {
 
-        PutDataRequest dataRequest = packData(messagePackage);
+        PutDataRequest dataRequest;
+
+
+        if (DATA_TRANSFER_TYPE.equals(DataTransferType.ASSET)) {
+            dataRequest = packAssetData(messagePackage);
+        } else {
+            dataRequest = packRegularData(messagePackage);
+        }
 
         if (dataRequest != null && validateConnection()) {
             sendData(dataRequest);
         }
+    }
+
+    private PutDataRequest packAssetData(MessagePackage messagePackage) {
+
+        Asset assetMessage = createAssetFromMessagePackage(messagePackage);
+
+        PutDataMapRequest dataMap = PutDataMapRequest.create("/sensors/" + System.currentTimeMillis());
+        dataMap.getDataMap().putAsset(SENSORS_MESSAGE, assetMessage);
+
+        return dataMap.asPutDataRequest();
+
+    }
+
+    private Asset createAssetFromMessagePackage(MessagePackage messagePackage) {
+        byte[] messageInBytes = ParcelableUtil.marshall(messagePackage);
+        return Asset.createFromBytes(messageInBytes);
     }
 
     private void sendData(PutDataRequest dataRequest) {
@@ -111,14 +137,14 @@ public class DataProcessingService extends IntentService {
                         Timber.w("Sending sensor data. result %s",
                                 (dataItemResult.getStatus().isSuccess() ? "success" : "failure"));
 
-                        if (!dataItemResult.getStatus().isSuccess()){
+                        if (!dataItemResult.getStatus().isSuccess()) {
                             Timber.w("failure reason: %s", dataItemResult.getStatus().getStatusMessage());
                         }
                     }
                 });
     }
 
-    private PutDataRequest packData(MessagePackage messagePackage) {
+    private PutDataRequest packRegularData(MessagePackage messagePackage) {
 
         byte[] sensorsMessageByteArray = ParcelableUtil.marshall(messagePackage);
 

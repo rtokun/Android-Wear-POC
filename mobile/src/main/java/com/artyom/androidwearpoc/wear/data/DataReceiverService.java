@@ -3,6 +3,7 @@ package com.artyom.androidwearpoc.wear.data;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.data.FreezableUtils;
+import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.DataMapItem;
@@ -16,6 +17,7 @@ import android.support.annotation.Nullable;
 
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
+import com.artyom.androidwearpoc.shared.Configuration;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
@@ -26,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import timber.log.Timber;
 
 import static com.artyom.androidwearpoc.shared.CommonConstants.SENSORS_MESSAGE;
+import static com.artyom.androidwearpoc.shared.enums.DataTransferType.ASSET;
 
 /**
  * Created by Artyom on 27/12/2016.
@@ -56,7 +59,7 @@ public class DataReceiverService extends WearableListenerService implements Goog
 
         List<DataEvent> events = FreezableUtils.freezeIterable(dataEventBuffer);
 
-        if (!validateGoogleClientConnection()){
+        if (!validateGoogleClientConnection()) {
             Timber.w("failed to connect Google client");
             return;
         }
@@ -96,14 +99,33 @@ public class DataReceiverService extends WearableListenerService implements Goog
     private void processData(DataEvent event) {
         Timber.d("processing data");
 
+        MessagePackage messagePackage;
+
+        if (Configuration.DATA_TRANSFER_TYPE == ASSET) {
+            messagePackage = getMessageFromAsset(event);
+        } else {
+            messagePackage = getMessageFromDefaultEvent(event);
+        }
+
+        logValues(messagePackage);
+    }
+
+    private MessagePackage getMessageFromAsset(DataEvent event) {
+
+        DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
+        Asset messageAsset = dataMapItem.getDataMap().getAsset(SENSORS_MESSAGE);
+
+        return ParcelableUtil.unmarshall(messageAsset.getData(), MessagePackage.CREATOR);
+    }
+
+    private MessagePackage getMessageFromDefaultEvent(DataEvent event) {
+
         byte[] data = DataMapItem
                 .fromDataItem(event.getDataItem())
                 .getDataMap()
                 .getByteArray(SENSORS_MESSAGE);
 
-        MessagePackage messagePackage = ParcelableUtil.unmarshall(data, MessagePackage.CREATOR);
-
-        logValues(messagePackage);
+        return ParcelableUtil.unmarshall(data, MessagePackage.CREATOR);
     }
 
     private void logValues(MessagePackage messagePackage) {
@@ -155,7 +177,7 @@ public class DataReceiverService extends WearableListenerService implements Goog
         // If we have successfully connected Google Api client we can retrieve local node ID
         // and store it once. On every event we need to check if it wasn't fired from this local
         // node
-        if (result.isSuccess()){
+        if (result.isSuccess()) {
             mLocalNodeId = Wearable.NodeApi.getLocalNode(mGoogleApiClient).await().getNode().getId();
         }
 

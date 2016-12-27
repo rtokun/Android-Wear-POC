@@ -14,6 +14,7 @@ import android.support.annotation.Nullable;
 import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.data.DataTransferHolder;
 import com.artyom.androidwearpoc.data.processing.DataProcessingService;
+import com.artyom.androidwearpoc.shared.Configuration;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
 
@@ -23,6 +24,8 @@ import javax.inject.Inject;
 
 import timber.log.Timber;
 
+import static com.artyom.androidwearpoc.shared.Configuration.SAMPLES_PER_PACKAGE_LIMIT;
+
 /**
  * Created by Artyom-IDEO on 25-Dec-16.
  */
@@ -31,7 +34,6 @@ public class MeasurementService extends Service implements SensorEventListener {
 
     public final static int SENS_ACCELEROMETER = Sensor.TYPE_ACCELEROMETER;
 
-    private static final int SAMPLES_PER_PACKAGE_LIMIT = 3000;
 
     public static final String MESSAGE_PACKAGE_ID = "message_package_id";
 
@@ -111,7 +113,9 @@ public class MeasurementService extends Service implements SensorEventListener {
                 newEvent.timestamp,
                 newEvent.values);
 
-        logNewEventData(newEventData, calculateTimeDiff(newEventData));
+        if (Configuration.LOG_EACH_SAMPLE){
+            logNewEventData(newEventData, calculateTimeDiff(newEventData));
+        }
 
         if (mCounter < SAMPLES_PER_PACKAGE_LIMIT) {
             addNewEventToPackage(newEventData);
