@@ -33,7 +33,7 @@ public class DataProcessingService extends IntentService {
 
     private GoogleApiClient mGoogleApiClient;
 
-    private static final long CLIENT_CONNECTION_TIMEOUT = 15000;
+    private static final long CLIENT_CONNECTION_TIMEOUT = 15;
 
     private static final String SENSORS_MESSAGE = "sensors_message";
 
@@ -120,7 +120,7 @@ public class DataProcessingService extends IntentService {
         }
 
         ConnectionResult result = mGoogleApiClient
-                .blockingConnect(CLIENT_CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
+                .blockingConnect(CLIENT_CONNECTION_TIMEOUT, TimeUnit.SECONDS);
 
         return result.isSuccess();
     }
