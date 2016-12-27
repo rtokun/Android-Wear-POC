@@ -123,7 +123,7 @@ public class MeasurementService extends Service implements SensorEventListener {
 
     private void sendPackageToMobileDevice(SensorEventsPackage sensorEventsPackage) {
         Intent sendPackageIntent = new Intent(this, DataProcessingService.class);
-        sendPackageIntent.putExtra()
+        //sendPackageIntent.putExtra()
     }
 
     private SensorEventsPackage createSensorEventsPackage(float batteryPercentage, ArrayList<SensorEventData> mSensorEventList) {

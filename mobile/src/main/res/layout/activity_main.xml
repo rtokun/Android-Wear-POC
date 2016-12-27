@@ -11,9 +11,25 @@
     tools:context="com.artyom.androidwearpoc.ui.MainActivity"
     >
 
-  <TextView
+  <Button
+      android:text="CSV"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="Hello World!"
+      android:id="@+id/buttonCSV"
+      android:onClick="onCSVButtonClick"
+      android:layout_alignParentStart="true"
+      android:layout_marginStart="16dp"
+      android:layout_marginTop="12dp"
+      />
+  <ProgressBar
+      style="?android:attr/progressBarStyleHorizontal"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignTop="@+id/buttonCSV"
+      android:layout_toEndOf="@+id/buttonCSV"
+      android:layout_marginStart="11dp"
+      android:layout_marginTop="13dp"
+      android:visibility="gone"
+      android:id="@+id/progressBarExport"
       />
 </RelativeLayout>

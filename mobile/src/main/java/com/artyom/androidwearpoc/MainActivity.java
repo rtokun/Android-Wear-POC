@@ -11,31 +11,52 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
+import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 
+import com.artyom.androidwearpoc.export.CSVExportTask;
+import com.artyom.androidwearpoc.model.AccelerometerSample;
 import com.artyom.androidwearpoc.wear.connectivity.ConnectivityStatusNotificationController;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import io.realm.Realm;
+import io.realm.RealmResults;
 import timber.log.Timber;
 
 import static com.google.android.gms.wearable.CapabilityApi.FILTER_REACHABLE;
 import static com.google.android.gms.wearable.CapabilityApi.GetCapabilityResult;
 
-public class MainActivity extends AppCompatActivity
-        implements
+public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
     public static final String WATCH_CAPABILITY = "fox_watch_capability";
 
     GoogleApiClient mGoogleApiClient;
+
+    private ProgressBar mProgressbar;
 
     @Inject
     ConnectivityStatusNotificationController mConnectivityStatusNotificationController;
@@ -45,6 +66,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         MyMobileApplication.getApplicationComponent().inject(this);
         setContentView(R.layout.activity_main);
+        mProgressbar = (ProgressBar) findViewById(R.id.progressBarExport);
         createGoogleClient();
         addCapabilityListener();
     }
@@ -158,6 +180,51 @@ public class MainActivity extends AppCompatActivity
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Timber.e("google client connection failed, connection result: %s", connectionResult.getErrorMessage());
     }
+
+
+    public void onCSVButtonClick(View view) {
+        Realm.init(this);
+        Realm realm = Realm.getDefaultInstance();
+        generateRandomAccelerometerSamples(realm);
+        realm.close();
+        CSVExportTask exportTask = new CSVExportTask(true, mProgressbar);
+        exportTask.execute();
+    }
+
+
+
+    private void generateRandomAccelerometerSamples(Realm realm){
+
+        Realm.Transaction transaction = new Realm.Transaction(){
+            @Override
+            public void execute(Realm realm) {
+                long ts = System.currentTimeMillis();
+                for(int i=0; i< 300; i++) {
+                    AccelerometerSample sample = realm.createObject(AccelerometerSample.class);
+                    sample.setTs(ts + i * 20);
+                    sample.setX(i);
+                    sample.setY(i);
+                    sample.setZ(i);
+                }
+            }
+        };
+        realm.executeTransactionAsync(transaction, new Realm.Transaction.OnSuccess(){
+
+            @Override
+            public void onSuccess() {
+                Timber.i("Random acc samples saved to db");
+            }
+        }, new Realm.Transaction.OnError(){
+
+            @Override
+            public void onError(Throwable error) {
+                Timber.i("Random acc samples saving to db failed %s", error.getMessage());
+            }
+        });
+    }
+
+
+
 
 
 }
