@@ -5,8 +5,8 @@ import android.os.Handler;
 
 import com.artyom.androidwearpoc.dagger.components.DaggerWearApplicationComponent;
 import com.artyom.androidwearpoc.dagger.components.WearApplicationComponent;
+import com.artyom.androidwearpoc.dagger.modules.ApplicationContextModule;
 import com.artyom.androidwearpoc.measurement.MeasurementServiceController;
-import com.artyom.androidwearpoc.shared.dagger.modules.ApplicationContextModule;
 
 import javax.inject.Inject;
 

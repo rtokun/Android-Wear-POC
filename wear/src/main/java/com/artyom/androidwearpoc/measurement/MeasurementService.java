@@ -16,7 +16,6 @@ import com.artyom.androidwearpoc.data.processing.DataProcessingService;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -30,7 +29,8 @@ public class MeasurementService extends Service implements SensorEventListener {
 
     public final static int SENS_ACCELEROMETER = Sensor.TYPE_ACCELEROMETER;
 
-    private static final int SAMPLES_PER_PACKAGE_LIMIT = 3125;
+    private static final int SAMPLES_PER_PACKAGE_LIMIT = 50;
+//    private static final int SAMPLES_PER_PACKAGE_LIMIT = 3125;
 
     public static final String ACCELEROMETER_SAMPLES = "accelerometer_samples";
 
@@ -123,10 +123,10 @@ public class MeasurementService extends Service implements SensorEventListener {
 
     private void sendPackageToMobileDevice(float batteryPercentage) {
         Intent sendPackageIntent = new Intent(this, DataProcessingService.class);
-        sendPackageIntent.putParcelableArrayListExtra(ACCELEROMETER_SAMPLES,
+        sendPackageIntent.putExtra(ACCELEROMETER_SAMPLES,
                 mAccelerometerSensorSamples);
         sendPackageIntent.putExtra(BATTERY_PERCENTAGE, batteryPercentage);
-
+        startService(sendPackageIntent);
     }
 
     private float getBatteryStatus() {
@@ -159,7 +159,7 @@ public class MeasurementService extends Service implements SensorEventListener {
     }
 
     private void logNewEventData(AccelerometerSampleData newEventData, long diff) {
-        Timber.d("sensor event occurred, sensor type: %s, accuracy: %s, timestamp: %s, values: " +
+        Timber.d("sensor event occurred, timestamp: %s, values: " +
                         "%s, time difference: %s",
                 newEventData.getTimestamp(),
                 newEventData.getValues(),

@@ -21,8 +21,11 @@
       </intent-filter>
     </activity>
 
-    <service android:name=".measurement.MeasurementService"/>
-    <service android:name=".data.processing.DataProcessingService"/>
+    <service android:name=".measurement.MeasurementService"
+        android:exported="false"/>
+    <service android:name=".data.processing.DataProcessingService"
+        android:exported="false"/>
+
   </application>
 
 </manifest>

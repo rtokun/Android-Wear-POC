@@ -1,4 +1,4 @@
-package com.artyom.androidwearpoc.shared.dagger.modules;
+package com.artyom.androidwearpoc.dagger.modules;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
@@ -39,5 +39,6 @@ public class GoogleApiModule {
                 .build();
 
     }
+
 
 }

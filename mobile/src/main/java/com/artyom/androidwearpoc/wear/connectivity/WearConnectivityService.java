@@ -16,13 +16,13 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+
 import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
-import com.artyom.androidwearpoc.shared.dagger.modules.GoogleApiModule;
+import com.artyom.androidwearpoc.dagger.components.DaggerMobileApplicationComponent;
+import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
 
 import java.util.Set;
-
-import javax.inject.Inject;
 
 import timber.log.Timber;
 

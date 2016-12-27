@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 
-import com.artyom.androidwearpoc.shared.dagger.scopes.ForApplication;
+import com.artyom.androidwearpoc.dagger.scopes.ForApplication;
 
 import javax.inject.Inject;
 

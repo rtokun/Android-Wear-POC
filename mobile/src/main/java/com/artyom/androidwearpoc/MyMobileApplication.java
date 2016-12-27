@@ -2,9 +2,9 @@ package com.artyom.androidwearpoc;
 
 import android.app.Application;
 
-import com.artyom.androidwearpoc.dagger.components.ApplicationComponent;
-import com.artyom.androidwearpoc.dagger.components.DaggerApplicationComponent;
-import com.artyom.androidwearpoc.shared.dagger.modules.ApplicationContextModule;
+import com.artyom.androidwearpoc.dagger.components.DaggerMobileApplicationComponent;
+import com.artyom.androidwearpoc.dagger.components.MobileApplicationComponent;
+import com.artyom.androidwearpoc.dagger.modules.ApplicationContextModule;
 import com.artyom.androidwearpoc.wear.connectivity.WearConnectivityServiceController;
 
 import javax.inject.Inject;
@@ -17,14 +17,14 @@ import timber.log.Timber;
 
 public class MyMobileApplication extends Application {
 
-    private static ApplicationComponent mApplicationComponent;
+    private static MobileApplicationComponent mMobileApplicationComponent;
 
     @Inject
     WearConnectivityServiceController mWearConnectivityServiceController;
 
     //region Accessors
-    public static ApplicationComponent getApplicationComponent() {
-        return mApplicationComponent;
+    public static MobileApplicationComponent getApplicationComponent() {
+        return mMobileApplicationComponent;
     }
 
     @Override
@@ -40,12 +40,12 @@ public class MyMobileApplication extends Application {
     }
 
     private void createDaggerApplicationController() {
-        mApplicationComponent = DaggerApplicationComponent
+        mMobileApplicationComponent = DaggerMobileApplicationComponent
                 .builder()
                 .applicationContextModule(new ApplicationContextModule(this))
                 .build();
 
-        mApplicationComponent.inject(this);
+        mMobileApplicationComponent.inject(this);
     }
 
     private void initTimber() {

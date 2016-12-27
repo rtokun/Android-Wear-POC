@@ -1,4 +1,4 @@
-package com.artyom.androidwearpoc.shared.dagger.scopes;/*
+package com.artyom.androidwearpoc.dagger.scopes;/*
  * Copyright (C) 2013 The Dagger Authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
