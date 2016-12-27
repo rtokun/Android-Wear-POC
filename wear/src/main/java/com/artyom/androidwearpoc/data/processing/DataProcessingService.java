@@ -22,4 +22,5 @@ public class DataProcessingService extends IntentService {
     protected void onHandleIntent(Intent intent) {
 
     }
+
 }
