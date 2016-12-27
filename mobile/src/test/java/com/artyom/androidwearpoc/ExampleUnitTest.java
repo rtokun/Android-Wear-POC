@@ -2,6 +2,8 @@ package com.artyom.androidwearpoc;
 
 import org.junit.Test;
 
+import io.realm.RealmObject;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -10,7 +12,6 @@ import static org.junit.Assert.assertEquals;
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 public class ExampleUnitTest {
-
     @Test
     public void addition_isCorrect() throws Exception {
         assertEquals(4, 2 + 2);
