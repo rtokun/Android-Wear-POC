@@ -13,10 +13,10 @@ import android.support.annotation.Nullable;
 
 import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.data.processing.DataProcessingService;
-import com.artyom.androidwearpoc.shared.models.SensorEventData;
-import com.artyom.androidwearpoc.shared.models.SensorEventsPackage;
+import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -32,16 +32,20 @@ public class MeasurementService extends Service implements SensorEventListener {
 
     private static final int SAMPLES_PER_PACKAGE_LIMIT = 3125;
 
+    public static final String ACCELEROMETER_SAMPLES = "accelerometer_samples";
+
+    public static final String BATTERY_PERCENTAGE = "battery_percentage";
+
     private static int mCounter;
 
-    private ArrayList<SensorEventData> mSensorEventList;
+    private ArrayList<AccelerometerSampleData> mAccelerometerSensorSamples;
 
     @Inject
     SensorManager mSensorManager;
 
     private Sensor mAccelerometerSensor;
 
-    private SensorEventData mLastEventData;
+    private AccelerometerSampleData mLastEventData;
 
     @Override
     public void onCreate() {
@@ -54,7 +58,7 @@ public class MeasurementService extends Service implements SensorEventListener {
 
     private void resetPackageValues() {
         mCounter = 0;
-        mSensorEventList = new ArrayList<>();
+        mAccelerometerSensorSamples = new ArrayList<>();
     }
 
     private void initSensors() {
@@ -101,10 +105,8 @@ public class MeasurementService extends Service implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent newEvent) {
 
-        SensorEventData newEventData = new SensorEventData(
+        AccelerometerSampleData newEventData = new AccelerometerSampleData(
                 newEvent.timestamp,
-                newEvent.sensor.getType(),
-                newEvent.accuracy,
                 newEvent.values);
 
         logNewEventData(newEventData, calculateTimeDiff(newEventData));
@@ -114,23 +116,17 @@ public class MeasurementService extends Service implements SensorEventListener {
             updateCurrentValues(newEventData);
         } else {
             float batteryPercentage = getBatteryStatus();
-            SensorEventsPackage sensorEventsPackage = createSensorEventsPackage
-                    (batteryPercentage, mSensorEventList);
-            sendPackageToMobileDevice(sensorEventsPackage);
+            sendPackageToMobileDevice(batteryPercentage);
             resetPackageValues();
         }
     }
 
-    private void sendPackageToMobileDevice(SensorEventsPackage sensorEventsPackage) {
+    private void sendPackageToMobileDevice(float batteryPercentage) {
         Intent sendPackageIntent = new Intent(this, DataProcessingService.class);
-        sendPackageIntent.putExtra()
-    }
+        sendPackageIntent.putParcelableArrayListExtra(ACCELEROMETER_SAMPLES,
+                mAccelerometerSensorSamples);
+        sendPackageIntent.putExtra(BATTERY_PERCENTAGE, batteryPercentage);
 
-    private SensorEventsPackage createSensorEventsPackage(float batteryPercentage, ArrayList<SensorEventData> mSensorEventList) {
-        SensorEventsPackage sensorEventsPackage = new SensorEventsPackage();
-        sensorEventsPackage.setSensorEvents(mSensorEventList);
-        sensorEventsPackage.setBatteryLevel(batteryPercentage);
-        return sensorEventsPackage;
     }
 
     private float getBatteryStatus() {
@@ -152,27 +148,25 @@ public class MeasurementService extends Service implements SensorEventListener {
     }
 
 
-    private void addNewEventToPackage(SensorEventData newEventData) {
-        mSensorEventList.add(newEventData);
+    private void addNewEventToPackage(AccelerometerSampleData newEventData) {
+        mAccelerometerSensorSamples.add(newEventData);
     }
 
 
-    private void updateCurrentValues(SensorEventData newEventData) {
+    private void updateCurrentValues(AccelerometerSampleData newEventData) {
         mLastEventData = newEventData;
         mCounter++;
     }
 
-    private void logNewEventData(SensorEventData newEventData, long diff) {
+    private void logNewEventData(AccelerometerSampleData newEventData, long diff) {
         Timber.d("sensor event occurred, sensor type: %s, accuracy: %s, timestamp: %s, values: " +
                         "%s, time difference: %s",
-                newEventData.getSensorType(),
-                newEventData.getAccuracy(),
                 newEventData.getTimestamp(),
                 newEventData.getValues(),
                 diff);
     }
 
-    private long calculateTimeDiff(SensorEventData newEventData) {
+    private long calculateTimeDiff(AccelerometerSampleData newEventData) {
 
         if (mLastEventData == null) {
             return 0;

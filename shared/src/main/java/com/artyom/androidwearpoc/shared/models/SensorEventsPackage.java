@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Artyom on 26/12/2016.
@@ -11,15 +12,15 @@ import java.util.ArrayList;
 
 public class SensorEventsPackage implements Parcelable{
 
-    private ArrayList<SensorEventData> sensorEvents;
+    private List<AccelerometerSampleData> sensorEvents;
 
     private float batteryLevel;
 
-    public ArrayList<SensorEventData> getSensorEvents() {
+    public ArrayList<AccelerometerSampleData> getSensorEvents() {
         return sensorEvents;
     }
 
-    public void setSensorEvents(ArrayList<SensorEventData> sensorEvents) {
+    public void setSensorEvents(ArrayList<AccelerometerSampleData> sensorEvents) {
         this.sensorEvents = sensorEvents;
     }
 
