@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <bool name="use_assets">false</bool>
-  <item name="use_assets" type="bool" />
-</resources>

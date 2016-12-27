@@ -9,6 +9,7 @@ import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
+import com.google.common.io.ByteStreams;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,6 +23,8 @@ import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -107,7 +110,11 @@ public class DataReceiverService extends WearableListenerService implements Goog
             messagePackage = getMessageFromDefaultEvent(event);
         }
 
-        logValues(messagePackage);
+        if (messagePackage != null){
+            logValues(messagePackage);
+        } else {
+            Timber.d("message values are null");
+        }
     }
 
     private MessagePackage getMessageFromAsset(DataEvent event) {
@@ -115,7 +122,18 @@ public class DataReceiverService extends WearableListenerService implements Goog
         DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
         Asset messageAsset = dataMapItem.getDataMap().getAsset(SENSORS_MESSAGE);
 
-        return ParcelableUtil.unmarshall(messageAsset.getData(), MessagePackage.CREATOR);
+        InputStream messageAssetInputStream = Wearable.DataApi
+                .getFdForAsset(mGoogleApiClient, messageAsset).await().getInputStream();
+
+
+        try {
+            byte[] messageBytes = ByteStreams.toByteArray(messageAssetInputStream);
+            return ParcelableUtil.unmarshall(messageBytes, MessagePackage.CREATOR);
+        } catch (IOException e) {
+            Timber.e("failed to convert input stream to byte array, reason: %s", e);
+            return null;
+        }
+
     }
 
     private MessagePackage getMessageFromDefaultEvent(DataEvent event) {
