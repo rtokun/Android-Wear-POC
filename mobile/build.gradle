@@ -41,5 +41,4 @@ dependencies {
 
     compile 'com.jakewharton.timber:timber:4.4.0'
     //compile 'io.realm:realm-android:0.80.3'
-    compile 'com.android.support:multidex:1.0.0'
 }

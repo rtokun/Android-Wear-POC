@@ -12,8 +12,10 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import com.artyom.androidwearpoc.MyWearApplication;
+import com.artyom.androidwearpoc.data.DataTransferHolder;
 import com.artyom.androidwearpoc.data.processing.DataProcessingService;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
+import com.artyom.androidwearpoc.shared.models.MessagePackage;
 
 import java.util.ArrayList;
 
@@ -29,12 +31,9 @@ public class MeasurementService extends Service implements SensorEventListener {
 
     public final static int SENS_ACCELEROMETER = Sensor.TYPE_ACCELEROMETER;
 
-    private static final int SAMPLES_PER_PACKAGE_LIMIT = 50;
-//    private static final int SAMPLES_PER_PACKAGE_LIMIT = 3125;
+    private static final int SAMPLES_PER_PACKAGE_LIMIT = 3000;
 
-    public static final String ACCELEROMETER_SAMPLES = "accelerometer_samples";
-
-    public static final String BATTERY_PERCENTAGE = "battery_percentage";
+    public static final String MESSAGE_PACKAGE_ID = "message_package_id";
 
     private static int mCounter;
 
@@ -42,6 +41,9 @@ public class MeasurementService extends Service implements SensorEventListener {
 
     @Inject
     SensorManager mSensorManager;
+
+    @Inject
+    DataTransferHolder mDataTransferHolder;
 
     private Sensor mAccelerometerSensor;
 
@@ -111,7 +113,7 @@ public class MeasurementService extends Service implements SensorEventListener {
 
         logNewEventData(newEventData, calculateTimeDiff(newEventData));
 
-        if (mCounter <= SAMPLES_PER_PACKAGE_LIMIT) {
+        if (mCounter < SAMPLES_PER_PACKAGE_LIMIT) {
             addNewEventToPackage(newEventData);
             updateCurrentValues(newEventData);
         } else {
@@ -122,11 +124,24 @@ public class MeasurementService extends Service implements SensorEventListener {
     }
 
     private void sendPackageToMobileDevice(float batteryPercentage) {
+        Timber.i("sending package to processing service");
+
+        long messagePackageId = System.currentTimeMillis();
+        MessagePackage messagePackage = createMessagePackage(mAccelerometerSensorSamples, batteryPercentage);
+
+        // Sending package in singleton holder
+        mDataTransferHolder.getQueueOfMessagePackages().put(messagePackageId, messagePackage);
+
         Intent sendPackageIntent = new Intent(this, DataProcessingService.class);
-        sendPackageIntent.putExtra(ACCELEROMETER_SAMPLES,
-                mAccelerometerSensorSamples);
-        sendPackageIntent.putExtra(BATTERY_PERCENTAGE, batteryPercentage);
+        sendPackageIntent.putExtra(MESSAGE_PACKAGE_ID, messagePackageId);
         startService(sendPackageIntent);
+    }
+
+    private MessagePackage createMessagePackage(ArrayList<AccelerometerSampleData> mAccelerometerSensorSamples, float batteryPercentage) {
+        MessagePackage messagePackage = new MessagePackage();
+        messagePackage.setAccelerometerSamples(mAccelerometerSensorSamples);
+        messagePackage.setBatteryPercentage(batteryPercentage);
+        return messagePackage;
     }
 
     private float getBatteryStatus() {
@@ -147,11 +162,9 @@ public class MeasurementService extends Service implements SensorEventListener {
         return batteryPercentage;
     }
 
-
     private void addNewEventToPackage(AccelerometerSampleData newEventData) {
         mAccelerometerSensorSamples.add(newEventData);
     }
-
 
     private void updateCurrentValues(AccelerometerSampleData newEventData) {
         mLastEventData = newEventData;
