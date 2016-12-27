@@ -23,7 +23,6 @@ public class DataReceiverService extends WearableListenerService {
         // Running through all the events
         for (DataEvent event : events) {
             if (event.getType() == DataEvent.TYPE_CHANGED) {
-                event.getDataItem().
             } else if (event.getType() == DataEvent.TYPE_DELETED){
 
             }
