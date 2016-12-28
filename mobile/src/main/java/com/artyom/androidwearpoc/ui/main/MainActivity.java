@@ -26,8 +26,10 @@ import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.R;
 import com.artyom.androidwearpoc.export.CSVExportTask;
 import com.artyom.androidwearpoc.ui.ExportFileDialog;
+import com.artyom.androidwearpoc.ui.utils.Conversions;
 import com.artyom.androidwearpoc.wear.connectivity.ConnectivityStatusNotificationController;
 
+import java.io.File;
 import java.util.List;
 import java.util.Set;
 
@@ -154,7 +156,6 @@ public class MainActivity extends AppCompatActivity implements
                         }
                     }
 
-
                     @Override
                     public void onFailure(@NonNull Status status) {
                         Timber.d("failed to retrieve the capabilities, the status: %s", status.getStatusMessage());
@@ -176,27 +177,30 @@ public class MainActivity extends AppCompatActivity implements
         CSVExportTask exportTask = new CSVExportTask(mProgressbar, new CSVExportTask.Callback() {
 
             @Override
-            public void onSuccess(String exportFilePath) {
+            public void onSuccess(File exportFile) {
                 Timber.i("Loading email dialog");
-                showDialog(exportFilePath,true, "Export file saved to : " + exportFilePath);
+                showCSVFileExportDialog(exportFile.getAbsolutePath(),true,
+                        "Export file saved to device: " + exportFile.getAbsolutePath() +
+                        " \nSize in MB:" + Conversions.humanReadableByteCount(exportFile.length(),true) +
+                         "\nWant to share?");
             }
 
             @Override
             public void onFailure(String message) {
                 Timber.e("CSV export failed %s", message);
-                showDialog("",false, "Failed to export file: \n" + message);
+                showCSVFileExportDialog("",false, "Failed to export file: \n" + message);
             }
 
             @Override
             public void onNoData() {
                 Timber.w("CSV export failed - no data");
-                showDialog("",false, "No data to export");
+                showCSVFileExportDialog("",false, "No data to export");
             }
         });
         exportTask.execute();
     }
 
-    void showDialog(String accSamplesFilePath, boolean success, String text) {
+    void showCSVFileExportDialog(String accSamplesFilePath, boolean success, String text) {
 
         // DialogFragment.show() will take care of adding the fragment
         // in a transaction.  We also want to remove any currently showing

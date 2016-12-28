@@ -16,16 +16,20 @@
       >
 
     <Button
-        android:text="Send"
-        android:layout_width="wrap_content"
+        android:text="Share"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:id="@+id/buttonSend"
+        android:padding="10dip"
+        android:layout_weight="1"
         />
     <Button
         android:text="Close"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:id="@+id/buttonClose"
+        android:padding="10dip"
+        android:layout_weight="1"
         />
   </LinearLayout>
 
