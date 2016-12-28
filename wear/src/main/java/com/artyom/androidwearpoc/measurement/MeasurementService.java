@@ -16,7 +16,10 @@ import com.artyom.androidwearpoc.data.DataTransferHolder;
 import com.artyom.androidwearpoc.data.processing.DataProcessingService;
 import com.artyom.androidwearpoc.shared.Configuration;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
+import com.artyom.androidwearpoc.shared.models.MeasurementServiceStatus;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 
@@ -47,6 +50,9 @@ public class MeasurementService extends Service implements SensorEventListener {
     @Inject
     DataTransferHolder mDataTransferHolder;
 
+    @Inject
+    EventBus mEventBus;
+
     private Sensor mAccelerometerSensor;
 
     private AccelerometerSampleData mLastEventData;
@@ -58,6 +64,7 @@ public class MeasurementService extends Service implements SensorEventListener {
         initSensors();
         resetPackageValues();
         startMeasurement();
+        mEventBus.postSticky(new MeasurementServiceStatus(true));
     }
 
     private void resetPackageValues() {
@@ -98,6 +105,7 @@ public class MeasurementService extends Service implements SensorEventListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mEventBus.postSticky(new MeasurementServiceStatus(false));
     }
 
     @Nullable

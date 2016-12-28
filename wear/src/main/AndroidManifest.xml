@@ -21,6 +21,10 @@
       </intent-filter>
     </activity>
 
+    <activity
+        android:name="android.support.wearable.activity.ConfirmationActivity">
+    </activity>
+
     <service android:name=".measurement.MeasurementService"
         android:exported="false"/>
     <service android:name=".data.processing.DataProcessingService"

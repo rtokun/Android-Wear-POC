@@ -2,11 +2,13 @@ package com.artyom.androidwearpoc.dagger.components;
 
 import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.dagger.modules.DataHolderModule;
+import com.artyom.androidwearpoc.dagger.modules.EventBusModule;
 import com.artyom.androidwearpoc.dagger.modules.MeasurementModule;
+import com.artyom.androidwearpoc.dagger.modules.UtilsModule;
 import com.artyom.androidwearpoc.dagger.scopes.ForApplication;
 import com.artyom.androidwearpoc.data.processing.DataProcessingService;
 import com.artyom.androidwearpoc.measurement.MeasurementService;
-import com.artyom.androidwearpoc.measurement.MeasurementServiceController;
+import com.artyom.androidwearpoc.ui.MainActivity;
 
 import dagger.Component;
 
@@ -14,10 +16,9 @@ import dagger.Component;
  * Created by Artyom-IDEO on 25-Dec-16.
  */
 @ForApplication
-@Component(modules = {MeasurementModule.class, DataHolderModule.class})
+@Component(modules = {MeasurementModule.class, DataHolderModule.class, UtilsModule.class,
+        EventBusModule.class})
 public interface WearApplicationComponent {
-
-    MeasurementServiceController measurementServiceController();
 
     void inject(MyWearApplication myWearApplication);
 
@@ -25,4 +26,5 @@ public interface WearApplicationComponent {
 
     void inject(DataProcessingService dataProcessingService);
 
+    void inject(MainActivity mainActivity);
 }
