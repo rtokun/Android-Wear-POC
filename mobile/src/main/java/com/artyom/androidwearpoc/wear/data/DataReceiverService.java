@@ -7,12 +7,19 @@ import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.WearableListenerService;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
+import com.artyom.androidwearpoc.db.AccelerometerSamplesRepo;
+import com.artyom.androidwearpoc.db.AccelerometerSamplesRepoImpl;
+import com.artyom.androidwearpoc.model.AccelerometerSample;
+import com.artyom.androidwearpoc.model.converter.AccelerometerSamplesConverter;
+import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
 
@@ -30,6 +37,8 @@ public class DataReceiverService extends WearableListenerService implements Goog
     private static final long CLIENT_CONNECTION_TIMEOUT = 15;
 
     private GoogleApiClient mGoogleApiClient;
+
+    private AccelerometerSamplesRepo mAccelerometerSamplesRepo = new AccelerometerSamplesRepoImpl();
 
     @Override
     public void onCreate() {
@@ -51,10 +60,15 @@ public class DataReceiverService extends WearableListenerService implements Goog
         for (DataEvent event : events) {
             if (event.getType() == DataEvent.TYPE_CHANGED) {
 
-                processData(event);
-                dele
+               /* processData(event);
+                dele*/
                 byte[] data = event.getDataItem().getData();
-                ParcelableUtil.unmarshall(data, MessagePackage.CREATOR);
+                MessagePackage message = ParcelableUtil.unmarshall(data, MessagePackage.CREATOR);
+                List<AccelerometerSampleData> accelerometerSamples = message.getmAccelerometerSamples();
+                List<AccelerometerSample> converted = AccelerometerSamplesConverter.convert(accelerometerSamples);
+                mAccelerometerSamplesRepo.saveSamples(converted);
+
+                float batteryPercentage = message.getmBatteryPercentage();
 
             } else if (event.getType() == DataEvent.TYPE_DELETED) {
 

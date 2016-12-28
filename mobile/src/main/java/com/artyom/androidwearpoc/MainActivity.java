@@ -183,17 +183,16 @@ public class MainActivity extends AppCompatActivity implements
 
 
     public void onCSVButtonClick(View view) {
-        Realm.init(this);
-        Realm realm = Realm.getDefaultInstance();
-        generateRandomAccelerometerSamples(realm);
-        realm.close();
+        //Realm realm = Realm.getDefaultInstance();
+        //generateRandomAccelerometerSamples(realm);
+        //realm.close();
         CSVExportTask exportTask = new CSVExportTask(true, mProgressbar);
         exportTask.execute();
     }
 
 
 
-    private void generateRandomAccelerometerSamples(Realm realm){
+    /*private void generateRandomAccelerometerSamples(Realm realm){
 
         Realm.Transaction transaction = new Realm.Transaction(){
             @Override
@@ -221,7 +220,7 @@ public class MainActivity extends AppCompatActivity implements
                 Timber.i("Random acc samples saving to db failed %s", error.getMessage());
             }
         });
-    }
+    }*/
 
 
 

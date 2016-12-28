@@ -7,33 +7,32 @@ import io.realm.RealmObject;
  * Created by tomerlev on 27/12/2016.
  */
 
-import io.realm.RealmObject;
 
 public class AccelerometerSample extends RealmObject {
-    private int x;
-    private int y;
-    private int z;
+    private float x;
+    private float y;
+    private float z;
     private long ts;
 
     public AccelerometerSample() {
     }
 
-    public AccelerometerSample(int x, int y, int z, long ts) {
+    public AccelerometerSample(float x, float y, float z, long ts) {
         this.x = x;
         this.y = y;
         this.z = z;
         this.ts = ts;
     }
 
-    public void setX(int x) {
+    public void setX(float x) {
         this.x = x;
     }
 
-    public void setY(int y) {
+    public void setY(float y) {
         this.y = y;
     }
 
-    public void setZ(int z) {
+    public void setZ(float z) {
         this.z = z;
     }
 
@@ -41,15 +40,15 @@ public class AccelerometerSample extends RealmObject {
         this.ts = ts;
     }
 
-    public int getX() {
+    public float getX() {
         return x;
     }
 
-    public int getY() {
+    public float getY() {
         return y;
     }
 
-    public int getZ() {
+    public float getZ() {
         return z;
     }
 
