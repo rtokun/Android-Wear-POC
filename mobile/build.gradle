@@ -11,6 +11,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+//        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -30,7 +31,7 @@ dependencies {
     wearApp project(':wear')
     compile project(':shared')
 
-    compile 'com.google.android.gms:play-services:10.0.1'
+    compile 'com.google.android.gms:play-services-wearable:10.0.1'
     compile 'com.android.support:appcompat-v7:25.1.0'
     testCompile 'junit:junit:4.12'
 
@@ -40,5 +41,5 @@ dependencies {
 
     compile 'com.jakewharton.timber:timber:4.4.0'
     compile 'com.google.guava:guava:20.0'
-    //compile 'io.realm:realm-android:0.80.3'
+  //  compile 'com.android.support:multidex:1.0.1'
 }
