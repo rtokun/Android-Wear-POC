@@ -39,6 +39,7 @@ public class MyMobileApplication extends Application {
     private void startAppComponents() {
         mWearConnectivityServiceController.startWearConnectivityService();
         Realm.init(this);
+        //Realm.getDefaultInstance().deleteAll();
     }
 
     private void createDaggerApplicationController() {

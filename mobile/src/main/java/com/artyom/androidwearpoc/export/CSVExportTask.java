@@ -27,10 +27,18 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Void> {
     private File mExportFile;
     private boolean mSendViaMail;
     private ProgressBar mProgressBar;
+    private Callback mCallback;
 
-    public CSVExportTask(boolean sendViaMail, ProgressBar progressBar) {
+    public  interface Callback{
+        void onSuccess(String exportFilePath);
+
+        void onFailure(String message);
+    }
+
+    public CSVExportTask(boolean sendViaMail, ProgressBar progressBar, Callback callback) {
         this.mSendViaMail = sendViaMail;
         this.mProgressBar = progressBar;
+        this.mCallback = callback;
     }
 
     @Override
@@ -76,7 +84,6 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Void> {
                 sb.append(String.valueOf(sample.getY()));
                 sb.append(" ,");
                 sb.append(String.valueOf(sample.getZ()));
-                sb.append(" ,");
                 sb.append("\n");
                 bw.write(sb.toString());
             }
@@ -85,6 +92,7 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Void> {
             Timber.e("CSV file saved to: %s", mExportFile.getAbsolutePath());
         } catch (IOException e) {
             Timber.e("Unable to write export file, error: %s", e.getMessage());
+            mCallback.onFailure(e.getMessage());
         }
         return null;
     }
@@ -95,6 +103,7 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Void> {
         if(mSendViaMail){
             //EmailSender.sendFileInEmail(mExportFile);
         }
+        mCallback.onSuccess(mExportFile.getAbsolutePath());
     }
 
     @Override

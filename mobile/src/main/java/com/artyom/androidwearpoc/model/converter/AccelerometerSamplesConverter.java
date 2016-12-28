@@ -12,6 +12,8 @@ import java.util.List;
 
 public class AccelerometerSamplesConverter {
 
+    private static final long ROUND_RANGE = 1000000;
+
     public static List<AccelerometerSample> convert(List<AccelerometerSampleData> samples){
         List<AccelerometerSample> convertedSamples = new LinkedList<>();
         for (AccelerometerSampleData sample : samples) {
@@ -20,7 +22,7 @@ public class AccelerometerSamplesConverter {
                     values[0],
                     values[1],
                     values[2],
-                    sample.getTimestamp()));
+                    sample.getTimestamp() / ROUND_RANGE));
         }
         return convertedSamples;
     }
