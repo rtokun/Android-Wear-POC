@@ -22,19 +22,27 @@ import timber.log.Timber;
 /**
  * Created by tomerlev on 27/12/2016.
  */
-public class CSVExportTask extends AsyncTask<Void,Integer,Void> {
+public class CSVExportTask extends AsyncTask<Void,Integer,Boolean> {
 
     private File mExportFile;
-    private boolean mSendViaMail;
     private ProgressBar mProgressBar;
+    private Callback mCallback;
 
-    public CSVExportTask(boolean sendViaMail, ProgressBar progressBar) {
-        this.mSendViaMail = sendViaMail;
-        this.mProgressBar = progressBar;
+    public  interface Callback{
+        void onSuccess(File exportFile);
+
+        void onFailure(String message);
+
+        void onNoData();
     }
 
-    @Override
-    protected void onPreExecute() {
+    public CSVExportTask(ProgressBar progressBar, Callback callback) {
+        this.mProgressBar = progressBar;
+        this.mCallback = callback;
+    }
+
+
+    protected void createFile() {
         final String date = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault()).format(new Date());
         final String filename = String.format("%s_%s.csv", "export", date);
 
@@ -49,12 +57,9 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Void> {
     }
 
     @Override
-    protected Void doInBackground(Void... voids) {
+    protected Boolean doInBackground(Void... voids) {
         BufferedWriter bw = null;
         try {
-            publishProgress(0);
-            FileWriter filewriter = new FileWriter(mExportFile);
-            bw = new BufferedWriter(filewriter);
 
             // Read data
             // TODO: Extract to method
@@ -62,10 +67,21 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Void> {
             RealmResults<AccelerometerSample> result = realm.where(AccelerometerSample.class).findAll();
             final int numSamples = result.size();
 
+            if(numSamples == 0){
+                mCallback.onNoData();
+                return false;
+            }
+
+            createFile();
+
+            FileWriter filewriter = new FileWriter(mExportFile);
+            bw = new BufferedWriter(filewriter);
+
+            publishProgress(0,numSamples);
+
             // Write the string to the file
             for (int i = 1; i < numSamples; i++) {
-                final int progress = i;
-                publishProgress((progress - i) /100);
+                publishProgress(i);
 
                 AccelerometerSample sample = result.get(i);
                 StringBuffer sb = new StringBuffer();
@@ -76,31 +92,38 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Void> {
                 sb.append(String.valueOf(sample.getY()));
                 sb.append(" ,");
                 sb.append(String.valueOf(sample.getZ()));
-                sb.append(" ,");
                 sb.append("\n");
                 bw.write(sb.toString());
             }
             bw.flush();
             bw.close();
-            Timber.e("CSV file saved to: %s", mExportFile.getAbsolutePath());
+            Timber.i("CSV file saved to: %s", mExportFile.getAbsolutePath());
+            deleteDataFromDB(realm,result);
         } catch (IOException e) {
             Timber.e("Unable to write export file, error: %s", e.getMessage());
+            mCallback.onFailure(e.getMessage());
         }
-        return null;
+        return true;
     }
 
+    private void deleteDataFromDB(Realm realm, RealmResults<AccelerometerSample> result){
+        Timber.i("Deleting data from DB after export...");
+        realm.beginTransaction();
+        result.deleteAllFromRealm();
+        realm.commitTransaction();
+    }
     @Override
-    protected void onPostExecute(Void aVoid) {
+    protected void onPostExecute(Boolean success) {
         mProgressBar.setVisibility(View.GONE);
-        if(mSendViaMail){
-            //EmailSender.sendFileInEmail(mExportFile);
+        if(success && mExportFile != null){
+            mCallback.onSuccess(mExportFile);
         }
     }
 
     @Override
     protected void onProgressUpdate(Integer... values) {
         if(values[0] == 0) {
-            mProgressBar.setMax(100);
+            mProgressBar.setMax(values[1]);
             mProgressBar.setVisibility(View.VISIBLE);
         }
         mProgressBar.setProgress(values[0]);

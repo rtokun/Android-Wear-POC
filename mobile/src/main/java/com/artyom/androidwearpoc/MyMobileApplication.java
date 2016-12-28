@@ -9,6 +9,7 @@ import com.artyom.androidwearpoc.wear.connectivity.WearConnectivityServiceContro
 
 import javax.inject.Inject;
 
+import io.realm.Realm;
 import timber.log.Timber;
 
 /**
@@ -37,6 +38,8 @@ public class MyMobileApplication extends Application {
 
     private void startAppComponents() {
         mWearConnectivityServiceController.startWearConnectivityService();
+        Realm.init(this);
+        //Realm.getDefaultInstance().deleteAll();
     }
 
     private void createDaggerApplicationController() {

@@ -16,8 +16,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.artyom.androidwearpoc.dagger.components.DaggerDBReposComponent;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
+import com.artyom.androidwearpoc.db.AccelerometerSamplesRepo;
+import com.artyom.androidwearpoc.model.AccelerometerSample;
+import com.artyom.androidwearpoc.model.converter.AccelerometerSamplesConverter;
 import com.artyom.androidwearpoc.shared.Configuration;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
@@ -27,6 +31,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
 
 import timber.log.Timber;
 
@@ -45,10 +51,13 @@ public class DataReceiverService extends WearableListenerService implements Goog
 
     private String mLocalNodeId;
 
+    @Inject
+    AccelerometerSamplesRepo mAccelerometerSamplesRepo;
+
     @Override
     public void onCreate() {
         super.onCreate();
-
+        DaggerDBReposComponent.builder().build().inject(this);
         mGoogleApiClient = DaggerGoogleComponent
                 .builder()
                 .googleApiModule(new GoogleApiModule(this.getApplicationContext(), this, this))
@@ -79,9 +88,7 @@ public class DataReceiverService extends WearableListenerService implements Goog
     }
 
     private void deleteProcessedItemFromDataLayer(DataEvent event) {
-
         Uri dataItemUri = event.getDataItem().getUri();
-
         Timber.d("deleting data item, uri: %s", dataItemUri);
         Wearable.DataApi.deleteDataItems(mGoogleApiClient, dataItemUri);
     }
@@ -111,7 +118,11 @@ public class DataReceiverService extends WearableListenerService implements Goog
         }
 
         if (messagePackage != null){
-            logValues(messagePackage);
+            //logValues(messagePackage);
+            List<AccelerometerSample> converted = AccelerometerSamplesConverter.convert(messagePackage.getmAccelerometerSamples());
+            mAccelerometerSamplesRepo.saveSamples(converted);
+
+            float batteryPercentage = messagePackage.getmBatteryPercentage();
         } else {
             Timber.d("message values are null");
         }
