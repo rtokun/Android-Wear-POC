@@ -1,6 +1,6 @@
 package com.artyom.androidwearpoc.dagger.components;
 
-import com.artyom.androidwearpoc.MainActivity;
+import com.artyom.androidwearpoc.ui.main.MainActivity;
 import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.dagger.modules.NotificationModule;
 import com.artyom.androidwearpoc.dagger.scopes.ForApplication;

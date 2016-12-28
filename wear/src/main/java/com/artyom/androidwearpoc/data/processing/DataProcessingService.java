@@ -3,6 +3,7 @@ package com.artyom.androidwearpoc.data.processing;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.wearable.Asset;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
@@ -13,17 +14,23 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
+import com.artyom.androidwearpoc.data.DataTransferHolder;
 import com.artyom.androidwearpoc.measurement.MeasurementService;
-import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
+import com.artyom.androidwearpoc.shared.enums.DataTransferType;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
 
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import timber.log.Timber;
+
+import static com.artyom.androidwearpoc.shared.CommonConstants.SENSORS_MESSAGE;
+import static com.artyom.androidwearpoc.shared.Configuration.DATA_TRANSFER_TYPE;
 
 /**
  * Created by Artyom on 25/12/2016.
@@ -31,11 +38,12 @@ import timber.log.Timber;
 
 public class DataProcessingService extends IntentService {
 
+    @Inject
+    DataTransferHolder mDataTransferHolder;
+
     private GoogleApiClient mGoogleApiClient;
 
     private static final long CLIENT_CONNECTION_TIMEOUT = 15;
-
-    private static final String SENSORS_MESSAGE = "sensors_message";
 
     public DataProcessingService() {
         super("DataProcessingService");
@@ -50,6 +58,8 @@ public class DataProcessingService extends IntentService {
                 .googleApiModule(new GoogleApiModule(this))
                 .build()
                 .googleApiClient();
+
+        MyWearApplication.getApplicationComponent().inject(this);
     }
 
     @Override
@@ -60,14 +70,18 @@ public class DataProcessingService extends IntentService {
 
             Bundle bundle = intent.getExtras();
 
-            ArrayList<AccelerometerSampleData> accelerometerSamples = bundle
-                    .getParcelableArrayList(MeasurementService.ACCELEROMETER_SAMPLES);
-            float batteryPercentage = bundle
-                    .getFloat(MeasurementService.BATTERY_PERCENTAGE, -1);
+            long messagePackageId = bundle.getLong(MeasurementService.MESSAGE_PACKAGE_ID, -1);
 
-            if (accelerometerSamples != null || batteryPercentage != -1) {
-                Timber.d("data received successfully");
-                processData(accelerometerSamples, batteryPercentage);
+            // Retrieving message package from data holder matching the ID
+            MessagePackage messagePackage = mDataTransferHolder
+                    .getQueueOfMessagePackages()
+                    .get(messagePackageId);
+
+            if (messagePackageId != -1 && messagePackage != null) {
+
+                Timber.d("message package id received successfully");
+                processData(messagePackage);
+                deleteProcessedPackageFromHolder(messagePackageId);
             } else {
                 Timber.w("missing data to process");
             }
@@ -76,14 +90,40 @@ public class DataProcessingService extends IntentService {
         }
     }
 
-    private void processData(ArrayList<AccelerometerSampleData> accelerometerSamples, float batteryPercentage) {
+    private void deleteProcessedPackageFromHolder(long messagePackageId) {
+        mDataTransferHolder.getQueueOfMessagePackages().remove(messagePackageId);
+    }
 
-        PutDataRequest dataRequest = packData(accelerometerSamples, batteryPercentage);
+    private void processData(MessagePackage messagePackage) {
 
-        if (dataRequest != null
-                && validateConnection()) {
+        PutDataRequest dataRequest;
+
+
+        if (DATA_TRANSFER_TYPE.equals(DataTransferType.ASSET)) {
+            dataRequest = packAssetData(messagePackage);
+        } else {
+            dataRequest = packRegularData(messagePackage);
+        }
+
+        if (dataRequest != null && validateConnection()) {
             sendData(dataRequest);
         }
+    }
+
+    private PutDataRequest packAssetData(MessagePackage messagePackage) {
+
+        Asset assetMessage = createAssetFromMessagePackage(messagePackage);
+
+        PutDataMapRequest dataMap = PutDataMapRequest.create("/sensors/" + System.currentTimeMillis());
+        dataMap.getDataMap().putAsset(SENSORS_MESSAGE, assetMessage);
+
+        return dataMap.asPutDataRequest();
+
+    }
+
+    private Asset createAssetFromMessagePackage(MessagePackage messagePackage) {
+        byte[] messageInBytes = ParcelableUtil.marshall(messagePackage);
+        return Asset.createFromBytes(messageInBytes);
     }
 
     private void sendData(PutDataRequest dataRequest) {
@@ -93,17 +133,18 @@ public class DataProcessingService extends IntentService {
 
                     @Override
                     public void onResult(@NonNull DataApi.DataItemResult dataItemResult) {
-                        Timber.d("Sending sensor data. result %s",
+
+                        Timber.w("Sending sensor data. result %s",
                                 (dataItemResult.getStatus().isSuccess() ? "success" : "failure"));
+
+                        if (!dataItemResult.getStatus().isSuccess()) {
+                            Timber.w("failure reason: %s", dataItemResult.getStatus().getStatusMessage());
+                        }
                     }
                 });
     }
 
-    private PutDataRequest packData(ArrayList<AccelerometerSampleData> accelerometerSamples, float batteryPercentage) {
-
-        MessagePackage messagePackage = new MessagePackage();
-        messagePackage.setAccelerometerSamples(accelerometerSamples);
-        messagePackage.setBatteryPercentage(batteryPercentage);
+    private PutDataRequest packRegularData(MessagePackage messagePackage) {
 
         byte[] sensorsMessageByteArray = ParcelableUtil.marshall(messagePackage);
 

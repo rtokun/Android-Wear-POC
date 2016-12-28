@@ -1,4 +1,4 @@
-package com.artyom.androidwearpoc;
+package com.artyom.androidwearpoc.ui.main;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -24,6 +24,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
+import com.artyom.androidwearpoc.MyMobileApplication;
+import com.artyom.androidwearpoc.R;
 import com.artyom.androidwearpoc.export.CSVExportTask;
 import com.artyom.androidwearpoc.model.AccelerometerSample;
 import com.artyom.androidwearpoc.wear.connectivity.ConnectivityStatusNotificationController;
