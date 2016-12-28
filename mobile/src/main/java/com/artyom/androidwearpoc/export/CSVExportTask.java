@@ -25,7 +25,6 @@ import timber.log.Timber;
 public class CSVExportTask extends AsyncTask<Void,Integer,Void> {
 
     private File mExportFile;
-    private boolean mSendViaMail;
     private ProgressBar mProgressBar;
     private Callback mCallback;
 
@@ -33,10 +32,11 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Void> {
         void onSuccess(String exportFilePath);
 
         void onFailure(String message);
+
+        void onNoData();
     }
 
-    public CSVExportTask(boolean sendViaMail, ProgressBar progressBar, Callback callback) {
-        this.mSendViaMail = sendViaMail;
+    public CSVExportTask(ProgressBar progressBar, Callback callback) {
         this.mProgressBar = progressBar;
         this.mCallback = callback;
     }
@@ -60,7 +60,7 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Void> {
     protected Void doInBackground(Void... voids) {
         BufferedWriter bw = null;
         try {
-            publishProgress(0);
+
             FileWriter filewriter = new FileWriter(mExportFile);
             bw = new BufferedWriter(filewriter);
 
@@ -69,11 +69,15 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Void> {
             Realm realm = Realm.getDefaultInstance();
             RealmResults<AccelerometerSample> result = realm.where(AccelerometerSample.class).findAll();
             final int numSamples = result.size();
+            publishProgress(0,numSamples);
+            if(numSamples == 0){
+                mCallback.onNoData();
+                return null;
+            }
 
             // Write the string to the file
             for (int i = 1; i < numSamples; i++) {
-                final int progress = i;
-                publishProgress((progress - i) /100);
+                publishProgress(i);
 
                 AccelerometerSample sample = result.get(i);
                 StringBuffer sb = new StringBuffer();
@@ -89,7 +93,8 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Void> {
             }
             bw.flush();
             bw.close();
-            Timber.e("CSV file saved to: %s", mExportFile.getAbsolutePath());
+            Timber.i("CSV file saved to: %s", mExportFile.getAbsolutePath());
+            deleteDataFromDB(realm,result);
         } catch (IOException e) {
             Timber.e("Unable to write export file, error: %s", e.getMessage());
             mCallback.onFailure(e.getMessage());
@@ -97,19 +102,22 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Void> {
         return null;
     }
 
+    private void deleteDataFromDB(Realm realm, RealmResults<AccelerometerSample> result){
+        Timber.i("Deleting data from DB after export...");
+        realm.beginTransaction();
+        result.deleteAllFromRealm();
+        realm.commitTransaction();
+    }
     @Override
     protected void onPostExecute(Void aVoid) {
         mProgressBar.setVisibility(View.GONE);
-        if(mSendViaMail){
-            //EmailSender.sendFileInEmail(mExportFile);
-        }
         mCallback.onSuccess(mExportFile.getAbsolutePath());
     }
 
     @Override
     protected void onProgressUpdate(Integer... values) {
         if(values[0] == 0) {
-            mProgressBar.setMax(100);
+            mProgressBar.setMax(values[1]);
             mProgressBar.setVisibility(View.VISIBLE);
         }
         mProgressBar.setProgress(values[0]);

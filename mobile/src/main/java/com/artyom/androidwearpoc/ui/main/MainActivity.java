@@ -11,17 +11,21 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.R;
 import com.artyom.androidwearpoc.export.CSVExportTask;
+import com.artyom.androidwearpoc.ui.ExportFileDialog;
 import com.artyom.androidwearpoc.wear.connectivity.ConnectivityStatusNotificationController;
 
 import java.util.List;
@@ -31,7 +35,6 @@ import javax.inject.Inject;
 
 import timber.log.Timber;
 
-import static android.widget.Toast.LENGTH_LONG;
 import static com.google.android.gms.wearable.CapabilityApi.FILTER_REACHABLE;
 import static com.google.android.gms.wearable.CapabilityApi.GetCapabilityResult;
 
@@ -52,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         MyMobileApplication.getApplicationComponent().inject(this);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_main);
         mProgressbar = (ProgressBar) findViewById(R.id.progressBarExport);
         createGoogleClient();
@@ -169,18 +173,47 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     public void onCSVButtonClick(View view) {
-        CSVExportTask exportTask = new CSVExportTask(true, mProgressbar, new CSVExportTask.Callback() {
+        CSVExportTask exportTask = new CSVExportTask(mProgressbar, new CSVExportTask.Callback() {
 
             @Override
             public void onSuccess(String exportFilePath) {
-                Toast.makeText(MainActivity.this,"Export file saved to: " + exportFilePath,LENGTH_LONG);
+                Timber.i("Loading email dialog");
+                showDialog(exportFilePath,true, "Export file saved to : " + exportFilePath);
             }
 
             @Override
             public void onFailure(String message) {
-                Toast.makeText(MainActivity.this,"Export failed: " + message,LENGTH_LONG);
+                Timber.e("CSV export failed %s", message);
+                showDialog("",false, "Failed to export file: \n" + message);
+            }
+
+            @Override
+            public void onNoData() {
+                Timber.w("CSV export failed - no data");
+                showDialog("",false, "No data to export");
             }
         });
         exportTask.execute();
+    }
+
+    void showDialog(String accSamplesFilePath, boolean success, String text) {
+
+        // DialogFragment.show() will take care of adding the fragment
+        // in a transaction.  We also want to remove any currently showing
+        // dialog, so make our own transaction and take care of that here.
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        Fragment prev = getFragmentManager().findFragmentByTag("dialog");
+        if (prev != null) {
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
+
+        // Create and show the dialog.
+        DialogFragment newFragment = ExportFileDialog.newInstance(
+                this,
+                success,
+                text,
+                accSamplesFilePath);
+        newFragment.show(ft, "dialog");
     }
 }
