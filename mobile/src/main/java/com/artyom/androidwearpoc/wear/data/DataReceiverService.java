@@ -146,7 +146,7 @@ public class DataReceiverService extends WearableListenerService implements Goog
         try {
             byte[] messageBytes = ByteStreams.toByteArray(messageAssetInputStream);
             return ParcelableUtil.unmarshall(messageBytes, MessagePackage.CREATOR);
-        } catch (IOException e) {
+        } catch (Exception e) {
             Timber.e("failed to convert input stream to byte array, reason: %s", e);
             return null;
         }
