@@ -55,7 +55,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
-    void measurementServiceStatusUpdated(MeasurementServiceStatus status){
+    public void measurementServiceStatusUpdated(MeasurementServiceStatus status){
         isMeasurementServiceRunning = status.isRunning();
         updateUI();
     }
