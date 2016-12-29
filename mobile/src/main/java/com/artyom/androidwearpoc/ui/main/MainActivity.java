@@ -20,12 +20,14 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.R;
 import com.artyom.androidwearpoc.db.AccelerometerSamplesRepo;
+import com.artyom.androidwearpoc.db.BatteryLevelSamplesRepo;
 import com.artyom.androidwearpoc.export.CSVExportTask;
 import com.artyom.androidwearpoc.ui.ExportFileDialog;
 import com.artyom.androidwearpoc.ui.utils.Conversions;
@@ -57,6 +59,9 @@ public class MainActivity extends AppCompatActivity implements
 
     @Inject
     AccelerometerSamplesRepo mAccelerometerSamplesRepo;
+
+    @Inject
+    BatteryLevelSamplesRepo mBatteryLevelSamplesRepo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -179,10 +184,13 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     public void onCSVButtonClick(View view) {
+        final Button csvButton = (Button)findViewById(R.id.buttonCSV);
+        csvButton.setEnabled(false);
         CSVExportTask exportTask = new CSVExportTask(mProgressbar, new CSVExportTask.Callback() {
 
             @Override
             public void onSuccess(File exportFile) {
+                csvButton.setEnabled(true);
                 Timber.i("Loading email dialog");
                 showCSVFileExportDialog(exportFile.getAbsolutePath(),true,
                         "Export file saved to device: " + exportFile.getAbsolutePath() +
@@ -192,12 +200,14 @@ public class MainActivity extends AppCompatActivity implements
 
             @Override
             public void onFailure(String message) {
+                csvButton.setEnabled(true);
                 Timber.e("CSV export failed %s", message);
                 showCSVFileExportDialog("",false, "Failed to export file: \n" + message);
             }
 
             @Override
             public void onNoData() {
+                csvButton.setEnabled(true);
                 Timber.w("CSV export failed - no data");
                 showCSVFileExportDialog("",false, "No data to export");
             }
@@ -228,6 +238,7 @@ public class MainActivity extends AppCompatActivity implements
 
     public void onDeleteAllClick(View view) {
         mAccelerometerSamplesRepo.deleteAll();
+        mBatteryLevelSamplesRepo.deleteAll();
         Toast.makeText(this,"All data has been deleted",Toast.LENGTH_LONG);
     }
 }

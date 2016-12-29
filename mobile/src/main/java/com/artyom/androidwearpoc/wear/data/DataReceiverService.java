@@ -20,7 +20,9 @@ import com.artyom.androidwearpoc.dagger.components.DaggerDBReposComponent;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
 import com.artyom.androidwearpoc.db.AccelerometerSamplesRepo;
+import com.artyom.androidwearpoc.db.BatteryLevelSamplesRepo;
 import com.artyom.androidwearpoc.model.AccelerometerSample;
+import com.artyom.androidwearpoc.model.BatteryLevelSample;
 import com.artyom.androidwearpoc.model.converter.AccelerometerSamplesConverter;
 import com.artyom.androidwearpoc.shared.Configuration;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
@@ -53,6 +55,9 @@ public class DataReceiverService extends WearableListenerService implements Goog
 
     @Inject
     AccelerometerSamplesRepo mAccelerometerSamplesRepo;
+
+    @Inject
+    BatteryLevelSamplesRepo mBatteryLevelSamplesRepo;
 
     @Override
     public void onCreate() {
@@ -123,6 +128,7 @@ public class DataReceiverService extends WearableListenerService implements Goog
             mAccelerometerSamplesRepo.saveSamples(converted);
 
             float batteryPercentage = messagePackage.getmBatteryPercentage();
+            mBatteryLevelSamplesRepo.saveSample(new BatteryLevelSample(batteryPercentage));
         } else {
             Timber.d("message values are null");
         }

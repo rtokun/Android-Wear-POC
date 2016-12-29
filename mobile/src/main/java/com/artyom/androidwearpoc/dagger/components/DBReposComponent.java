@@ -2,6 +2,7 @@ package com.artyom.androidwearpoc.dagger.components;
 
 import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.dagger.modules.DBRepoModule;
+import com.artyom.androidwearpoc.ui.main.MainActivity;
 import com.artyom.androidwearpoc.wear.data.DataReceiverService;
 
 import dagger.Component;
@@ -15,4 +16,6 @@ public interface DBReposComponent {
     void inject(DataReceiverService dataReceiverService);
 
     void inject(MyMobileApplication myMobileApplication);
+
+    void inject(MainActivity mainActivity);
 }

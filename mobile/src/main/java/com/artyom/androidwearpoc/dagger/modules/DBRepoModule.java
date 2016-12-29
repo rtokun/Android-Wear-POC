@@ -2,6 +2,8 @@ package com.artyom.androidwearpoc.dagger.modules;
 
 import com.artyom.androidwearpoc.db.AccelerometerSamplesRepo;
 import com.artyom.androidwearpoc.db.AccelerometerSamplesRepoImpl;
+import com.artyom.androidwearpoc.db.BatteryLevelSamplesRepo;
+import com.artyom.androidwearpoc.db.BatteryLevelSamplesRepoImpl;
 
 import dagger.Module;
 import dagger.Provides;
@@ -16,5 +18,10 @@ public class DBRepoModule {
     @Provides
     AccelerometerSamplesRepo accelerometerSamplesRepo(){
         return new AccelerometerSamplesRepoImpl();
+    }
+
+    @Provides
+    BatteryLevelSamplesRepo batteryLevelSamplesRepo(){
+        return new BatteryLevelSamplesRepoImpl();
     }
 }
