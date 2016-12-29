@@ -12,4 +12,6 @@ public interface AccelerometerSamplesRepo {
 
     void saveSamples(List<AccelerometerSample> samples);
 
+    void deleteAll();
+
 }

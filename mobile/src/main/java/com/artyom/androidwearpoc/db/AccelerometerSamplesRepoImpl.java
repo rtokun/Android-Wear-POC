@@ -12,35 +12,22 @@ import timber.log.Timber;
  */
 public class AccelerometerSamplesRepoImpl implements AccelerometerSamplesRepo{
 
-    //private Realm mRealm = Realm.getDefaultInstance();
-
     @Override
     public void saveSamples(final List<AccelerometerSample> samples) {
-        //TODO: Async
         Timber.i("Starting to save acc samples to database, size: %d", samples.size());
         Realm mRealm = Realm.getDefaultInstance();
         mRealm.beginTransaction();
         mRealm.copyToRealm(samples);
         mRealm.commitTransaction();
-        /*Realm.Transaction transaction = new Realm.Transaction(){
-            @Override
-            public void execute(Realm realm) {
-                Timber.i("Starting to save acc samples to database, size: %d", samples.size());
-                realm.copyFromRealm(samples);
-            }
-        };
-        mRealm.executeTransactionAsync(transaction, new Realm.Transaction.OnSuccess(){
+    }
 
-            @Override
-            public void onSuccess() {
-                Timber.i("Acc samples saved to db");
-            }
-        }, new Realm.Transaction.OnError(){
-
-            @Override
-            public void onError(Throwable error) {
-                Timber.i("Acc samples saving to db failed %s", error.getMessage());
-            }
-        });*/
+    @Override
+    public void deleteAll() {
+        Timber.i("Deleting all accelerometer data from DB ...");
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.delete(AccelerometerSample.class);
+        realm.commitTransaction();
+        Timber.i("All accelerometer data has been deleted");
     }
 }

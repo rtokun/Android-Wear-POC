@@ -98,7 +98,6 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Boolean> {
             bw.flush();
             bw.close();
             Timber.i("CSV file saved to: %s", mExportFile.getAbsolutePath());
-            deleteDataFromDB(realm,result);
         } catch (IOException e) {
             Timber.e("Unable to write export file, error: %s", e.getMessage());
             mCallback.onFailure(e.getMessage());
@@ -106,12 +105,6 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Boolean> {
         return true;
     }
 
-    private void deleteDataFromDB(Realm realm, RealmResults<AccelerometerSample> result){
-        Timber.i("Deleting data from DB after export...");
-        realm.beginTransaction();
-        result.deleteAllFromRealm();
-        realm.commitTransaction();
-    }
     @Override
     protected void onPostExecute(Boolean success) {
         mProgressBar.setVisibility(View.GONE);
