@@ -36,4 +36,5 @@ dependencies {
     provided 'javax.annotation:jsr250-api:1.0'
     compile 'com.jakewharton.timber:timber:4.4.0'
     compile 'com.google.guava:guava:20.0'
+    compile 'testfairy:testfairy-android-sdk:1.+@aar'
 }

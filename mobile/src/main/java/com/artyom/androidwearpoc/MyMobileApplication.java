@@ -6,6 +6,7 @@ import com.artyom.androidwearpoc.dagger.components.DaggerMobileApplicationCompon
 import com.artyom.androidwearpoc.dagger.components.MobileApplicationComponent;
 import com.artyom.androidwearpoc.dagger.modules.ApplicationContextModule;
 import com.artyom.androidwearpoc.wear.connectivity.WearConnectivityServiceController;
+import com.testfairy.TestFairy;
 
 import javax.inject.Inject;
 
@@ -34,6 +35,7 @@ public class MyMobileApplication extends Application {
         initTimber();
         createDaggerApplicationController();
         startAppComponents();
+        TestFairy.begin(this, "24e7daf120f87d841cdbaebd1fb1ac34b68885bb");
     }
 
     private void startAppComponents() {
