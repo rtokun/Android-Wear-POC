@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+
 import com.artyom.androidwearpoc.dagger.components.DaggerDBReposComponent;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
@@ -62,7 +63,10 @@ public class DataReceiverService extends WearableListenerService implements Goog
     @Override
     public void onCreate() {
         super.onCreate();
-        DaggerDBReposComponent.builder().build().inject(this);
+        DaggerDBReposComponent.builder()
+                .build()
+                .inject(this);
+
         mGoogleApiClient = DaggerGoogleComponent
                 .builder()
                 .googleApiModule(new GoogleApiModule(this.getApplicationContext(), this, this))

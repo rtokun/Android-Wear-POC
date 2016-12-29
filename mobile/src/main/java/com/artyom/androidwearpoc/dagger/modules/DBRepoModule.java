@@ -11,7 +11,6 @@ import dagger.Provides;
 /**
  * Created by tomerlev on 28/12/2016.
  */
-
 @Module
 public class DBRepoModule {
 

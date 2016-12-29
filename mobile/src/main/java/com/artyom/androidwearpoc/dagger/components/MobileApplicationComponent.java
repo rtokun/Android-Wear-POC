@@ -15,7 +15,7 @@ import dagger.Component;
 @Component(modules = {NotificationModule.class})
 public interface MobileApplicationComponent {
 
-    ConnectivityStatusNotificationController connectivityStatusNotificationController();
+    ConnectivityStatusNotificationController getConnectivityStatusNotificationController();
 
     void inject(MyMobileApplication myMobileApplication);
 

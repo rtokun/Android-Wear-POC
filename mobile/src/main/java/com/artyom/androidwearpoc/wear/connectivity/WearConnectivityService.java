@@ -16,10 +16,8 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-
 import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
-import com.artyom.androidwearpoc.dagger.components.DaggerMobileApplicationComponent;
 import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
 
 import java.util.Set;
@@ -50,21 +48,22 @@ public class WearConnectivityService extends Service
     @Override
     public void onCreate() {
         super.onCreate();
+        initDependencies();
+        mGoogleApiClient.connect();
+        startForeground(ConnectivityStatusNotificationController.CONNECTIVITY_STATUS_NOTIFICATION_ID,
+                mConnectivityStatusNotificationController.getNotification(Unknown));
+    }
 
+    private void initDependencies() {
         mConnectivityStatusNotificationController = MyMobileApplication
                 .getApplicationComponent()
-                .connectivityStatusNotificationController();
+                .getConnectivityStatusNotificationController();
 
         mGoogleApiClient = DaggerGoogleComponent
                 .builder()
                 .googleApiModule(new GoogleApiModule(this.getApplicationContext(), this, this))
                 .build()
                 .googleApiClient();
-
-        mGoogleApiClient.connect();
-
-        startForeground(ConnectivityStatusNotificationController.CONNECTIVITY_STATUS_NOTIFICATION_ID,
-                mConnectivityStatusNotificationController.getNotification(Unknown));
     }
 
     @Override

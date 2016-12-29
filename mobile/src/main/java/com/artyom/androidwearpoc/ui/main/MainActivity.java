@@ -26,6 +26,8 @@ import android.widget.Toast;
 
 import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.R;
+import com.artyom.androidwearpoc.dagger.components.DBReposComponent;
+import com.artyom.androidwearpoc.dagger.components.DaggerDBReposComponent;
 import com.artyom.androidwearpoc.db.AccelerometerSamplesRepo;
 import com.artyom.androidwearpoc.db.BatteryLevelSamplesRepo;
 import com.artyom.androidwearpoc.export.CSVExportTask;
@@ -36,8 +38,6 @@ import com.artyom.androidwearpoc.wear.connectivity.ConnectivityStatusNotificatio
 import java.io.File;
 import java.util.List;
 import java.util.Set;
-
-import javax.inject.Inject;
 
 import timber.log.Timber;
 
@@ -54,19 +54,21 @@ public class MainActivity extends AppCompatActivity implements
 
     private ProgressBar mProgressbar;
 
-    @Inject
-    ConnectivityStatusNotificationController mConnectivityStatusNotificationController;
+    private AccelerometerSamplesRepo mAccelerometerSamplesRepo;
 
-    @Inject
-    AccelerometerSamplesRepo mAccelerometerSamplesRepo;
-
-    @Inject
-    BatteryLevelSamplesRepo mBatteryLevelSamplesRepo;
+    private BatteryLevelSamplesRepo mBatteryLevelSamplesRepo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MyMobileApplication.getApplicationComponent().inject(this);
+
+        DBReposComponent dbReposComponent = DaggerDBReposComponent
+                .builder()
+                .build();
+
+        mAccelerometerSamplesRepo = dbReposComponent.getAccelerometerSamplesRepo();
+        mBatteryLevelSamplesRepo = dbReposComponent.getBatteryLevelSamplesRepo();
+
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_main);
         mProgressbar = (ProgressBar) findViewById(R.id.progressBarExport);
@@ -124,8 +126,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Timber.d("google API client connected, retrieving nodes");
-//        getNodesNodeApi();
-        getNodesCapabilityApi();
     }
 
     private void getNodesNodeApi() {
@@ -147,31 +147,6 @@ public class MainActivity extends AppCompatActivity implements
                 });
     }
 
-    private void getNodesCapabilityApi() {
-        Timber.d("retrieving nodes through Capability Api");
-        Wearable.CapabilityApi
-                .getCapability(mGoogleApiClient, WATCH_CAPABILITY, FILTER_REACHABLE)
-                .setResultCallback(new ResultCallbacks<GetCapabilityResult>() {
-
-                    @Override
-                    public void onSuccess(@NonNull GetCapabilityResult getCapabilityResult) {
-
-                        Set<Node> nodes = getCapabilityResult.getCapability().getNodes();
-                        Timber.d("nodes amount from Capability Api: %s", nodes.size());
-
-                        if (nodes.size() > 0) {
-                            for (Node node : nodes) {
-                                Timber.d("node is: %s", node.getDisplayName());
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Status status) {
-                        Timber.d("failed to retrieve the capabilities, the status: %s", status.getStatusMessage());
-                    }
-                });
-    }
 
     @Override
     public void onConnectionSuspended(int i) {
