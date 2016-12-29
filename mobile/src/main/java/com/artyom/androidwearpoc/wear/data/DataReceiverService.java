@@ -16,7 +16,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-
 import com.artyom.androidwearpoc.dagger.components.DaggerDBReposComponent;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
@@ -30,7 +29,6 @@ import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -116,7 +114,7 @@ public class DataReceiverService extends WearableListenerService implements Goog
     }
 
     private void processData(DataEvent event) {
-        Timber.d("processing data");
+        Timber.d("New package arrived from wearable, processing data...");
 
         MessagePackage messagePackage;
 
@@ -133,8 +131,9 @@ public class DataReceiverService extends WearableListenerService implements Goog
 
             float batteryPercentage = messagePackage.getmBatteryPercentage();
             mBatteryLevelSamplesRepo.saveSample(new BatteryLevelSample(batteryPercentage));
+            Timber.d("Wearable battery level: " + batteryPercentage);
         } else {
-            Timber.d("message values are null");
+            Timber.d("Wearable message values are null");
         }
     }
 
