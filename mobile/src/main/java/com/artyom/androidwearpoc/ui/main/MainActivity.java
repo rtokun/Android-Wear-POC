@@ -203,4 +203,10 @@ public class MainActivity extends AppCompatActivity implements
         mBatteryLevelSamplesRepo.deleteAll();
         Toast.makeText(this,"All data has been deleted",Toast.LENGTH_LONG).show();
     }
+
+    public void onCountSamplesClick(View view) {
+        long count = mAccelerometerSamplesRepo.count();
+        Toast.makeText(this,"There are: " + count + " accelerometer samples",Toast.LENGTH_LONG)
+                .show();
+    }
 }

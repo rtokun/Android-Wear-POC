@@ -12,4 +12,6 @@ public interface AccelerometerSamplesRepo {
 
     void deleteAll();
 
+    long count();
+
 }

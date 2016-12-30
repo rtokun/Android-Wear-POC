@@ -43,4 +43,10 @@ public abstract class BaseRepo<T extends RealmObject> {
         realm.commitTransaction();
         Timber.i("All samples of type %s has been db", clazz);
     }
+
+    public long count(){
+        Timber.i("Counting samples of type %s ...", clazz);
+        Realm realm = Realm.getDefaultInstance();
+        return realm.where(clazz).count();
+    }
 }
