@@ -13,7 +13,7 @@
 
   <Button
       android:text="CSV"
-      android:layout_width="wrap_content"
+      android:layout_width="140dp"
       android:layout_height="wrap_content"
       android:id="@+id/buttonCSV"
       android:onClick="onCSVButtonClick"
@@ -21,34 +21,33 @@
       android:layout_marginStart="16dp"
       android:layout_marginTop="12dp"
       />
+  <Button
+      android:text="Delete Data"
+      android:layout_width="140dp"
+      android:layout_height="wrap_content"
+      android:id="@+id/buttonDeleteAllData"
+      android:onClick="onDeleteAllClick"
+      android:layout_below="@+id/buttonCSV"
+      android:layout_alignStart="@+id/buttonCSV"
+      />
+  <Button
+      android:text="Count Samples"
+      android:layout_width="140dp"
+      android:layout_height="wrap_content"
+      android:id="@+id/buttonCountSamples"
+      android:onClick="onCountSamplesClick"
+      android:layout_below="@+id/buttonDeleteAllData"
+      android:layout_alignStart="@+id/buttonDeleteAllData"
+      />
   <ProgressBar
       style="?android:attr/progressBarStyleHorizontal"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_alignTop="@+id/buttonCSV"
+      android:layout_marginStart="29dp"
+      android:layout_above="@+id/buttonDeleteAllData"
       android:layout_toEndOf="@+id/buttonCSV"
-      android:layout_marginStart="11dp"
-      android:layout_marginTop="13dp"
+      android:layout_marginBottom="13dp"
       android:visibility="gone"
       android:id="@+id/progressBarExport"
-      />
-  <Button
-      android:text="Delete Data"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignBottom="@+id/buttonCSV"
-      android:layout_centerHorizontal="true"
-      android:id="@+id/buttonDeleteAllData"
-      android:onClick="onDeleteAllClick"
-      />
-  <Button
-      android:text="Count Samples"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignTop="@+id/buttonDeleteAllData"
-      android:layout_toEndOf="@+id/buttonDeleteAllData"
-      android:layout_marginStart="12dp"
-      android:id="@+id/buttonCountSamples"
-      android:onClick="onCountSamplesClick"
       />
 </RelativeLayout>
