@@ -21,7 +21,7 @@ import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
 import com.artyom.androidwearpoc.db.AccelerometerSamplesRepo;
 import com.artyom.androidwearpoc.db.BatteryLevelSamplesRepo;
-import com.artyom.androidwearpoc.model.AccelerometerSample;
+import com.artyom.androidwearpoc.model.AccelerometerSampleTEMPORAL;
 import com.artyom.androidwearpoc.model.BatteryLevelSample;
 import com.artyom.androidwearpoc.model.converter.AccelerometerSamplesConverter;
 import com.artyom.androidwearpoc.shared.Configuration;
@@ -134,12 +134,19 @@ public class DataReceiverService extends WearableListenerService implements Goog
 
         if (messagePackage != null){
             //logValues(messagePackage);
-            List<AccelerometerSample> converted = AccelerometerSamplesConverter.convert(messagePackage.getAccelerometerSamples());
+            int messageIndex = messagePackage.getIndex();
+
+            //TODO: revert back to - List<AccelerometerSample> converted =
+            // AccelerometerSamplesConverter.convert(messagePackage.getAccelerometerSamples());
+            List<AccelerometerSampleTEMPORAL> converted =
+                    AccelerometerSamplesConverter.convert(messagePackage.getAccelerometerSamples(), messageIndex);
             mAccelerometerSamplesRepo.saveSamples(converted);
 
             float batteryPercentage = messagePackage.getBatteryPercentage();
             mBatteryLevelSamplesRepo.saveSample(new BatteryLevelSample(batteryPercentage));
-            Timber.d("Wearable battery level: " + batteryPercentage);
+
+            Timber.d("Wearable message arrived, message index: %s battery level: %s", messageIndex,
+                    batteryPercentage) ;
         } else {
             Timber.d("Wearable message values are null");
         }

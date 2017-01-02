@@ -18,7 +18,7 @@ public abstract class BaseRepo<T extends RealmObject> {
     }
 
     public void saveSample(final T sample) {
-        Timber.i("Starting to save sample of type %s to database", clazz.getName());
+        Timber.i("Starting to save sample of type %s to db", clazz.getName());
         Realm mRealm = Realm.getDefaultInstance();
         mRealm.beginTransaction();
         mRealm.copyToRealm(sample);
@@ -41,7 +41,7 @@ public abstract class BaseRepo<T extends RealmObject> {
         realm.beginTransaction();
         realm.delete(clazz);
         realm.commitTransaction();
-        Timber.i("All samples of type %s has been db", clazz);
+        Timber.i("All samples of type %s has been deleted", clazz);
     }
 
     public long count(){

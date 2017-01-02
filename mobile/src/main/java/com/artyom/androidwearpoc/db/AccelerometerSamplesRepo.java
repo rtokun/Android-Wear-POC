@@ -1,6 +1,6 @@
 package com.artyom.androidwearpoc.db;
 
-import com.artyom.androidwearpoc.model.AccelerometerSample;
+import com.artyom.androidwearpoc.model.AccelerometerSampleTEMPORAL;
 
 /**
  * Created by tomerlev on 27/12/2016.
@@ -8,7 +8,9 @@ import com.artyom.androidwearpoc.model.AccelerometerSample;
 
 public interface AccelerometerSamplesRepo {
 
-    void saveSamples(final Iterable<AccelerometerSample> samples);
+    //TODO: revert back to - void saveSamples(final Iterable<AccelerometerSample> samples);
+
+    void saveSamples(final Iterable<AccelerometerSampleTEMPORAL> samples);
 
     void deleteAll();
 

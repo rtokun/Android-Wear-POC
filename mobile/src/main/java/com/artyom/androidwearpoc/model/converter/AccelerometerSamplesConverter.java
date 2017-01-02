@@ -1,6 +1,7 @@
 package com.artyom.androidwearpoc.model.converter;
 
 import com.artyom.androidwearpoc.model.AccelerometerSample;
+import com.artyom.androidwearpoc.model.AccelerometerSampleTEMPORAL;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 
 import java.util.LinkedList;
@@ -19,6 +20,21 @@ public class AccelerometerSamplesConverter {
         for (AccelerometerSampleData sample : samples) {
             float[] values = sample.getValues();
             convertedSamples.add(new AccelerometerSample(
+                    values[0],
+                    values[1],
+                    values[2],
+                    sample.getTimestamp() / ROUND_RANGE));
+        }
+        return convertedSamples;
+    }
+
+    //TODO: remove this method
+    public static List<AccelerometerSampleTEMPORAL> convert(List<AccelerometerSampleData> samples, int
+            messageIndex){
+        List<AccelerometerSampleTEMPORAL> convertedSamples = new LinkedList<>();
+        for (AccelerometerSampleData sample : samples) {
+            float[] values = sample.getValues();
+            convertedSamples.add(new AccelerometerSampleTEMPORAL(messageIndex,
                     values[0],
                     values[1],
                     values[2],

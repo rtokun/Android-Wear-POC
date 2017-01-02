@@ -4,22 +4,32 @@ import io.realm.RealmObject;
 
 
 /**
- * Created by tomerlev on 27/12/2016.
+ * TODO: DELETE this class
  */
-public class AccelerometerSample extends RealmObject {
+public class AccelerometerSampleTEMPORAL extends RealmObject {
+    private int messageIndex;
     private float x;
     private float y;
     private float z;
     private long ts;
 
-    public AccelerometerSample() {
+    public AccelerometerSampleTEMPORAL() {
     }
 
-    public AccelerometerSample(float x, float y, float z, long ts) {
+    public AccelerometerSampleTEMPORAL(int messageIndex, float x, float y, float z, long ts) {
+        this.messageIndex = messageIndex;
         this.x = x;
         this.y = y;
         this.z = z;
         this.ts = ts;
+    }
+
+    public int getMessageIndex() {
+        return messageIndex;
+    }
+
+    public void setMessageIndex(int messageIndex) {
+        this.messageIndex = messageIndex;
     }
 
     public void setX(float x) {
