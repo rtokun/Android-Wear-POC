@@ -73,6 +73,14 @@ public class DataReceiverService extends WearableListenerService implements Goog
     }
 
     @Override
+    public void onDestroy() {
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+        super.onDestroy();
+    }
+
+    @Override
     public void onDataChanged(DataEventBuffer dataEventBuffer) {
         Timber.d("events arrived");
 

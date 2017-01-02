@@ -2,11 +2,14 @@ package com.artyom.androidwearpoc.wear.connectivity;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 
 import com.artyom.androidwearpoc.R;
 import com.artyom.androidwearpoc.dagger.scopes.ForApplication;
+import com.artyom.androidwearpoc.ui.main.MainActivity;
 
 import javax.inject.Inject;
 
@@ -63,11 +66,22 @@ public class ConnectivityStatusNotificationController {
 
     private Notification getNotification(int icon, String msg) {
 
+        Intent openMainActivityIntent = new Intent(mApplicationContext, MainActivity.class);
+
+        PendingIntent openAppIntent =
+                PendingIntent.getActivity(
+                        mApplicationContext,
+                        0,
+                        openMainActivityIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(mApplicationContext)
                 .setSmallIcon(icon)
                 .setContentTitle(mApplicationContext
                         .getResources()
                         .getString(R.string.app_name))
+                .setContentIntent(openAppIntent)
                 .setStyle(new NotificationCompat.
                         BigTextStyle().
                         bigText(msg)).

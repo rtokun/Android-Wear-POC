@@ -70,6 +70,14 @@ public class DataProcessingService extends IntentService {
     }
 
     @Override
+    public void onDestroy() {
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+        super.onDestroy();
+    }
+
+    @Override
     protected void onHandleIntent(Intent intent) {
         Timber.d("message received, checking extras");
 
