@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.artyom.androidwearpoc.BuildConfig;
 import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.R;
 import com.artyom.androidwearpoc.measurement.MeasurementServiceController;
@@ -29,7 +30,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private ImageButton mImgBtnControlService;
 
-    private TextView mtv_Title;
+    private TextView mtvTitle;
+
+    private TextView mtvVersionCode;
 
     private boolean isMeasurementServiceRunning = false;
 
@@ -62,12 +65,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private void updateUI() {
         if (isMeasurementServiceRunning) {
-            mtv_Title.setText("Measurement status:\nRecording");
+            mtvTitle.setText("Measurement status:\nRecording");
             mImgBtnControlService.setImageResource(R.drawable.ic_pause_circle_outline_black_48dp);
         } else {
-            mtv_Title.setText("Measurement status:\nNot recording");
+            mtvTitle.setText("Measurement status:\nNot recording");
             mImgBtnControlService.setImageResource(R.drawable.ic_play_circle_outline_black_48dp);
         }
+        mtvVersionCode.setText("version code: " + BuildConfig.VERSION_CODE);
     }
 
     private void setListeners() {
@@ -76,7 +80,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private void findViews() {
         mImgBtnControlService = (ImageButton) findViewById(R.id.img_view_control_service);
-        mtv_Title = (TextView) findViewById(R.id.tv_title);
+        mtvTitle = (TextView) findViewById(R.id.tv_title);
+        mtvVersionCode = (TextView) findViewById(R.id.tv_version_code);
     }
 
     @Override

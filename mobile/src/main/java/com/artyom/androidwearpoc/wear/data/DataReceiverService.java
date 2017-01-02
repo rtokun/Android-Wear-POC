@@ -126,10 +126,10 @@ public class DataReceiverService extends WearableListenerService implements Goog
 
         if (messagePackage != null){
             //logValues(messagePackage);
-            List<AccelerometerSample> converted = AccelerometerSamplesConverter.convert(messagePackage.getmAccelerometerSamples());
+            List<AccelerometerSample> converted = AccelerometerSamplesConverter.convert(messagePackage.getAccelerometerSamples());
             mAccelerometerSamplesRepo.saveSamples(converted);
 
-            float batteryPercentage = messagePackage.getmBatteryPercentage();
+            float batteryPercentage = messagePackage.getBatteryPercentage();
             mBatteryLevelSamplesRepo.saveSample(new BatteryLevelSample(batteryPercentage));
             Timber.d("Wearable battery level: " + batteryPercentage);
         } else {
@@ -168,10 +168,10 @@ public class DataReceiverService extends WearableListenerService implements Goog
 
     private void logValues(MessagePackage messagePackage) {
 
-        float batteryPercentage = messagePackage.getmBatteryPercentage();
-        int size = messagePackage.getmAccelerometerSamples().size();
-        AccelerometerSampleData firstSample = messagePackage.getmAccelerometerSamples().get(0);
-        AccelerometerSampleData lastSample = messagePackage.getmAccelerometerSamples().get(size - 1);
+        float batteryPercentage = messagePackage.getBatteryPercentage();
+        int size = messagePackage.getAccelerometerSamples().size();
+        AccelerometerSampleData firstSample = messagePackage.getAccelerometerSamples().get(0);
+        AccelerometerSampleData lastSample = messagePackage.getAccelerometerSamples().get(size - 1);
 
         Timber.i("battery percentage: %s", batteryPercentage);
         Timber.i("amount of samples: %s", size);

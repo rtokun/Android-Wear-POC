@@ -9,6 +9,8 @@ public class MessagePackage implements Parcelable {
 
     private float mBatteryPercentage;
 
+    private int mIndex;
+
     private List<AccelerometerSampleData> mAccelerometerSamples;
 
     public MessagePackage() {
@@ -32,21 +34,31 @@ public class MessagePackage implements Parcelable {
         }
     };
 
-    public List<AccelerometerSampleData> getmAccelerometerSamples() {
+    //region Setters and Getters
+    public List<AccelerometerSampleData> getAccelerometerSamples() {
         return mAccelerometerSamples;
     }
 
-    public void setAccelerometerSamples(List<AccelerometerSampleData> mAccelerometerSamples) {
-        this.mAccelerometerSamples = mAccelerometerSamples;
+    public void setAccelerometerSamples(List<AccelerometerSampleData> accelerometerSamples) {
+        this.mAccelerometerSamples = accelerometerSamples;
     }
 
-    public float getmBatteryPercentage() {
+    public float getBatteryPercentage() {
         return mBatteryPercentage;
     }
 
     public void setBatteryPercentage(float mBatteryPercentage) {
         this.mBatteryPercentage = mBatteryPercentage;
     }
+
+    public int getIndex() {
+        return mIndex;
+    }
+
+    public void setIndex(int index) {
+        this.mIndex = index;
+    }
+    //endregion
 
     @Override
     public int describeContents() {
