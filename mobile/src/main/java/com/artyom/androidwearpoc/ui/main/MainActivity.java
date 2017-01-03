@@ -12,12 +12,17 @@ import com.google.android.gms.wearable.Wearable;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -35,17 +40,30 @@ import java.util.List;
 
 import timber.log.Timber;
 
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 
 public class MainActivity extends AppCompatActivity implements
+        View.OnClickListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
     public static final String WATCH_CAPABILITY = "fox_watch_capability";
 
+    public static final int MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE = 1001;
+
     GoogleApiClient mGoogleApiClient;
 
     private ProgressBar mProgressbar;
+
+    private Button mBtnCSVExport;
+
+    private Button mBtnDeleteData;
+
+    private Button mBtnCountSamples;
+
+    private CoordinatorLayout mMainCoordinatorLayout;
 
     private AccelerometerSamplesRepo mAccelerometerSamplesRepo;
 
@@ -54,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         DBReposComponent dbReposComponent = DaggerDBReposComponent
                 .builder()
@@ -62,17 +81,84 @@ public class MainActivity extends AppCompatActivity implements
         mAccelerometerSamplesRepo = dbReposComponent.getAccelerometerSamplesRepo();
         mBatteryLevelSamplesRepo = dbReposComponent.getBatteryLevelSamplesRepo();
 
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        setContentView(R.layout.activity_main);
-        mProgressbar = (ProgressBar) findViewById(R.id.progressBarExport);
+        findViews();
+        setListeners();
         createGoogleClient();
         addCapabilityListener();
+        requestRequiredPermissions();
+    }
+
+    private void setListeners() {
+        mBtnCSVExport.setOnClickListener(this);
+        mBtnDeleteData.setOnClickListener(this);
+        mBtnCountSamples.setOnClickListener(this);
+    }
+
+    private void findViews() {
+        mProgressbar = (ProgressBar) findViewById(R.id.progressBarExport);
+        mBtnCSVExport = (Button) findViewById(R.id.buttonCSV);
+        mBtnDeleteData = (Button) findViewById(R.id.buttonDeleteAllData);
+        mBtnCountSamples = (Button) findViewById(R.id.buttonCountSamples);
+        mMainCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.main_coordinator_layout);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         connectGoogleClient();
+    }
+
+    private boolean requestRequiredPermissions() {
+
+        if (ContextCompat.checkSelfPermission(this,
+                WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{WRITE_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE:
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    Timber.i("permission granted: write external storage");
+
+                } else {
+
+                    showDeniedPermissionSnackBar();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                break;
+        }
+    }
+
+    private void showDeniedPermissionSnackBar() {
+
+        Snackbar permissionDeniedSnackbar = Snackbar
+                .make(mMainCoordinatorLayout, "Permission denied", Snackbar.LENGTH_LONG)
+                .setAction("GRANT", new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        requestRequiredPermissions();
+                    }
+                });
+
+        permissionDeniedSnackbar.show();
     }
 
     @Override
@@ -151,27 +237,28 @@ public class MainActivity extends AppCompatActivity implements
         Timber.e("google client connection failed, connection result: %s", connectionResult.getErrorMessage());
     }
 
-    public void onCSVButtonClick(View view) {
+    private void exportCSV() {
         CSVExportTask exportTask = new CSVExportTask(mProgressbar, new CSVExportTask.Callback() {
+
             @Override
             public void onSuccess(File exportFile) {
                 Timber.i("Loading email dialog");
-                showCSVFileExportDialog(exportFile.getAbsolutePath(),true,
+                showCSVFileExportDialog(exportFile.getAbsolutePath(), true,
                         "Export file saved to device: " + exportFile.getAbsolutePath() +
-                        " \nSize in MB:" + Conversions.humanReadableByteCount(exportFile.length(),true) +
-                         "\nWant to share?");
+                                " \nSize in MB:" + Conversions.humanReadableByteCount(exportFile.length(), true) +
+                                "\nWant to share?");
             }
 
             @Override
             public void onFailure(String message) {
                 Timber.e("CSV export failed %s", message);
-                showCSVFileExportDialog("",false, "Failed to export file: \n" + message);
+                showCSVFileExportDialog("", false, "Failed to export file: \n" + message);
             }
 
             @Override
             public void onNoData() {
                 Timber.w("CSV export failed - no data");
-                showCSVFileExportDialog("",false, "No data to export");
+                showCSVFileExportDialog("", false, "No data to export");
             }
         });
         exportTask.execute();
@@ -198,15 +285,30 @@ public class MainActivity extends AppCompatActivity implements
         newFragment.show(ft, "dialog");
     }
 
-    public void onDeleteAllClick(View view) {
+    public void deleteAllData() {
         mAccelerometerSamplesRepo.deleteAll();
         mBatteryLevelSamplesRepo.deleteAll();
-        Toast.makeText(this,"All data has been deleted",Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "All data has been deleted", Toast.LENGTH_LONG).show();
     }
 
-    public void onCountSamplesClick(View view) {
+    public void countSamples() {
         long count = mAccelerometerSamplesRepo.count();
-        Toast.makeText(this,"There are: " + count + " accelerometer samples",Toast.LENGTH_LONG)
+        Toast.makeText(this, "There are: " + count + " accelerometer samples", Toast.LENGTH_LONG)
                 .show();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.buttonCSV:
+                exportCSV();
+                break;
+            case R.id.buttonDeleteAllData:
+                deleteAllData();
+                break;
+            case R.id.buttonCountSamples:
+                countSamples();
+                break;
+        }
     }
 }

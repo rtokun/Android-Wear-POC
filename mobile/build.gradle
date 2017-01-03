@@ -30,6 +30,7 @@ dependencies {
     compile project(':shared')
     compile 'com.google.android.gms:play-services-wearable:10.0.1'
     compile 'com.android.support:appcompat-v7:25.1.0'
+    compile 'com.android.support:design:25.1.0'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.8'
     compile 'com.google.dagger:dagger:2.8'

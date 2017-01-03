@@ -1,53 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_main"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.artyom.androidwearpoc.ui.MainActivity"
+    android:id="@+id/main_coordinator_layout"
     >
 
-  <Button
-      android:text="CSV"
-      android:layout_width="140dp"
-      android:layout_height="wrap_content"
-      android:id="@+id/buttonCSV"
-      android:onClick="onCSVButtonClick"
-      android:layout_alignParentStart="true"
-      android:layout_marginStart="16dp"
-      android:layout_marginTop="12dp"
-      />
-  <Button
-      android:text="Delete Data"
-      android:layout_width="140dp"
-      android:layout_height="wrap_content"
-      android:id="@+id/buttonDeleteAllData"
-      android:onClick="onDeleteAllClick"
-      android:layout_below="@+id/buttonCSV"
-      android:layout_alignStart="@+id/buttonCSV"
-      />
-  <Button
-      android:text="Count Samples"
-      android:layout_width="140dp"
-      android:layout_height="wrap_content"
-      android:id="@+id/buttonCountSamples"
-      android:onClick="onCountSamplesClick"
-      android:layout_below="@+id/buttonDeleteAllData"
-      android:layout_alignStart="@+id/buttonDeleteAllData"
-      />
-  <ProgressBar
-      style="?android:attr/progressBarStyleHorizontal"
+  <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      android:id="@+id/activity_main"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="29dp"
-      android:layout_above="@+id/buttonDeleteAllData"
-      android:layout_toEndOf="@+id/buttonCSV"
-      android:layout_marginBottom="13dp"
-      android:visibility="gone"
-      android:id="@+id/progressBarExport"
-      />
-</RelativeLayout>
+      android:layout_height="match_parent"
+      android:paddingBottom="@dimen/activity_vertical_margin"
+      android:paddingLeft="@dimen/activity_horizontal_margin"
+      android:paddingRight="@dimen/activity_horizontal_margin"
+      android:paddingTop="@dimen/activity_vertical_margin"
+      tools:context="com.artyom.androidwearpoc.ui.MainActivity"
+      >
+
+    <Button
+        android:id="@+id/buttonCSV"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:text="CSV"
+        />
+    <Button
+        android:id="@+id/buttonDeleteAllData"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/buttonCSV"
+        android:layout_below="@+id/buttonCSV"
+        android:text="Delete Data"
+        />
+    <Button
+        android:id="@+id/buttonCountSamples"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/buttonDeleteAllData"
+        android:layout_below="@+id/buttonDeleteAllData"
+        android:text="Count Samples"
+        />
+    <ProgressBar
+        android:id="@+id/progressBarExport"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/buttonDeleteAllData"
+        android:layout_marginBottom="13dp"
+        android:layout_marginStart="29dp"
+        android:layout_toEndOf="@+id/buttonCSV"
+        android:visibility="gone"
+        style="?android:attr/progressBarStyleHorizontal"
+        />
+  </RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>
