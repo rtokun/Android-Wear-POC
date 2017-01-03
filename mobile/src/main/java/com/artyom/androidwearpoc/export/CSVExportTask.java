@@ -5,7 +5,7 @@ import android.os.Environment;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import com.artyom.androidwearpoc.model.AccelerometerSample;
+import com.artyom.androidwearpoc.model.AccelerometerSampleTEMPORAL;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -64,7 +64,11 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Boolean> {
             // Read data
             // TODO: Extract to method
             Realm realm = Realm.getDefaultInstance();
-            RealmResults<AccelerometerSample> result = realm.where(AccelerometerSample.class).findAll();
+            //TODO revert back to - RealmResults<AccelerometerSample> result = realm.where
+            // (AccelerometerSample.class).findAll();
+            RealmResults<AccelerometerSampleTEMPORAL> result = realm.where(AccelerometerSampleTEMPORAL.class)
+                    .findAll();
+
             final int numSamples = result.size();
 
             if(numSamples == 0){
@@ -83,7 +87,8 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Boolean> {
             for (int i = 1; i < numSamples; i++) {
                 publishProgress(i);
 
-                AccelerometerSample sample = result.get(i);
+                //TODO: revert back to - AccelerometerSample sample = result.get(i);
+                AccelerometerSampleTEMPORAL sample = result.get(i);
                 StringBuffer sb = new StringBuffer();
                 sb.append(sample.getTs());
                 sb.append(" ,");
@@ -92,6 +97,10 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Boolean> {
                 sb.append(String.valueOf(sample.getY()));
                 sb.append(" ,");
                 sb.append(String.valueOf(sample.getZ()));
+                //TODO: remove 2 lines below
+                sb.append(" ,");
+                sb.append(String.valueOf(sample.getMessageIndex()));
+                //end
                 sb.append("\n");
                 bw.write(sb.toString());
             }
