@@ -67,14 +67,6 @@ public class WearConnectivityService extends Service
                 .googleApiClient();
     }
 
-    @Override
-    public void onDestroy() {
-        unRegisterCapabilityChangedCallbacks();
-        if (mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
-        }
-        super.onDestroy();
-    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {

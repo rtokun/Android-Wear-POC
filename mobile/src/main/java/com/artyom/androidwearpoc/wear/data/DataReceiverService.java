@@ -72,13 +72,6 @@ public class DataReceiverService extends WearableListenerService implements Goog
                 .googleApiClient();
     }
 
-    @Override
-    public void onDestroy() {
-        if (mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
-        }
-        super.onDestroy();
-    }
 
     @Override
     public void onDataChanged(DataEventBuffer dataEventBuffer) {
