@@ -1,8 +1,6 @@
 package com.artyom.androidwearpoc.dagger.modules;
 
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.wearable.Wearable;
 
 import android.content.Context;
