@@ -54,5 +54,16 @@
         android:visibility="gone"
         style="?android:attr/progressBarStyleHorizontal"
         />
+
   </RelativeLayout>
+
+  <TextView
+      android:id="@+id/tv_version"
+      android:textSize="12sp"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="bottom|end"
+      android:layout_below="@id/buttonCountSamples"
+      />
+
 </android.support.design.widget.CoordinatorLayout>

@@ -24,8 +24,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.artyom.androidwearpoc.BuildConfig;
 import com.artyom.androidwearpoc.R;
 import com.artyom.androidwearpoc.dagger.components.DBReposComponent;
 import com.artyom.androidwearpoc.dagger.components.DaggerDBReposComponent;
@@ -63,6 +65,8 @@ public class MainActivity extends AppCompatActivity implements
 
     private Button mBtnCountSamples;
 
+    private TextView mTvVersion;
+
     private CoordinatorLayout mMainCoordinatorLayout;
 
     private AccelerometerSamplesRepo mAccelerometerSamplesRepo;
@@ -86,6 +90,8 @@ public class MainActivity extends AppCompatActivity implements
         createGoogleClient();
         addCapabilityListener();
         requestRequiredPermissions();
+
+        mTvVersion.setText("Version: " + BuildConfig.VERSION_NAME);
     }
 
     private void setListeners() {
@@ -100,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements
         mBtnDeleteData = (Button) findViewById(R.id.buttonDeleteAllData);
         mBtnCountSamples = (Button) findViewById(R.id.buttonCountSamples);
         mMainCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.main_coordinator_layout);
+        mTvVersion = (TextView) findViewById(R.id.tv_version);
     }
 
     @Override
