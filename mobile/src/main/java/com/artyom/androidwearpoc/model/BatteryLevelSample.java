@@ -1,5 +1,7 @@
 package com.artyom.androidwearpoc.model;
 
+import java.util.Date;
+
 import io.realm.RealmObject;
 
 /**
@@ -8,11 +10,12 @@ import io.realm.RealmObject;
 
 public class BatteryLevelSample extends RealmObject {
     private float level;
+    private Date date;
 
     public BatteryLevelSample() {
     }
 
-    public BatteryLevelSample(float level) {
+    public BatteryLevelSample(float level, Date date) {
         this.level = level;
     }
 
@@ -22,5 +25,13 @@ public class BatteryLevelSample extends RealmObject {
 
     public void setLevel(float level) {
         this.level = level;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 }

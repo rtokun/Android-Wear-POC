@@ -14,7 +14,7 @@ public class AccelerometerSamplesRepoImpl extends BaseRepo<AccelerometerSampleTE
         AccelerometerSamplesRepo{
 
     public AccelerometerSamplesRepoImpl() {
-        super(AccelerometerSample.class);
+        super(AccelerometerSampleTEMPORAL.class);
     }
 
     //TODO: remove this method and use the one from BaseRepo - without the int messageIndex

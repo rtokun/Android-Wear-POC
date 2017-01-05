@@ -30,6 +30,7 @@ import com.artyom.androidwearpoc.shared.models.MessagePackage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
 
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -143,7 +144,7 @@ public class DataReceiverService extends WearableListenerService implements Goog
             mAccelerometerSamplesRepo.saveSamples(converted);
 
             float batteryPercentage = messagePackage.getBatteryPercentage();
-            mBatteryLevelSamplesRepo.saveSample(new BatteryLevelSample(batteryPercentage));
+            mBatteryLevelSamplesRepo.saveSample(new BatteryLevelSample(batteryPercentage, new Date()));
 
             Timber.d("Wearable message arrived, message index: %s battery level: %s", messageIndex,
                     batteryPercentage) ;
