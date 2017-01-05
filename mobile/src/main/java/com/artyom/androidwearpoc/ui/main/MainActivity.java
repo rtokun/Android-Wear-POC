@@ -163,7 +163,14 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onPause() {
+        disconnectGoogleClient();
         super.onPause();
+    }
+
+    private void disconnectGoogleClient() {
+        if (mGoogleApiClient != null){
+            mGoogleApiClient.disconnect();
+        }
     }
 
     private void connectGoogleClient() {

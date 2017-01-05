@@ -19,6 +19,7 @@ public class MessagePackage implements Parcelable {
     protected MessagePackage(Parcel in) {
         mBatteryPercentage = in.readFloat();
         mAccelerometerSamples = in.createTypedArrayList(AccelerometerSampleData.CREATOR);
+        mIndex = in.readInt();
     }
 
     public static final Creator<MessagePackage> CREATOR = new Creator<MessagePackage>() {
@@ -69,5 +70,6 @@ public class MessagePackage implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeFloat(mBatteryPercentage);
         dest.writeTypedList(mAccelerometerSamples);
+        dest.writeInt(mIndex);
     }
 }

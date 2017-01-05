@@ -54,6 +54,13 @@ public class WearConnectivityService extends Service
                 mConnectivityStatusNotificationController.getNotification(Unknown));
     }
 
+    @Override
+    public void onDestroy() {
+        if(mGoogleApiClient != null){
+            mGoogleApiClient.disconnect();
+        }
+        super.onDestroy();
+    }
 
     private void initDependencies() {
         mConnectivityStatusNotificationController = MyMobileApplication
