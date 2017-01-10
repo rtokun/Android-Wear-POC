@@ -1,5 +1,10 @@
 apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
+apply plugin: 'io.fabric'
+
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
+}
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -12,11 +17,23 @@ android {
         versionName rootProject.ext.versionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+    signingConfigs {
+        release {
+            storeFile file('/Users/Artyom/Programming/Projects/Android/AndroidWearPOC/key.jks')
+            storePassword "123456"
+            keyAlias "key"
+            keyPassword "123456"
+        }
+    }
     buildTypes {
+        debug {
+            signingConfig signingConfigs.release
+        }
         release {
             debuggable true
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
@@ -37,5 +54,7 @@ dependencies {
     provided 'javax.annotation:jsr250-api:1.0'
     compile 'com.jakewharton.timber:timber:4.4.0'
     compile 'com.google.guava:guava:20.0'
-    compile 'testfairy:testfairy-android-sdk:1.+@aar'
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.5@aar') {
+        transitive = true;
+    }
 }

@@ -10,11 +10,23 @@ android {
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
     }
+    signingConfigs {
+        release {
+            storeFile file('/Users/Artyom/Programming/Projects/Android/AndroidWearPOC/key.jks')
+            storePassword "123456"
+            keyAlias "key"
+            keyPassword "123456"
+        }
+    }
     buildTypes {
-        release {true
-            debuggable
+        debug {
+            signingConfig signingConfigs.release
+        }
+        release {
+            debuggable true
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }

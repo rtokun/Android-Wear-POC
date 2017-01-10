@@ -1,5 +1,7 @@
 package com.artyom.androidwearpoc;
 
+import com.google.android.gms.tasks.RuntimeExecutionException;
+
 import android.app.Application;
 import android.os.Handler;
 
