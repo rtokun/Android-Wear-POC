@@ -4,7 +4,7 @@ import android.content.Context;
 
 
 import com.artyom.androidwearpoc.dagger.scopes.ForApplication;
-import com.artyom.androidwearpoc.util.CrashReportController;
+import com.artyom.androidwearpoc.report.CrashReportController;
 
 import dagger.Module;
 import dagger.Provides;
@@ -22,12 +22,6 @@ public class ApplicationContextModule {
     @Provides
     Context application() {
         return mApplicationContext;
-    }
-
-    @ForApplication
-    @Provides
-    CrashReportController crashReportController(){
-        return new CrashReportController();
     }
 
 }

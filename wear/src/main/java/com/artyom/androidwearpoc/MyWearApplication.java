@@ -1,13 +1,13 @@
 package com.artyom.androidwearpoc;
 
-import com.google.android.gms.tasks.RuntimeExecutionException;
-
 import android.app.Application;
+import android.content.Intent;
 import android.os.Handler;
 
 import com.artyom.androidwearpoc.dagger.components.DaggerWearApplicationComponent;
 import com.artyom.androidwearpoc.dagger.components.WearApplicationComponent;
 import com.artyom.androidwearpoc.dagger.modules.ApplicationContextModule;
+import com.artyom.androidwearpoc.error.ErrorProcessingService;
 import com.artyom.androidwearpoc.measurement.MeasurementServiceController;
 
 import javax.inject.Inject;
@@ -25,12 +25,21 @@ public class MyWearApplication extends Application {
 
     private static WearApplicationComponent mApplicationComponent;
 
+    // Android Wear's default UncaughtExceptionHandler
+    private Thread.UncaughtExceptionHandler mDefaultUEH;
+
     @Override
     public void onCreate() {
         super.onCreate();
+        initExceptionHandler();
         initTimber();
         createDaggerApplicationController();
         startAppComponents();
+    }
+
+    private void initExceptionHandler() {
+        mDefaultUEH = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler(mWearUEH);
     }
 
     private void createDaggerApplicationController() {
@@ -63,4 +72,18 @@ public class MyWearApplication extends Application {
     public static WearApplicationComponent getApplicationComponent() {
         return mApplicationComponent;
     }
+
+    private Thread.UncaughtExceptionHandler mWearUEH = new Thread.UncaughtExceptionHandler() {
+        @Override
+        public void uncaughtException(final Thread thread, final Throwable ex) {
+
+            // Pass the exception to a Service which will send the data upstream to your Smartphone/Tablet
+            Intent errorIntent = new Intent(MyWearApplication.this, ErrorProcessingService.class);
+            errorIntent.putExtra("exception", ex);
+            startService(errorIntent);
+
+            // Let the default UncaughtExceptionHandler take it from here
+            mDefaultUEH.uncaughtException(thread, ex);
+        }
+    };
 }

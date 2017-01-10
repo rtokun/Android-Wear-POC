@@ -131,7 +131,7 @@ public class DataProcessingService extends IntentService {
         putDataMapRequest.getDataMap().putInt(MESSAGE_INDEX, index);
 
         PutDataRequest putDataRequest = putDataMapRequest.asPutDataRequest();
-        Wearable.DataApi.putDataItem(mGoogleApiClient, putDataRequest).await();
+        Wearable.DataApi.putDataItem(mGoogleApiClient, putDataRequest).await(30, TimeUnit.SECONDS);
     }
 
     private int getIndexFromDataLayer() {
@@ -148,7 +148,7 @@ public class DataProcessingService extends IntentService {
 
             // Retrieving data item related to that path
             DataItemBuffer dataItemBuffer = Wearable.DataApi.getDataItems(mGoogleApiClient,
-                    uri).await(10, TimeUnit.SECONDS);
+                    uri).await(30, TimeUnit.SECONDS);
 
             // If the data was set to this path once we will retrieve the data object and take the
             // index from it

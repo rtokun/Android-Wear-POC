@@ -29,6 +29,7 @@
         android:exported="false"/>
     <service android:name=".data.processing.DataProcessingService"
         android:exported="false"/>
+    <service android:name=".error.ErrorProcessingService"/>
 
   </application>
 

@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerDBReposComponent;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
@@ -23,11 +24,14 @@ import com.artyom.androidwearpoc.db.AccelerometerSamplesRepo;
 import com.artyom.androidwearpoc.db.BatteryLevelSamplesRepo;
 import com.artyom.androidwearpoc.model.AccelerometerSampleTEMPORAL;
 import com.artyom.androidwearpoc.model.BatteryLevelSample;
+import com.artyom.androidwearpoc.model.MessageData;
 import com.artyom.androidwearpoc.model.converter.AccelerometerSamplesConverter;
+import com.artyom.androidwearpoc.report.log.DataMismatchEvent;
 import com.artyom.androidwearpoc.shared.Configuration;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
+import com.artyom.androidwearpoc.util.SharedPrefsController;
 
 import java.io.InputStream;
 import java.util.Date;
@@ -39,19 +43,27 @@ import javax.inject.Inject;
 import timber.log.Timber;
 
 import static com.artyom.androidwearpoc.shared.CommonConstants.SENSORS_MESSAGE;
+import static com.artyom.androidwearpoc.shared.Configuration.MAX_ALLOWED_DIFF_BETWEEN_PACKAGES;
+import static com.artyom.androidwearpoc.shared.Configuration.MAX_ALLOWED_PACKAGES_DIFF;
+import static com.artyom.androidwearpoc.shared.Configuration.SAMPLES_PER_PACKAGE_LIMIT;
 import static com.artyom.androidwearpoc.shared.enums.DataTransferType.ASSET;
 
 /**
  * Created by Artyom on 27/12/2016.
  */
 
-public class DataReceiverService extends WearableListenerService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class DataReceiverService extends WearableListenerService
+        implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
     private static final long CLIENT_CONNECTION_TIMEOUT = 15;
 
     private GoogleApiClient mGoogleApiClient;
 
     private String mLocalNodeId;
+
+    private SharedPrefsController mSharedPrefsController;
 
     @Inject
     AccelerometerSamplesRepo mAccelerometerSamplesRepo;
@@ -66,6 +78,9 @@ public class DataReceiverService extends WearableListenerService implements Goog
                 .build()
                 .inject(this);
 
+        mSharedPrefsController = MyMobileApplication.getApplicationComponent()
+                .getSharedPrefsController();
+
         mGoogleApiClient = DaggerGoogleComponent
                 .builder()
                 .googleApiModule(new GoogleApiModule(this.getApplicationContext(), this, this))
@@ -75,7 +90,7 @@ public class DataReceiverService extends WearableListenerService implements Goog
 
     @Override
     public void onDestroy() {
-        if (mGoogleApiClient != null){
+        if (mGoogleApiClient != null) {
             mGoogleApiClient.disconnect();
         }
         super.onDestroy();
@@ -133,8 +148,13 @@ public class DataReceiverService extends WearableListenerService implements Goog
             messagePackage = getMessageFromDefaultEvent(event);
         }
 
-        if (messagePackage != null){
-            //logValues(messagePackage);
+        if (messagePackage != null) {
+
+            MessageData lastSavedMessageData = mSharedPrefsController.getLastMessage();
+            if (lastSavedMessageData != null) {
+                verifyValues(lastSavedMessageData, messagePackage);
+            }
+
             int messageIndex = messagePackage.getIndex();
 
             //TODO: revert back to - List<AccelerometerSample> converted =
@@ -146,8 +166,10 @@ public class DataReceiverService extends WearableListenerService implements Goog
             float batteryPercentage = messagePackage.getBatteryPercentage();
             mBatteryLevelSamplesRepo.saveSample(new BatteryLevelSample(batteryPercentage, new Date()));
 
+            mSharedPrefsController.saveMessage(messagePackage);
+
             Timber.d("Wearable message arrived, message index: %s battery level: %s", messageIndex,
-                    batteryPercentage) ;
+                    batteryPercentage);
         } else {
             Timber.d("Wearable message values are null");
         }
@@ -161,7 +183,6 @@ public class DataReceiverService extends WearableListenerService implements Goog
         InputStream messageAssetInputStream = Wearable.DataApi
                 .getFdForAsset(mGoogleApiClient, messageAsset).await().getInputStream();
 
-
         try {
             byte[] messageBytes = ByteStreams.toByteArray(messageAssetInputStream);
             return ParcelableUtil.unmarshall(messageBytes, MessagePackage.CREATOR);
@@ -169,7 +190,6 @@ public class DataReceiverService extends WearableListenerService implements Goog
             Timber.e("failed to convert input stream to byte array, reason: %s", e);
             return null;
         }
-
     }
 
     private MessagePackage getMessageFromDefaultEvent(DataEvent event) {
@@ -182,25 +202,48 @@ public class DataReceiverService extends WearableListenerService implements Goog
         return ParcelableUtil.unmarshall(data, MessagePackage.CREATOR);
     }
 
-    private void logValues(MessagePackage messagePackage) {
+    private void verifyValues(@NonNull MessageData lastSavedMessageData,
+                              @NonNull MessagePackage newMessagePackage) {
 
-        float batteryPercentage = messagePackage.getBatteryPercentage();
-        int size = messagePackage.getAccelerometerSamples().size();
-        AccelerometerSampleData firstSample = messagePackage.getAccelerometerSamples().get(0);
-        AccelerometerSampleData lastSample = messagePackage.getAccelerometerSamples().get(size - 1);
+        // Retrieving important data from new arrived package
+        int newPackageSize = newMessagePackage.getAccelerometerSamples().size();
+        AccelerometerSampleData newFirstSample = newMessagePackage.getAccelerometerSamples().get(0);
+        AccelerometerSampleData newLastSample = newMessagePackage.getAccelerometerSamples().get
+                (newPackageSize - 1);
 
-        Timber.i("battery percentage: %s", batteryPercentage);
-        Timber.i("amount of samples: %s", size);
+        // Creating custom crashlytics event to be sent if any mismatch prsents in new arrived
+        // data from wearable
+        DataMismatchEvent dataMismatchEvent = new DataMismatchEvent();
+        boolean isDataValid = true;
 
-        Timber.i("first sample: x = %s, y = %s, z = %s",
-                firstSample.getValues()[0],
-                firstSample.getValues()[1],
-                firstSample.getValues()[2]);
+        if (newPackageSize != SAMPLES_PER_PACKAGE_LIMIT) {
+            dataMismatchEvent.updateSamplesAmountMismatch(SAMPLES_PER_PACKAGE_LIMIT, newPackageSize);
+            isDataValid = false;
+        }
 
-        Timber.i("last sample: x = %s, y = %s, z = %s",
-                lastSample.getValues()[0],
-                lastSample.getValues()[1],
-                lastSample.getValues()[2]);
+        if (!packagesTimeDifferenceValid(newFirstSample.getTimestamp(),
+                lastSavedMessageData.getLastSampleTimestamp())){
+
+            String timeDiffString = calculateDiff(newFirstSample.getTimestamp(),
+                    lastSavedMessageData.getLastSampleTimestamp());
+            dataMismatchEvent.updatePackagesTimesMismatch(timeDiffString);
+        }
+    }
+
+    private String calculateDiff(long lastSampleOldMessageTimestamp,
+                                 long firstSampleNewMessageTimestamp) {
+
+
+    }
+
+    private boolean packagesTimeDifferenceValid(long lastSampleOldMessageTimestamp,
+                                                long firstSampleNewMessageTimestamp) {
+        return (firstSampleNewMessageTimestamp - lastSampleOldMessageTimestamp) <=
+                MAX_ALLOWED_DIFF_BETWEEN_PACKAGES;
+    }
+
+    private boolean timeDiffValid(long timestamp, long lastSampleTimestamp) {
+        return false;
     }
 
     @Override

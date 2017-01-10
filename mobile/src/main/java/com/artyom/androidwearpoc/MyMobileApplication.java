@@ -36,11 +36,10 @@ public class MyMobileApplication extends Application {
         initTimber();
         createDaggerApplicationController();
         startAppComponents();
-//        TestFairy.begin(this, "24e7daf120f87d841cdbaebd1fb1ac34b68885bb");
+        initCrashlytics();
     }
 
     private void startAppComponents() {
-        initCrashlytics();
         mWearConnectivityServiceController.startWearConnectivityService();
         Realm.init(this);
 //        Realm realm = Realm.getDefaultInstance();
@@ -50,7 +49,6 @@ public class MyMobileApplication extends Application {
     }
 
     private void initCrashlytics() {
-//        Fabric.with(this, new Crashlytics());
         final Fabric fabric = new Fabric.Builder(this)
                 .kits(new Crashlytics())
                 .debuggable(true)

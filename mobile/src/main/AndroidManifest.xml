@@ -4,7 +4,7 @@
 
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-
+  <uses-permission android:name="android.permission.INTERNET" />
 
   <application
       android:name=".MyMobileApplication"
@@ -36,6 +36,19 @@
         <data
             android:host="*"
             android:pathPrefix="/sensors/"
+            android:scheme="wear"/>
+      </intent-filter>
+    </service>
+
+    <!-- Wear errors listener service-->
+    <service android:name=".report.error.WearErrorsListenerService">
+
+      <intent-filter>
+        <action android:name="com.google.android.gms.wearable.DATA_CHANGED"/>
+
+        <data
+            android:host="*"
+            android:pathPrefix="/wear_error"
             android:scheme="wear"/>
       </intent-filter>
     </service>

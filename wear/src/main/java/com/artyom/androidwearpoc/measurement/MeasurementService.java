@@ -8,6 +8,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.BatteryManager;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
@@ -27,6 +28,7 @@ import javax.inject.Inject;
 
 import timber.log.Timber;
 
+import static com.artyom.androidwearpoc.shared.Configuration.ACCELEROMETER_SAMPLE_PERIOD_IN_MICROSECONDS;
 import static com.artyom.androidwearpoc.shared.Configuration.SAMPLES_PER_PACKAGE_LIMIT;
 
 /**
@@ -85,7 +87,10 @@ public class MeasurementService extends Service implements SensorEventListener {
         Timber.d("starting measurement");
         if (checkNotNull()) {
             Timber.d("sensors are valid, registering listeners");
-            mSensorManager.registerListener(this, mAccelerometerSensor, 20000, 20000);
+            mSensorManager.registerListener(this,
+                    mAccelerometerSensor,
+                    ACCELEROMETER_SAMPLE_PERIOD_IN_MICROSECONDS,
+                    ACCELEROMETER_SAMPLE_PERIOD_IN_MICROSECONDS);
         } else {
             Timber.w("sensors are null");
         }

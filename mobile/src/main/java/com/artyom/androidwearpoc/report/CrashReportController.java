@@ -1,4 +1,4 @@
-package com.artyom.androidwearpoc.util;
+package com.artyom.androidwearpoc.report;
 
 import com.crashlytics.android.Crashlytics;
 

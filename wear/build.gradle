@@ -12,7 +12,7 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('/Users/Artyom/Programming/Projects/Android/AndroidWearPOC/key.jks')
+            storeFile file('../key.jks')
             storePassword "123456"
             keyAlias "key"
             keyPassword "123456"
