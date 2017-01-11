@@ -22,12 +22,17 @@ import com.artyom.androidwearpoc.shared.models.MessagePackage;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import timber.log.Timber;
 
+import static android.hardware.SensorManager.SENSOR_DELAY_GAME;
+import static android.hardware.SensorManager.SENSOR_DELAY_NORMAL;
 import static com.artyom.androidwearpoc.shared.Configuration.ACCELEROMETER_SAMPLE_PERIOD_IN_MICROSECONDS;
+import static com.artyom.androidwearpoc.shared.Configuration.MAX_ALLOWED_DIFF_BETWEEN_PACKAGES_IN_MILLIS;
+import static com.artyom.androidwearpoc.shared.Configuration.MAX_ALLOWED_SAMPLES_DIFF_IN_MILLIS;
 import static com.artyom.androidwearpoc.shared.Configuration.SAMPLES_PER_PACKAGE_LIMIT;
 
 /**
@@ -37,7 +42,6 @@ import static com.artyom.androidwearpoc.shared.Configuration.SAMPLES_PER_PACKAGE
 public class MeasurementService extends Service implements SensorEventListener {
 
     public final static int SENS_ACCELEROMETER = Sensor.TYPE_ACCELEROMETER;
-
 
     public static final String MESSAGE_PACKAGE_ID = "message_package_id";
 
@@ -88,8 +92,7 @@ public class MeasurementService extends Service implements SensorEventListener {
             Timber.d("sensors are valid, registering listeners");
             mSensorManager.registerListener(this,
                     mAccelerometerSensor,
-                    ACCELEROMETER_SAMPLE_PERIOD_IN_MICROSECONDS,
-                    ACCELEROMETER_SAMPLE_PERIOD_IN_MICROSECONDS);
+                    SENSOR_DELAY_GAME);
         } else {
             Timber.w("sensors are null");
         }
@@ -109,6 +112,7 @@ public class MeasurementService extends Service implements SensorEventListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mSensorManager.unregisterListener(this);
         mEventBus.postSticky(new MeasurementServiceStatus(false));
     }
 
@@ -121,8 +125,10 @@ public class MeasurementService extends Service implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent newEvent) {
 
+        long timestampInMillis = TimeUnit.NANOSECONDS.toMillis(newEvent.timestamp);
+
         AccelerometerSampleData newEventData = new AccelerometerSampleData(
-                newEvent.timestamp,
+                timestampInMillis,
                 newEvent.values);
 
         if (Configuration.LOG_EACH_SAMPLE) {
@@ -188,11 +194,10 @@ public class MeasurementService extends Service implements SensorEventListener {
     }
 
     private void logNewEventData(AccelerometerSampleData newEventData, long diff) {
-        Timber.d("sensor event occurred, timestamp: %s, values: " +
-                        "%s, time difference: %s",
-                newEventData.getTimestamp(),
-                newEventData.getValues(),
-                diff);
+//        if (diff > MAX_ALLOWED_SAMPLES_DIFF_IN_MILLIS) {
+            Timber.d("new accelerometer event, timestamp: %s, time difference: %s milliseconds",
+                    newEventData.getTimestamp(), diff);
+//        }
     }
 
     private long calculateTimeDiff(AccelerometerSampleData newEventData) {

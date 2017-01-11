@@ -88,6 +88,7 @@ public class DataProcessingService extends IntentService {
 
                 Timber.d("message package id received successfully");
                 processData(messagePackage);
+
                 deleteProcessedPackageFromHolder(messagePackageId);
             } else {
                 Timber.w("missing data to process");
@@ -121,6 +122,8 @@ public class DataProcessingService extends IntentService {
         }
 
         if (dataRequest != null && validateConnection()) {
+            Timber.d("sending package, package index: %s, package amount: %s", messagePackage
+                    .getIndex(), messagePackage.getAccelerometerSamples().size());
             sendData(dataRequest);
         }
     }

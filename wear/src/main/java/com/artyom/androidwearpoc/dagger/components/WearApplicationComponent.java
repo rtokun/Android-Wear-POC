@@ -4,6 +4,7 @@ import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.dagger.modules.DataHolderModule;
 import com.artyom.androidwearpoc.dagger.modules.EventBusModule;
 import com.artyom.androidwearpoc.dagger.modules.MeasurementModule;
+import com.artyom.androidwearpoc.dagger.modules.SharedPrefsModule;
 import com.artyom.androidwearpoc.dagger.modules.UtilsModule;
 import com.artyom.androidwearpoc.dagger.scopes.ForApplication;
 import com.artyom.androidwearpoc.data.processing.DataProcessingService;
@@ -17,8 +18,10 @@ import dagger.Component;
  */
 @ForApplication
 @Component(modules = {MeasurementModule.class, DataHolderModule.class, UtilsModule.class,
-        EventBusModule.class})
+        EventBusModule.class, SharedPrefsModule.class})
 public interface WearApplicationComponent {
+
+    Sha
 
     void inject(MyWearApplication myWearApplication);
 

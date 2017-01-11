@@ -45,7 +45,7 @@ import javax.inject.Inject;
 import timber.log.Timber;
 
 import static com.artyom.androidwearpoc.shared.CommonConstants.SENSORS_MESSAGE;
-import static com.artyom.androidwearpoc.shared.Configuration.MAX_ALLOWED_DIFF_BETWEEN_PACKAGES;
+import static com.artyom.androidwearpoc.shared.Configuration.MAX_ALLOWED_DIFF_BETWEEN_PACKAGES_IN_MILLIS;
 import static com.artyom.androidwearpoc.shared.Configuration.SAMPLES_PER_PACKAGE_LIMIT;
 import static com.artyom.androidwearpoc.shared.enums.DataTransferType.ASSET;
 
@@ -154,6 +154,8 @@ public class DataReceiverService extends WearableListenerService
         }
 
         if (messagePackage != null) {
+            Timber.d("received package, package index: %s, package amount: %s", messagePackage
+                    .getIndex(), messagePackage.getAccelerometerSamples().size());
 
             MessageData lastSavedMessageData = mSharedPrefsController.getLastMessage();
 
@@ -225,23 +227,22 @@ public class DataReceiverService extends WearableListenerService
             isDataValid = false;
         }
 
-        if (!packagesTimeDifferenceValid(lastSavedMessageData.getLastSampleTimestamp(), firstSampleInNewPackage.getTimestamp())) {
+        long firstSampleTime = firstSampleInNewPackage.getTimestamp();
+        long lastSampleTime = lastSavedMessageData.getLastSampleTimestamp();
 
-            dataMismatchEvent.updatePackagesTimesMismatch(firstSampleInNewPackage.getTimestamp(),
-                    lastSavedMessageData.getLastSampleTimestamp());
+        if (!packagesTimeDifferenceValid(lastSampleTime, firstSampleTime)) {
+            dataMismatchEvent.updatePackagesTimesMismatch(lastSampleTime, firstSampleTime);
             isDataValid = false;
         }
 
-        if (!isDataValid){
+        if (!isDataValid) {
             mReportController.sendCustomEvent(dataMismatchEvent);
         }
 
     }
 
-
     private boolean packagesTimeDifferenceValid(long lastSampleOldMessageTimestamp, long firstSampleNewMessageTimestamp) {
-        long differenceInNanoseconds = firstSampleNewMessageTimestamp - lastSampleOldMessageTimestamp;
-        return differenceInNanoseconds <= MAX_ALLOWED_DIFF_BETWEEN_PACKAGES;
+        return firstSampleNewMessageTimestamp - lastSampleOldMessageTimestamp <= MAX_ALLOWED_DIFF_BETWEEN_PACKAGES_IN_MILLIS;
     }
 
     @Override
@@ -253,7 +254,6 @@ public class DataReceiverService extends WearableListenerService
     public void onConnectionSuspended(int i) {
         Timber.e("google client connection suspended");
     }
-
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {

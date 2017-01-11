@@ -6,6 +6,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
 
@@ -35,20 +36,24 @@ public class DataMismatchEvent extends CustomEvent {
         this.putCustomAttribute("Packages Time Gap", timeDiffString);
     }
 
-    private String createTimeDiffString(long lastSampleTimestampInNano,
-                                        long firstSampleTimestampInNano) {
+    private String createTimeDiffString(long lastSampleTime,
+                                        long firstSampleTime) {
 
-        long timeDiffInNanoSeconds = (firstSampleTimestampInNano -
-                lastSampleTimestampInNano);
-
-        long timeDiffInMillisec = timeDiffInNanoSeconds / 1000 / 1000;
+        long timeDiffInMillis = (firstSampleTime -
+                lastSampleTime);
 
         DateFormat format = new SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.getDefault());
-        Date lastSampleDate = new Date(lastSampleTimestampInNano / 1000 / 1000);
-        Date newSampleDate = new Date(firstSampleTimestampInNano /1000 / 1000);
+        Date lastSampleDate = new Date(lastSampleTime);
+        Date newSampleDate = new Date(firstSampleTime);
 
-        return "last sample at: " + format.format(lastSampleDate) +
-                " new sample at: " + format.format(newSampleDate) +
-                " => gap: " + timeDiffInMillisec + " milliseconds";
+        if (timeDiffInMillis > 1000) {
+            return "last sample at: " + format.format(lastSampleDate) +
+                    " new sample at: " + format.format(newSampleDate) +
+                    " => gap: " + TimeUnit.MILLISECONDS.toSeconds(timeDiffInMillis) + " seconds";
+        } else {
+            return "last sample at: " + format.format(lastSampleDate) +
+                    " new sample at: " + format.format(newSampleDate) +
+                    " => gap: " + timeDiffInMillis + " milliseconds";
+        }
     }
 }

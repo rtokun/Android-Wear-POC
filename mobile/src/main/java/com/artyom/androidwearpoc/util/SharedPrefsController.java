@@ -27,13 +27,6 @@ public class SharedPrefsController {
         this.mApplicationContext = mApplicationContext;
     }
 
-    public boolean isMessagePresented() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences
-                (mApplicationContext);
-
-        return sharedPreferences.getString(LAST_MESSAGE_DATA, null) != null;
-    }
-
     public void saveMessage(MessagePackage message) {
         MessageData messageData = mapWearPackageToMessageData(message);
         String serializedMessageData = serializeToString(messageData);
