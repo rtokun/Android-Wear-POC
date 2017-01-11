@@ -1,7 +1,7 @@
 package com.artyom.androidwearpoc.dagger.modules;
 
 import com.artyom.androidwearpoc.dagger.scopes.ForApplication;
-import com.artyom.androidwearpoc.report.CrashReportController;
+import com.artyom.androidwearpoc.report.ReportController;
 
 import dagger.Module;
 import dagger.Provides;
@@ -10,12 +10,12 @@ import dagger.Provides;
  * Created by Artyom-IDEO on 10-Jan-17.
  */
 @Module
-public class CrashReportModule {
+public class ReportModule {
 
     @ForApplication
     @Provides
-    CrashReportController crashReportController(){
-        return new CrashReportController();
+    ReportController crashReportController(){
+        return new ReportController();
     }
 
 }

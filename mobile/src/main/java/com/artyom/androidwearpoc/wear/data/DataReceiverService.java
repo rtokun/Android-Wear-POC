@@ -19,6 +19,7 @@ import android.support.annotation.Nullable;
 import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerDBReposComponent;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
+import com.artyom.androidwearpoc.dagger.components.MobileApplicationComponent;
 import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
 import com.artyom.androidwearpoc.db.AccelerometerSamplesRepo;
 import com.artyom.androidwearpoc.db.BatteryLevelSamplesRepo;
@@ -26,6 +27,7 @@ import com.artyom.androidwearpoc.model.AccelerometerSampleTEMPORAL;
 import com.artyom.androidwearpoc.model.BatteryLevelSample;
 import com.artyom.androidwearpoc.model.MessageData;
 import com.artyom.androidwearpoc.model.converter.AccelerometerSamplesConverter;
+import com.artyom.androidwearpoc.report.ReportController;
 import com.artyom.androidwearpoc.report.log.DataMismatchEvent;
 import com.artyom.androidwearpoc.shared.Configuration;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
@@ -44,7 +46,6 @@ import timber.log.Timber;
 
 import static com.artyom.androidwearpoc.shared.CommonConstants.SENSORS_MESSAGE;
 import static com.artyom.androidwearpoc.shared.Configuration.MAX_ALLOWED_DIFF_BETWEEN_PACKAGES;
-import static com.artyom.androidwearpoc.shared.Configuration.MAX_ALLOWED_PACKAGES_DIFF;
 import static com.artyom.androidwearpoc.shared.Configuration.SAMPLES_PER_PACKAGE_LIMIT;
 import static com.artyom.androidwearpoc.shared.enums.DataTransferType.ASSET;
 
@@ -65,6 +66,8 @@ public class DataReceiverService extends WearableListenerService
 
     private SharedPrefsController mSharedPrefsController;
 
+    private ReportController mReportController;
+
     @Inject
     AccelerometerSamplesRepo mAccelerometerSamplesRepo;
 
@@ -78,9 +81,11 @@ public class DataReceiverService extends WearableListenerService
                 .build()
                 .inject(this);
 
-        mSharedPrefsController = MyMobileApplication.getApplicationComponent()
-                .getSharedPrefsController();
+        MobileApplicationComponent applicationComponent = MyMobileApplication
+                .getApplicationComponent();
 
+        mSharedPrefsController = applicationComponent.getSharedPrefsController();
+        mReportController = applicationComponent.getReportController();
         mGoogleApiClient = DaggerGoogleComponent
                 .builder()
                 .googleApiModule(new GoogleApiModule(this.getApplicationContext(), this, this))
@@ -151,6 +156,7 @@ public class DataReceiverService extends WearableListenerService
         if (messagePackage != null) {
 
             MessageData lastSavedMessageData = mSharedPrefsController.getLastMessage();
+
             if (lastSavedMessageData != null) {
                 verifyValues(lastSavedMessageData, messagePackage);
             }
@@ -207,9 +213,7 @@ public class DataReceiverService extends WearableListenerService
 
         // Retrieving important data from new arrived package
         int newPackageSize = newMessagePackage.getAccelerometerSamples().size();
-        AccelerometerSampleData newFirstSample = newMessagePackage.getAccelerometerSamples().get(0);
-        AccelerometerSampleData newLastSample = newMessagePackage.getAccelerometerSamples().get
-                (newPackageSize - 1);
+        AccelerometerSampleData firstSampleInNewPackage = newMessagePackage.getAccelerometerSamples().get(0);
 
         // Creating custom crashlytics event to be sent if any mismatch prsents in new arrived
         // data from wearable
@@ -221,29 +225,23 @@ public class DataReceiverService extends WearableListenerService
             isDataValid = false;
         }
 
-        if (!packagesTimeDifferenceValid(newFirstSample.getTimestamp(),
-                lastSavedMessageData.getLastSampleTimestamp())){
+        if (!packagesTimeDifferenceValid(lastSavedMessageData.getLastSampleTimestamp(), firstSampleInNewPackage.getTimestamp())) {
 
-            String timeDiffString = calculateDiff(newFirstSample.getTimestamp(),
+            dataMismatchEvent.updatePackagesTimesMismatch(firstSampleInNewPackage.getTimestamp(),
                     lastSavedMessageData.getLastSampleTimestamp());
-            dataMismatchEvent.updatePackagesTimesMismatch(timeDiffString);
+            isDataValid = false;
         }
+
+        if (!isDataValid){
+            mReportController.sendCustomEvent(dataMismatchEvent);
+        }
+
     }
 
-    private String calculateDiff(long lastSampleOldMessageTimestamp,
-                                 long firstSampleNewMessageTimestamp) {
 
-
-    }
-
-    private boolean packagesTimeDifferenceValid(long lastSampleOldMessageTimestamp,
-                                                long firstSampleNewMessageTimestamp) {
-        return (firstSampleNewMessageTimestamp - lastSampleOldMessageTimestamp) <=
-                MAX_ALLOWED_DIFF_BETWEEN_PACKAGES;
-    }
-
-    private boolean timeDiffValid(long timestamp, long lastSampleTimestamp) {
-        return false;
+    private boolean packagesTimeDifferenceValid(long lastSampleOldMessageTimestamp, long firstSampleNewMessageTimestamp) {
+        long differenceInNanoseconds = firstSampleNewMessageTimestamp - lastSampleOldMessageTimestamp;
+        return differenceInNanoseconds <= MAX_ALLOWED_DIFF_BETWEEN_PACKAGES;
     }
 
     @Override

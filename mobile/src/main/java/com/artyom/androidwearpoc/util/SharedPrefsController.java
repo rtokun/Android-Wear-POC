@@ -11,6 +11,8 @@ import com.artyom.androidwearpoc.shared.models.MessagePackage;
 
 import javax.inject.Inject;
 
+import timber.log.Timber;
+
 /**
  * Created by Artyom-IDEO on 10-Jan-17.
  */
@@ -37,6 +39,7 @@ public class SharedPrefsController {
         String serializedMessageData = serializeToString(messageData);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences
                 (mApplicationContext);
+        Timber.d("saving message data to shared preferences, message data: %s", serializedMessageData);
         sharedPreferences.edit()
                 .putString(LAST_MESSAGE_DATA, serializedMessageData).commit();
     }

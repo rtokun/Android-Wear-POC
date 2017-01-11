@@ -4,7 +4,6 @@ import android.content.Context;
 
 
 import com.artyom.androidwearpoc.dagger.scopes.ForApplication;
-import com.artyom.androidwearpoc.report.CrashReportController;
 
 import dagger.Module;
 import dagger.Provides;

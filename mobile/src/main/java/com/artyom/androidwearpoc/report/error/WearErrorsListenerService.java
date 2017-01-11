@@ -15,9 +15,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
-import com.crashlytics.android.Crashlytics;
+import com.artyom.androidwearpoc.report.ReportController;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -42,6 +43,8 @@ public class WearErrorsListenerService extends WearableListenerService
 
     private String mLocalNodeId;
 
+    private ReportController mReportController;
+
 
     @Override
     public void onCreate() {
@@ -52,6 +55,9 @@ public class WearErrorsListenerService extends WearableListenerService
                 .googleApiModule(new GoogleApiModule(this.getApplicationContext(), this, this))
                 .build()
                 .googleApiClient();
+
+        mReportController = MyMobileApplication.getApplicationComponent()
+                .getReportController();
     }
 
     @Override
@@ -85,15 +91,16 @@ public class WearErrorsListenerService extends WearableListenerService
 
             Throwable ex = (Throwable) ois.readObject();
 
-            Crashlytics.setBool("wear_exception", true);
-            Crashlytics.setString("board", map.getString("board"));
-            Crashlytics.setString("fingerprint", map.getString("fingerprint"));
-            Crashlytics.setString("model", map.getString("model"));
-            Crashlytics.setString("manufacturer", map.getString("manufacturer"));
-            Crashlytics.setString("product", map.getString("product"));
+            mReportController.setBool("wear_exception", true);
+            mReportController.setString("board", map.getString("board"));
+            mReportController.setString("board", map.getString("board"));
+            mReportController.setString("fingerprint", map.getString("fingerprint"));
+            mReportController.setString("model", map.getString("model"));
+            mReportController.setString("manufacturer", map.getString("manufacturer"));
+            mReportController.setString("product", map.getString("product"));
 
             Timber.d("sending new wearable crashlytics exception");
-            Crashlytics.logException(ex);
+            mReportController.reportCustomEvent(ex);
         } catch (IOException | ClassNotFoundException e) {
             Timber.e(e);
         }
