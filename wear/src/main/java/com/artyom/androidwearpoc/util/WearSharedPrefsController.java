@@ -7,13 +7,13 @@ import android.preference.PreferenceManager;
 /**
  * Created by Artyom-IDEO on 11-Jan-17.
  */
-public class SharedPrefsController {
+public class WearSharedPrefsController {
 
     private Context mAppContext;
 
     private static final String MESSAGE_INDEX = "message_index";
 
-    public SharedPrefsController(Context applicationContext) {
+    public WearSharedPrefsController(Context applicationContext) {
         mAppContext = applicationContext;
     }
 

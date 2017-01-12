@@ -10,7 +10,6 @@ import com.artyom.androidwearpoc.dagger.scopes.ForApplication;
 import com.artyom.androidwearpoc.data.processing.DataProcessingService;
 import com.artyom.androidwearpoc.measurement.MeasurementService;
 import com.artyom.androidwearpoc.ui.MainActivity;
-import com.artyom.androidwearpoc.util.SharedPrefsController;
 
 import dagger.Component;
 

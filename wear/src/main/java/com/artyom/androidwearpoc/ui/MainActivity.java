@@ -22,7 +22,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import javax.inject.Inject;
 
-import static com.artyom.androidwearpoc.shared.Configuration.DEFAULT_SAMPLING_RATE_IN_MICRO;
+import static com.artyom.androidwearpoc.shared.DefaultConfiguration.DEFAULT_SAMPLING_RATE_IN_MICRO;
 
 public class MainActivity extends Activity implements View.OnClickListener {
 

@@ -1,21 +1,11 @@
 package com.artyom.androidwearpoc.ui.main;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.wearable.CapabilityApi;
-import com.google.android.gms.wearable.CapabilityInfo;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
-import com.google.android.gms.wearable.Wearable;
-
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
@@ -26,12 +16,12 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.artyom.androidwearpoc.BuildConfig;
+import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.R;
 import com.artyom.androidwearpoc.dagger.components.DBReposComponent;
 import com.artyom.androidwearpoc.dagger.components.DaggerDBReposComponent;
@@ -40,10 +30,10 @@ import com.artyom.androidwearpoc.db.BatteryLevelSamplesRepo;
 import com.artyom.androidwearpoc.export.CSVExportTask;
 import com.artyom.androidwearpoc.ui.ExportFileDialog;
 import com.artyom.androidwearpoc.ui.utils.Conversions;
-import com.artyom.androidwearpoc.util.SharedPrefsController;
+import com.artyom.androidwearpoc.util.ConfigController;
+import com.bytesizebit.androidutils.KeyboardUtils;
 
 import java.io.File;
-import java.util.List;
 
 import timber.log.Timber;
 
@@ -51,15 +41,9 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 
 public class MainActivity extends AppCompatActivity implements
-        View.OnClickListener,
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
-
-    public static final String WATCH_CAPABILITY = "fox_watch_capability";
+        View.OnClickListener {
 
     public static final int MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE = 1001;
-
-    GoogleApiClient mGoogleApiClient;
 
     private ProgressBar mProgressbar;
 
@@ -68,8 +52,6 @@ public class MainActivity extends AppCompatActivity implements
     private Button mBtnDeleteData;
 
     private Button mBtnCountSamples;
-
-    private Button mBtnSubmitSamplingRate;
 
     private TextView mTvVersion;
 
@@ -81,13 +63,20 @@ public class MainActivity extends AppCompatActivity implements
 
     private BatteryLevelSamplesRepo mBatteryLevelSamplesRepo;
 
-    private SharedPrefsController mSharedPrefsController;
+    private ConfigController mConfigController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initDependencies();
+        findViews();
+        setListeners();
+        initUI();
+        requestRequiredPermissions();
+    }
 
+    private void initDependencies() {
         DBReposComponent dbReposComponent = DaggerDBReposComponent
                 .builder()
                 .build();
@@ -95,25 +84,37 @@ public class MainActivity extends AppCompatActivity implements
         mAccelerometerSamplesRepo = dbReposComponent.getAccelerometerSamplesRepo();
         mBatteryLevelSamplesRepo = dbReposComponent.getBatteryLevelSamplesRepo();
 
-        findViews();
-        setListeners();
-        initUI();
-        createGoogleClient();
-        addCapabilityListener();
-        requestRequiredPermissions();
+        mConfigController = MyMobileApplication.getApplicationComponent()
+                .getConfigController();
     }
 
     private void initUI() {
         mTvVersion.setText("Version: " + BuildConfig.VERSION_NAME);
-        mEDSamplingRate.setText("50");
 
+        int samplingRate = mConfigController.getSamplingRateInHz();
+        mEDSamplingRate.setText(String.valueOf(samplingRate));
     }
 
     private void setListeners() {
         mBtnCSVExport.setOnClickListener(this);
         mBtnDeleteData.setOnClickListener(this);
         mBtnCountSamples.setOnClickListener(this);
-        mBtnSubmitSamplingRate.setOnClickListener(this);
+        mEDSamplingRate.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE){
+                    KeyboardUtils.hideSoftKeyboard(MainActivity.this, mEDSamplingRate);
+                    int newRate = Integer.valueOf(mEDSamplingRate.getText().toString());
+                    if (isRateChanged(newRate)) {
+                        mConfigController.updateSamplingRate(newRate);
+                        Toast.makeText(MainActivity.this, "Updating sampling rate", Toast.LENGTH_LONG)
+                                .show();
+                    }
+                }
+                return false;
+            }
+        });
     }
 
     private void findViews() {
@@ -124,13 +125,6 @@ public class MainActivity extends AppCompatActivity implements
         mMainCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.main_coordinator_layout);
         mTvVersion = (TextView) findViewById(R.id.tv_version);
         mEDSamplingRate = (TextInputEditText) findViewById(R.id.ed_rate);
-        mBtnSubmitSamplingRate = (Button) findViewById(R.id.btn_submit_rate);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        connectGoogleClient();
     }
 
     private boolean requestRequiredPermissions() {
@@ -184,89 +178,6 @@ public class MainActivity extends AppCompatActivity implements
                 });
 
         permissionDeniedSnackbar.show();
-    }
-
-    @Override
-    protected void onPause() {
-        disconnectGoogleClient();
-        super.onPause();
-    }
-
-    private void disconnectGoogleClient() {
-        if (mGoogleApiClient != null){
-            mGoogleApiClient.disconnect();
-        }
-    }
-
-    private void connectGoogleClient() {
-        mGoogleApiClient.connect();
-    }
-
-    private void addCapabilityListener() {
-        Timber.d("adding capability changed listener");
-        Wearable.CapabilityApi.addCapabilityListener(
-                mGoogleApiClient,
-                new CapabilityApi.CapabilityListener() {
-
-                    @Override
-                    public void onCapabilityChanged(CapabilityInfo capabilityInfo) {
-                        Timber.d("capability changed, the nodes: %s",
-                                capabilityInfo.getNodes());
-
-                        for (Node node : capabilityInfo.getNodes()) {
-                            if (node.isNearby()) {
-                                Timber.d("Capability of directly connected node changed, node " +
-                                        "info: %s", node.getDisplayName());
-                                return;
-                            }
-                        }
-                    }
-                },
-                WATCH_CAPABILITY);
-    }
-
-    private void createGoogleClient() {
-        Timber.d("creating google api client");
-        mGoogleApiClient = new GoogleApiClient.Builder(this.getApplicationContext())
-                .addApi(Wearable.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Timber.d("google API client connected, retrieving nodes");
-    }
-
-    private void getNodesNodeApi() {
-        Timber.d("retrieving nodes through Node Api");
-        Wearable.NodeApi.getConnectedNodes(mGoogleApiClient)
-                .setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>() {
-
-                    @Override
-                    public void onResult(@NonNull NodeApi.GetConnectedNodesResult getConnectedNodesResult) {
-                        List<Node> nodes = getConnectedNodesResult.getNodes();
-                        Timber.d("nodes amount from Node Api: %s", nodes.size());
-
-                        if (nodes.size() > 0) {
-                            for (int i = 0; i < nodes.size(); i++) {
-                                Timber.d("node #%s is: %s", i, nodes.get(i).getDisplayName());
-                            }
-                        }
-                    }
-                });
-    }
-
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Timber.e("google client connection suspended");
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Timber.e("google client connection failed, connection result: %s", connectionResult.getErrorMessage());
     }
 
     private void exportCSV() {
@@ -341,17 +252,11 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.buttonCountSamples:
                 countSamples();
                 break;
-            case R.id.btn_submit_rate:
-                mEDSamplingRate.clearFocus();
-                int newRate = Integer.valueOf(mEDSamplingRate.getText().toString());
-                if (isRateChanged()){
-                    sendNewRateToWearable();
-                }
-                break;
         }
     }
 
-    public void isRateChanged() {
-
+    public boolean isRateChanged(int newRate) {
+        int savedRateInHz = mConfigController.getSamplingRateInHz();
+        return newRate != savedRateInHz;
     }
 }

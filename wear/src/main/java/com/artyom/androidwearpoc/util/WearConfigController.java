@@ -6,13 +6,13 @@ import com.google.android.gms.wearable.WearableListenerService;
 /**
  * Created by Artyom-IDEO on 11-Jan-17.
  */
-public class ConfigController extends WearableListenerService {
+public class WearConfigController extends WearableListenerService {
 
     private long mSamplingRate;
 
-    private SharedPrefsController mSharedPrefsController;
+    private WearSharedPrefsController mSharedPrefsController;
 
-    public ConfigController(SharedPrefsController mSharedPrefsController) {
+    public WearConfigController(WearSharedPrefsController mSharedPrefsController) {
         this.mSharedPrefsController = mSharedPrefsController;
     }
 

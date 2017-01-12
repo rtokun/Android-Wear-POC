@@ -29,7 +29,7 @@ import com.artyom.androidwearpoc.model.MessageData;
 import com.artyom.androidwearpoc.model.converter.AccelerometerSamplesConverter;
 import com.artyom.androidwearpoc.report.ReportController;
 import com.artyom.androidwearpoc.report.log.DataMismatchEvent;
-import com.artyom.androidwearpoc.shared.Configuration;
+import com.artyom.androidwearpoc.shared.DefaultConfiguration;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
@@ -45,8 +45,8 @@ import javax.inject.Inject;
 import timber.log.Timber;
 
 import static com.artyom.androidwearpoc.shared.CommonConstants.SENSORS_MESSAGE;
-import static com.artyom.androidwearpoc.shared.Configuration.MAX_ALLOWED_DIFF_BETWEEN_PACKAGES_IN_MILLIS;
-import static com.artyom.androidwearpoc.shared.Configuration.DEFAULT_SAMPLES_PER_PACKAGE_LIMIT;
+import static com.artyom.androidwearpoc.shared.DefaultConfiguration.MAX_ALLOWED_DIFF_BETWEEN_PACKAGES_IN_MILLIS;
+import static com.artyom.androidwearpoc.shared.DefaultConfiguration.DEFAULT_SAMPLES_PER_PACKAGE_LIMIT;
 import static com.artyom.androidwearpoc.shared.enums.DataTransferType.ASSET;
 
 /**
@@ -147,7 +147,7 @@ public class DataReceiverService extends WearableListenerService
 
         MessagePackage messagePackage;
 
-        if (Configuration.DATA_TRANSFER_TYPE == ASSET) {
+        if (DefaultConfiguration.DATA_TRANSFER_TYPE == ASSET) {
             messagePackage = getMessageFromAsset(event);
         } else {
             messagePackage = getMessageFromDefaultEvent(event);

@@ -18,6 +18,12 @@ import timber.log.Timber;
  */
 public class SharedPrefsController {
 
+    public static final String SAMPLING_RATE = "sampling_rate";
+
+    public static final String STRING_NOT_FOUND = "not_found";
+
+    public static final int NUMBER_NOT_FOUND = -1;
+
     private Context mApplicationContext;
 
     public static final String LAST_MESSAGE_DATA = "wearable_message_data";
@@ -76,4 +82,21 @@ public class SharedPrefsController {
         return messageData;
     }
 
+    public String getStringPreference(String key) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences
+                (mApplicationContext);
+        return sharedPreferences.getString(key, STRING_NOT_FOUND);
+    }
+
+    public Integer getIntPreference(String key) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences
+                (mApplicationContext);
+        return sharedPreferences.getInt(key, NUMBER_NOT_FOUND);
+    }
+
+    public void setIntPreference(String key, Integer value) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences
+                (mApplicationContext);
+        sharedPreferences.edit().putInt(key, value).apply();
+    }
 }

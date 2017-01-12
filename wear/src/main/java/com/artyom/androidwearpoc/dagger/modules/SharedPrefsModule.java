@@ -3,7 +3,7 @@ package com.artyom.androidwearpoc.dagger.modules;
 import android.content.Context;
 
 import com.artyom.androidwearpoc.dagger.scopes.ForApplication;
-import com.artyom.androidwearpoc.util.SharedPrefsController;
+import com.artyom.androidwearpoc.util.WearSharedPrefsController;
 
 import dagger.Module;
 import dagger.Provides;
@@ -16,8 +16,8 @@ public class SharedPrefsModule {
 
     @ForApplication
     @Provides
-    SharedPrefsController sharedPrefsController(Context applicationContext){
-        return new SharedPrefsController(applicationContext);
+    WearSharedPrefsController sharedPrefsController(Context applicationContext){
+        return new WearSharedPrefsController(applicationContext);
     }
 
 }

@@ -11,7 +11,6 @@ import javax.inject.Inject;
 /**
  * Created by Artyom on 24/12/2016.
  */
-@ForApplication
 public class WearConnectivityServiceController {
 
     @Inject

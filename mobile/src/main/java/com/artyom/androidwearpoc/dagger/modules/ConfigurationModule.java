@@ -1,8 +1,8 @@
 package com.artyom.androidwearpoc.dagger.modules;
 
 import com.artyom.androidwearpoc.dagger.scopes.ForApplication;
-import com.artyom.androidwearpoc.util.WearConfigController;
-import com.artyom.androidwearpoc.util.WearSharedPrefsController;
+import com.artyom.androidwearpoc.util.ConfigController;
+import com.artyom.androidwearpoc.util.SharedPrefsController;
 
 import dagger.Module;
 import dagger.Provides;
@@ -15,8 +15,8 @@ public class ConfigurationModule {
 
     @ForApplication
     @Provides
-    WearConfigController configController(WearSharedPrefsController sharedPrefsController){
-        return new WearConfigController(sharedPrefsController);
+    ConfigController configController(SharedPrefsController sharedPrefsController){
+        return new ConfigController(sharedPrefsController);
     }
 
 }
