@@ -27,6 +27,7 @@ import com.artyom.androidwearpoc.measurement.MeasurementService;
 import com.artyom.androidwearpoc.shared.enums.DataTransferType;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
+import com.artyom.androidwearpoc.util.SharedPrefsController;
 
 import java.util.concurrent.TimeUnit;
 
@@ -46,11 +47,12 @@ public class DataProcessingService extends IntentService {
     @Inject
     DataTransferHolder mDataTransferHolder;
 
+    @Inject
+    SharedPrefsController mSharedPrefsController;
+
     private GoogleApiClient mGoogleApiClient;
 
     private static final long CLIENT_CONNECTION_TIMEOUT = 15;
-
-    private static final String MESSAGE_INDEX = "message_index";
 
     public DataProcessingService() {
         super("DataProcessingService");
@@ -129,48 +131,48 @@ public class DataProcessingService extends IntentService {
     }
 
     private void updateIndexInDataLayer(int index) {
-
-        PutDataMapRequest putDataMapRequest = PutDataMapRequest.create("/messages_index");
-        putDataMapRequest.getDataMap().putInt(MESSAGE_INDEX, index);
-
-        PutDataRequest putDataRequest = putDataMapRequest.asPutDataRequest();
-        Wearable.DataApi.putDataItem(mGoogleApiClient, putDataRequest).await(30, TimeUnit.SECONDS);
+        mSharedPrefsController.setMessagePackageIndex(index);
+//        PutDataMapRequest putDataMapRequest = PutDataMapRequest.create("/messages_index");
+//        putDataMapRequest.getDataMap().putInt(MESSAGE_INDEX, index);
+//
+//        PutDataRequest putDataRequest = putDataMapRequest.asPutDataRequest();
+//        Wearable.DataApi.putDataItem(mGoogleApiClient, putDataRequest).await(30, TimeUnit.SECONDS);
     }
 
     private int getIndexFromDataLayer() {
-
-        try {
-
-            validateConnection();
-
-            // Creating URI to store the index to this path
-            Uri uri = new Uri.Builder()
-                    .scheme(PutDataRequest.WEAR_URI_SCHEME)
-                    .path("/messages_index")
-                    .build();
-
-            // Retrieving data item related to that path
-            DataItemBuffer dataItemBuffer = Wearable.DataApi.getDataItems(mGoogleApiClient,
-                    uri).await(30, TimeUnit.SECONDS);
-
-            // If the data was set to this path once we will retrieve the data object and take the
-            // index from it
-            if (dataItemBuffer.getStatus().isSuccess()
-                    && dataItemBuffer.get(0) != null) {
-
-                DataMap dataMap = DataMapItem
-                        .fromDataItem(dataItemBuffer.get(0))
-                        .getDataMap();
-
-                return dataMap.getInt(MESSAGE_INDEX, 0);
-            } else {
-                Timber.e("failed to get index from data layer");
-                return 0;
-            }
-        } catch (Exception e) {
-            Timber.e("Failed to retrieve data from Data Layer, the reason: ", e);
-            return -1;
-        }
+        return mSharedPrefsController.getMessagePackageIndex();
+//        try {
+//
+//            validateConnection();
+//
+//            // Creating URI to store the index to this path
+//            Uri uri = new Uri.Builder()
+//                    .scheme(PutDataRequest.WEAR_URI_SCHEME)
+//                    .path("/messages_index")
+//                    .build();
+//
+//            // Retrieving data item related to that path
+//            DataItemBuffer dataItemBuffer = Wearable.DataApi.getDataItems(mGoogleApiClient,
+//                    uri).await(30, TimeUnit.SECONDS);
+//
+//            // If the data was set to this path once we will retrieve the data object and take the
+//            // index from it
+//            if (dataItemBuffer.getStatus().isSuccess()
+//                    && dataItemBuffer.get(0) != null) {
+//
+//                DataMap dataMap = DataMapItem
+//                        .fromDataItem(dataItemBuffer.get(0))
+//                        .getDataMap();
+//
+//                return dataMap.getInt(MESSAGE_INDEX, 0);
+//            } else {
+//                Timber.e("failed to get index from data layer");
+//                return 0;
+//            }
+//        } catch (Exception e) {
+//            Timber.e("Failed to retrieve data from Data Layer, the reason: ", e);
+//            return -1;
+//        }
     }
 
     private PutDataRequest packAssetData(MessagePackage messagePackage) {
@@ -228,5 +230,4 @@ public class DataProcessingService extends IntentService {
 
         return result.isSuccess();
     }
-
 }

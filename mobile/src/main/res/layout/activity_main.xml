@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_coordinator_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/main_coordinator_layout"
     >
 
-  <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:tools="http://schemas.android.com/tools"
+  <TextView
+      android:id="@+id/tv_version"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@+id/buttonCountSamples"
+      android:layout_gravity="bottom|end"
+      android:textSize="12sp"
+      />
+  <RelativeLayout
       android:id="@+id/activity_main"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
@@ -55,15 +63,43 @@
         style="?android:attr/progressBarStyleHorizontal"
         />
 
-  </RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical|start"
+        android:layout_below="@id/buttonCountSamples"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"
+        >
 
-  <TextView
-      android:id="@+id/tv_version"
-      android:textSize="12sp"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_gravity="bottom|end"
-      android:layout_below="@id/buttonCountSamples"
-      />
+      <android.support.design.widget.TextInputLayout
+          android:layout_width="200dp"
+          android:layout_height="wrap_content"
+          >
+
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/ed_rate"
+            android:layout_height="wrap_content"
+            android:hint="Sample rate in Hz"
+            android:inputType="number"
+            android:layout_width="match_parent"
+            />
+
+      </android.support.design.widget.TextInputLayout>
+
+
+      <Button
+          android:text="Submit"
+          android:focusable="true"
+          android:id="@+id/btn_submit_rate"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+  </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

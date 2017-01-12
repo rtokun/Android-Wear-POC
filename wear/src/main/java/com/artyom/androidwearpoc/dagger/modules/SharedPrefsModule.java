@@ -16,7 +16,7 @@ public class SharedPrefsModule {
 
     @ForApplication
     @Provides
-    SharedPrefsController sharedPrefsModule(Context applicationContext){
+    SharedPrefsController sharedPrefsController(Context applicationContext){
         return new SharedPrefsController(applicationContext);
     }
 

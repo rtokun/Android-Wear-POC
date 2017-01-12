@@ -10,6 +10,7 @@ import com.artyom.androidwearpoc.dagger.scopes.ForApplication;
 import com.artyom.androidwearpoc.data.processing.DataProcessingService;
 import com.artyom.androidwearpoc.measurement.MeasurementService;
 import com.artyom.androidwearpoc.ui.MainActivity;
+import com.artyom.androidwearpoc.util.SharedPrefsController;
 
 import dagger.Component;
 
@@ -21,7 +22,7 @@ import dagger.Component;
         EventBusModule.class, SharedPrefsModule.class})
 public interface WearApplicationComponent {
 
-    Sha
+
 
     void inject(MyWearApplication myWearApplication);
 

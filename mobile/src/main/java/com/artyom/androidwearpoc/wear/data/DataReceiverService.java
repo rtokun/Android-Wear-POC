@@ -46,7 +46,7 @@ import timber.log.Timber;
 
 import static com.artyom.androidwearpoc.shared.CommonConstants.SENSORS_MESSAGE;
 import static com.artyom.androidwearpoc.shared.Configuration.MAX_ALLOWED_DIFF_BETWEEN_PACKAGES_IN_MILLIS;
-import static com.artyom.androidwearpoc.shared.Configuration.SAMPLES_PER_PACKAGE_LIMIT;
+import static com.artyom.androidwearpoc.shared.Configuration.DEFAULT_SAMPLES_PER_PACKAGE_LIMIT;
 import static com.artyom.androidwearpoc.shared.enums.DataTransferType.ASSET;
 
 /**
@@ -222,8 +222,8 @@ public class DataReceiverService extends WearableListenerService
         DataMismatchEvent dataMismatchEvent = new DataMismatchEvent();
         boolean isDataValid = true;
 
-        if (newPackageSize != SAMPLES_PER_PACKAGE_LIMIT) {
-            dataMismatchEvent.updateSamplesAmountMismatch(SAMPLES_PER_PACKAGE_LIMIT, newPackageSize);
+        if (newPackageSize != DEFAULT_SAMPLES_PER_PACKAGE_LIMIT) {
+            dataMismatchEvent.updateSamplesAmountMismatch(DEFAULT_SAMPLES_PER_PACKAGE_LIMIT, newPackageSize);
             isDataValid = false;
         }
 

@@ -10,5 +10,11 @@ public class ConfigController extends WearableListenerService {
 
     private long mSamplingRate;
 
+    private SharedPrefsController mSharedPrefsController;
+
+    public ConfigController(SharedPrefsController mSharedPrefsController) {
+        this.mSharedPrefsController = mSharedPrefsController;
+    }
+
 
 }

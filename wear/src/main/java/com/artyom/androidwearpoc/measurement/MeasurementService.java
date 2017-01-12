@@ -18,6 +18,7 @@ import com.artyom.androidwearpoc.shared.Configuration;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 import com.artyom.androidwearpoc.shared.models.MeasurementServiceStatus;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
+import com.artyom.androidwearpoc.util.SharedPrefsController;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -29,11 +30,7 @@ import javax.inject.Inject;
 import timber.log.Timber;
 
 import static android.hardware.SensorManager.SENSOR_DELAY_GAME;
-import static android.hardware.SensorManager.SENSOR_DELAY_NORMAL;
-import static com.artyom.androidwearpoc.shared.Configuration.ACCELEROMETER_SAMPLE_PERIOD_IN_MICROSECONDS;
-import static com.artyom.androidwearpoc.shared.Configuration.MAX_ALLOWED_DIFF_BETWEEN_PACKAGES_IN_MILLIS;
-import static com.artyom.androidwearpoc.shared.Configuration.MAX_ALLOWED_SAMPLES_DIFF_IN_MILLIS;
-import static com.artyom.androidwearpoc.shared.Configuration.SAMPLES_PER_PACKAGE_LIMIT;
+import static com.artyom.androidwearpoc.shared.Configuration.DEFAULT_SAMPLES_PER_PACKAGE_LIMIT;
 
 /**
  * Created by Artyom-IDEO on 25-Dec-16.
@@ -58,6 +55,9 @@ public class MeasurementService extends Service implements SensorEventListener {
     @Inject
     EventBus mEventBus;
 
+    @Inject
+    SharedPrefsController mSharedPrefsController;
+
     private Sensor mAccelerometerSensor;
 
     private AccelerometerSampleData mLastEventData;
@@ -68,6 +68,7 @@ public class MeasurementService extends Service implements SensorEventListener {
         MyWearApplication.getApplicationComponent().inject(this);
         initSensors();
         resetPackageValues();
+        mSharedPrefsController.setMessagePackageIndex(0);
         startMeasurement();
         mEventBus.postSticky(new MeasurementServiceStatus(true));
     }
@@ -135,7 +136,7 @@ public class MeasurementService extends Service implements SensorEventListener {
             logNewEventData(newEventData, calculateTimeDiff(newEventData));
         }
 
-        if (mCounter < SAMPLES_PER_PACKAGE_LIMIT) {
+        if (mCounter < DEFAULT_SAMPLES_PER_PACKAGE_LIMIT) {
             addNewEventToPackage(newEventData);
             updateCurrentValues(newEventData);
         } else {

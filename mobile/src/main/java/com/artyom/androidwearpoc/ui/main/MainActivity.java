@@ -18,11 +18,15 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +40,7 @@ import com.artyom.androidwearpoc.db.BatteryLevelSamplesRepo;
 import com.artyom.androidwearpoc.export.CSVExportTask;
 import com.artyom.androidwearpoc.ui.ExportFileDialog;
 import com.artyom.androidwearpoc.ui.utils.Conversions;
+import com.artyom.androidwearpoc.util.SharedPrefsController;
 
 import java.io.File;
 import java.util.List;
@@ -64,13 +69,19 @@ public class MainActivity extends AppCompatActivity implements
 
     private Button mBtnCountSamples;
 
+    private Button mBtnSubmitSamplingRate;
+
     private TextView mTvVersion;
+
+    private TextInputEditText mEDSamplingRate;
 
     private CoordinatorLayout mMainCoordinatorLayout;
 
     private AccelerometerSamplesRepo mAccelerometerSamplesRepo;
 
     private BatteryLevelSamplesRepo mBatteryLevelSamplesRepo;
+
+    private SharedPrefsController mSharedPrefsController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,17 +97,23 @@ public class MainActivity extends AppCompatActivity implements
 
         findViews();
         setListeners();
+        initUI();
         createGoogleClient();
         addCapabilityListener();
         requestRequiredPermissions();
+    }
 
+    private void initUI() {
         mTvVersion.setText("Version: " + BuildConfig.VERSION_NAME);
+        mEDSamplingRate.setText("50");
+
     }
 
     private void setListeners() {
         mBtnCSVExport.setOnClickListener(this);
         mBtnDeleteData.setOnClickListener(this);
         mBtnCountSamples.setOnClickListener(this);
+        mBtnSubmitSamplingRate.setOnClickListener(this);
     }
 
     private void findViews() {
@@ -106,6 +123,8 @@ public class MainActivity extends AppCompatActivity implements
         mBtnCountSamples = (Button) findViewById(R.id.buttonCountSamples);
         mMainCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.main_coordinator_layout);
         mTvVersion = (TextView) findViewById(R.id.tv_version);
+        mEDSamplingRate = (TextInputEditText) findViewById(R.id.ed_rate);
+        mBtnSubmitSamplingRate = (Button) findViewById(R.id.btn_submit_rate);
     }
 
     @Override
@@ -322,6 +341,17 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.buttonCountSamples:
                 countSamples();
                 break;
+            case R.id.btn_submit_rate:
+                mEDSamplingRate.clearFocus();
+                int newRate = Integer.valueOf(mEDSamplingRate.getText().toString());
+                if (isRateChanged()){
+                    sendNewRateToWearable();
+                }
+                break;
         }
+    }
+
+    public void isRateChanged() {
+
     }
 }

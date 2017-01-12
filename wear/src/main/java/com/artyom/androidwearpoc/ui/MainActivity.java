@@ -2,7 +2,6 @@ package com.artyom.androidwearpoc.ui;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.icu.util.TimeUnit;
 import android.os.Bundle;
 import android.support.wearable.activity.ConfirmationActivity;
 import android.view.View;
@@ -15,7 +14,6 @@ import com.artyom.androidwearpoc.BuildConfig;
 import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.R;
 import com.artyom.androidwearpoc.measurement.MeasurementServiceController;
-import com.artyom.androidwearpoc.shared.Configuration;
 import com.artyom.androidwearpoc.shared.models.MeasurementServiceStatus;
 
 import org.greenrobot.eventbus.EventBus;
@@ -24,7 +22,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import javax.inject.Inject;
 
-import static com.artyom.androidwearpoc.shared.Configuration.ACCELEROMETER_SAMPLE_PERIOD_IN_MICROSECONDS;
+import static com.artyom.androidwearpoc.shared.Configuration.DEFAULT_SAMPLING_RATE_IN_MICRO;
 
 public class MainActivity extends Activity implements View.OnClickListener {
 
@@ -96,7 +94,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
         mTVVersionCode.setText("Version code: " + BuildConfig.VERSION_CODE);
         mTVRate.setText(String.format("Sampling rate: %d Hz", 1000000 /
-                ACCELEROMETER_SAMPLE_PERIOD_IN_MICROSECONDS));
+                DEFAULT_SAMPLING_RATE_IN_MICRO));
         setLoadingUI(false);
     }
 
