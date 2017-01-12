@@ -11,8 +11,8 @@ import dagger.Provides;
 /**
  * Created by Artyom-IDEO on 10-Jan-17.
  */
-@Module(includes = ApplicationContextModule.class)
-public class SharedPrefsModule {
+@Module(includes = WearApplicationContextModule.class)
+public class WearSharedPrefsModule {
 
     @ForApplication
     @Provides

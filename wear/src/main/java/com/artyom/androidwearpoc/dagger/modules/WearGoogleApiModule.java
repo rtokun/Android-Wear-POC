@@ -12,12 +12,12 @@ import dagger.Provides;
  * Created by Artyom on 24/12/2016.
  */
 @Module
-public class GoogleApiModule {
+public class WearGoogleApiModule {
 
     Context mContext;
 
 
-    public GoogleApiModule(Context context) {
+    public WearGoogleApiModule(Context context) {
         this.mContext = context;
 
     }

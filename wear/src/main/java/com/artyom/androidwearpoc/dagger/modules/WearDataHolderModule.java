@@ -10,7 +10,7 @@ import dagger.Provides;
  * Created by Artyom on 27/12/2016.
  */
 @Module
-public class DataHolderModule {
+public class WearDataHolderModule {
 
     @ForApplication
     @Provides

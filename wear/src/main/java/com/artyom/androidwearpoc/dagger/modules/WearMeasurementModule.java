@@ -10,8 +10,8 @@ import dagger.Module;
 import dagger.Provides;
 
 
-@Module(includes = ApplicationContextModule.class)
-public class MeasurementModule {
+@Module(includes = WearApplicationContextModule.class)
+public class WearMeasurementModule {
 
     @ForApplication
     @Provides

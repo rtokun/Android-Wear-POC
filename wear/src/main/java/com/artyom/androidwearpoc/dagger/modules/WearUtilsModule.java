@@ -11,8 +11,8 @@ import dagger.Provides;
 /**
  * Created by Artyom on 28/12/2016.
  */
-@Module(includes = ApplicationContextModule.class)
-public class UtilsModule {
+@Module(includes = WearApplicationContextModule.class)
+public class WearUtilsModule {
 
     @ForApplication
     @Provides

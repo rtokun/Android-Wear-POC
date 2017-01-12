@@ -59,6 +59,7 @@ public class WearConnectivityService extends Service
         if(mGoogleApiClient != null){
             mGoogleApiClient.disconnect();
         }
+        unRegisterCapabilityChangedCallbacks();
         super.onDestroy();
     }
 

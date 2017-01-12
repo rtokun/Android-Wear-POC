@@ -16,7 +16,7 @@ import android.support.annotation.NonNull;
 
 import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
-import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
+import com.artyom.androidwearpoc.dagger.modules.WearGoogleApiModule;
 import com.artyom.androidwearpoc.data.DataTransferHolder;
 import com.artyom.androidwearpoc.measurement.MeasurementService;
 import com.artyom.androidwearpoc.shared.enums.DataTransferType;
@@ -59,7 +59,7 @@ public class DataProcessingService extends IntentService {
 
         mGoogleApiClient = DaggerGoogleComponent
                 .builder()
-                .googleApiModule(new GoogleApiModule(this))
+                .googleApiModule(new WearGoogleApiModule(this))
                 .build()
                 .googleApiClient();
 

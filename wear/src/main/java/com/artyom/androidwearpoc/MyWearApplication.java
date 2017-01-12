@@ -6,7 +6,7 @@ import android.os.Handler;
 
 import com.artyom.androidwearpoc.dagger.components.DaggerWearApplicationComponent;
 import com.artyom.androidwearpoc.dagger.components.WearApplicationComponent;
-import com.artyom.androidwearpoc.dagger.modules.ApplicationContextModule;
+import com.artyom.androidwearpoc.dagger.modules.WearApplicationContextModule;
 import com.artyom.androidwearpoc.error.ErrorProcessingService;
 import com.artyom.androidwearpoc.measurement.MeasurementServiceController;
 
@@ -45,7 +45,7 @@ public class MyWearApplication extends Application {
     private void createDaggerApplicationController() {
         mApplicationComponent = DaggerWearApplicationComponent
                 .builder()
-                .applicationContextModule(new ApplicationContextModule(this))
+                .applicationContextModule(new WearApplicationContextModule(this))
                 .build();
 
         mApplicationComponent.inject(this);

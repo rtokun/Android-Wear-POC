@@ -1,6 +1,7 @@
 package com.artyom.androidwearpoc.util;
 
 import com.artyom.androidwearpoc.shared.DefaultConfiguration;
+import com.artyom.androidwearpoc.wear.communication.CommunicationController;
 
 import static com.artyom.androidwearpoc.util.SharedPrefsController.NUMBER_NOT_FOUND;
 import static com.artyom.androidwearpoc.util.SharedPrefsController.SAMPLING_RATE;
@@ -11,12 +12,16 @@ import static com.artyom.androidwearpoc.util.SharedPrefsController.SAMPLING_RATE
 
 public class ConfigController {
 
+    private CommunicationController mCommunicationController;
+
     private SharedPrefsController mSharedPrefsController;
 
     private Integer mSamplingRate;
 
 
-    public ConfigController(SharedPrefsController sharedPrefsController) {
+    public ConfigController(SharedPrefsController sharedPrefsController,
+                            CommunicationController communicationController) {
+        mCommunicationController = communicationController;
         mSharedPrefsController = sharedPrefsController;
         loadConfigurationValues();
     }
@@ -40,11 +45,11 @@ public class ConfigController {
         if (newSamplingRate != mSamplingRate) {
             mSamplingRate = newSamplingRate;
             mSharedPrefsController.setIntPreference(SAMPLING_RATE, mSamplingRate);
-            notifySamplingRateChanged();
+            notifySamplingRateChanged(newSamplingRate);
         }
     }
 
-    private void notifySamplingRateChanged() {
-
+    private void notifySamplingRateChanged(int newSamplingRate) {
+        mCommunicationController.updateSamplingRate(newSamplingRate);
     }
 }

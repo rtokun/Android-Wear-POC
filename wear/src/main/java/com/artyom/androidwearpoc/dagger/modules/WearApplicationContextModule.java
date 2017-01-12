@@ -8,11 +8,11 @@ import dagger.Module;
 import dagger.Provides;
 
 @Module
-public class ApplicationContextModule {
+public class WearApplicationContextModule {
 
     private final Context mApplicationContext;
 
-    public ApplicationContextModule(Context myApplication) {
+    public WearApplicationContextModule(Context myApplication) {
         this.mApplicationContext = myApplication;
     }
 

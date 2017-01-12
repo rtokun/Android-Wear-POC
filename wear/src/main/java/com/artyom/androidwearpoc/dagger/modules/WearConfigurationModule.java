@@ -10,8 +10,8 @@ import dagger.Provides;
 /**
  * Created by Artyom on 11/01/2017.
  */
-@Module(includes = SharedPrefsModule.class)
-public class ConfigurationModule {
+@Module(includes = WearSharedPrefsModule.class)
+public class WearConfigurationModule {
 
     @ForApplication
     @Provides

@@ -11,7 +11,7 @@ import dagger.Provides;
  * Created by Artyom on 28/12/2016.
  */
 @Module
-public class EventBusModule {
+public class WearEventBusModule {
 
     @Provides
     @ForApplication
