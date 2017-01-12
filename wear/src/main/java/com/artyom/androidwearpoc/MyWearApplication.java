@@ -45,22 +45,14 @@ public class MyWearApplication extends Application {
     private void createDaggerApplicationController() {
         mApplicationComponent = DaggerWearApplicationComponent
                 .builder()
-                .applicationContextModule(new WearApplicationContextModule(this))
+                .wearApplicationContextModule(new WearApplicationContextModule(this))
                 .build();
 
         mApplicationComponent.inject(this);
     }
 
     private void startAppComponents() {
-        Timber.d("starting wear app components in 10 seconds delay");
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                mMeasurementServiceController.startMeasurementService();
-            }
-        }, 5000);
+        mMeasurementServiceController.startMeasurementService();
     }
 
     private void initTimber() {

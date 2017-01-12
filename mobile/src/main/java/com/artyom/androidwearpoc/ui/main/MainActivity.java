@@ -11,7 +11,6 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -23,15 +22,19 @@ import android.widget.Toast;
 import com.artyom.androidwearpoc.BuildConfig;
 import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.R;
+import com.artyom.androidwearpoc.base.BaseEventActivity;
 import com.artyom.androidwearpoc.dagger.components.DBReposComponent;
 import com.artyom.androidwearpoc.dagger.components.DaggerDBReposComponent;
 import com.artyom.androidwearpoc.db.AccelerometerSamplesRepo;
 import com.artyom.androidwearpoc.db.BatteryLevelSamplesRepo;
+import com.artyom.androidwearpoc.events.MessageEvent;
 import com.artyom.androidwearpoc.export.CSVExportTask;
 import com.artyom.androidwearpoc.ui.ExportFileDialog;
 import com.artyom.androidwearpoc.ui.utils.Conversions;
 import com.artyom.androidwearpoc.util.ConfigController;
 import com.bytesizebit.androidutils.KeyboardUtils;
+
+import org.greenrobot.eventbus.Subscribe;
 
 import java.io.File;
 
@@ -40,7 +43,7 @@ import timber.log.Timber;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 
-public class MainActivity extends AppCompatActivity implements
+public class MainActivity extends BaseEventActivity implements
         View.OnClickListener {
 
     public static final int MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE = 1001;
@@ -76,6 +79,11 @@ public class MainActivity extends AppCompatActivity implements
         requestRequiredPermissions();
     }
 
+    @Subscribe
+    public void onWearMessageEvent(MessageEvent messageEvent){
+        Toast.makeText(this, messageEvent.getMessage(), Toast.LENGTH_LONG).show();
+    }
+
     private void initDependencies() {
         DBReposComponent dbReposComponent = DaggerDBReposComponent
                 .builder()
@@ -91,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements
     private void initUI() {
         mTvVersion.setText("Version: " + BuildConfig.VERSION_NAME);
 
-        int samplingRate = mConfigController.getSamplingRateInHz();
+        int samplingRate = mConfigController.getSamplingRate();
         mEDSamplingRate.setText(String.valueOf(samplingRate));
     }
 
@@ -256,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     public boolean isRateChanged(int newRate) {
-        int savedRateInHz = mConfigController.getSamplingRateInHz();
+        int savedRateInHz = mConfigController.getSamplingRate();
         return newRate != savedRateInHz;
     }
 }

@@ -13,6 +13,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
@@ -37,7 +38,7 @@ import static com.artyom.androidwearpoc.shared.DefaultConfiguration.DATA_TRANSFE
  * Created by Artyom on 25/12/2016.
  */
 
-public class DataProcessingService extends IntentService {
+public class DataProcessingService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     @Inject
     DataTransferHolder mDataTransferHolder;
@@ -59,7 +60,7 @@ public class DataProcessingService extends IntentService {
 
         mGoogleApiClient = DaggerGoogleComponent
                 .builder()
-                .googleApiModule(new WearGoogleApiModule(this))
+                .wearGoogleApiModule(new WearGoogleApiModule(this, this, this))
                 .build()
                 .googleApiClient();
 
@@ -187,5 +188,20 @@ public class DataProcessingService extends IntentService {
                 .blockingConnect(CLIENT_CONNECTION_TIMEOUT, TimeUnit.SECONDS);
 
         return result.isSuccess();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Timber.d("connected to google client");
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Timber.e("google client connection suspended");
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Timber.e("google client connection failed, cause: %s", connectionResult.getErrorMessage());
     }
 }

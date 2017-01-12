@@ -40,6 +40,8 @@
       </intent-filter>
     </service>
 
+    <service android:name=".wear.communication.CommunicationService"/>
+
     <!-- Wear errors listener service-->
     <service android:name=".report.error.WearErrorsListenerService">
 

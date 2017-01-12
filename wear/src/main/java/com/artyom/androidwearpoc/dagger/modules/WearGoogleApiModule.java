@@ -14,18 +14,26 @@ import dagger.Provides;
 @Module
 public class WearGoogleApiModule {
 
-    Context mContext;
+    private Context mContext;
 
+    private GoogleApiClient.ConnectionCallbacks mConnectionCallbacks;
 
-    public WearGoogleApiModule(Context context) {
+    private GoogleApiClient.OnConnectionFailedListener mOnConnectionFailedListener;
+
+    public WearGoogleApiModule(Context context,
+                               GoogleApiClient.ConnectionCallbacks connectionCallbacks,
+                               GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener) {
         this.mContext = context;
-
+        mConnectionCallbacks = connectionCallbacks;
+        mOnConnectionFailedListener = onConnectionFailedListener;
     }
 
     @Provides
     GoogleApiClient googleApiClient() {
         return new GoogleApiClient.Builder(mContext.getApplicationContext())
                 .addApi(Wearable.API)
+                .addConnectionCallbacks(mConnectionCallbacks)
+                .addOnConnectionFailedListener(mOnConnectionFailedListener)
                 .build();
 
     }

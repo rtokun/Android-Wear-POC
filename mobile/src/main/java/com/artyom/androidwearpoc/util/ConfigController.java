@@ -3,8 +3,8 @@ package com.artyom.androidwearpoc.util;
 import com.artyom.androidwearpoc.shared.DefaultConfiguration;
 import com.artyom.androidwearpoc.wear.communication.CommunicationController;
 
-import static com.artyom.androidwearpoc.util.SharedPrefsController.NUMBER_NOT_FOUND;
-import static com.artyom.androidwearpoc.util.SharedPrefsController.SAMPLING_RATE;
+import static com.artyom.androidwearpoc.shared.CommonConstants.NUMBER_NOT_FOUND;
+import static com.artyom.androidwearpoc.shared.CommonConstants.SAMPLING_RATE;
 
 /**
  * Created by Artyom on 12/01/2017.
@@ -35,10 +35,6 @@ public class ConfigController {
             mSamplingRate = DefaultConfiguration.DEFAULT_SAMPLING_RATE_IN_HZ;
         }
         return mSamplingRate;
-    }
-
-    public int getSamplingRateInHz() {
-        return getSamplingRate();
     }
 
     public void updateSamplingRate(int newSamplingRate) {

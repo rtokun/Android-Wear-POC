@@ -20,9 +20,12 @@ import com.artyom.androidwearpoc.shared.DefaultConfiguration;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 import com.artyom.androidwearpoc.shared.models.MeasurementServiceStatus;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
+import com.artyom.androidwearpoc.shared.models.UpdateRateMessage;
+import com.artyom.androidwearpoc.util.WearConfigController;
 import com.artyom.androidwearpoc.util.WearSharedPrefsController;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -31,10 +34,7 @@ import javax.inject.Inject;
 
 import timber.log.Timber;
 
-import static android.hardware.SensorManager.SENSOR_DELAY_GAME;
 import static com.artyom.androidwearpoc.shared.DefaultConfiguration.DEFAULT_SAMPLES_PER_PACKAGE_LIMIT;
-import static com.artyom.androidwearpoc.shared.DefaultConfiguration.MAX_ALLOWED_SAMPLES_DIFF_IN_MILLIS;
-import static com.artyom.androidwearpoc.shared.DefaultConfiguration.MIN_ALLOWED_SAMPLES_DIFF_IN_MILLIS;
 
 /**
  * Created by Artyom-IDEO on 25-Dec-16.
@@ -43,6 +43,9 @@ import static com.artyom.androidwearpoc.shared.DefaultConfiguration.MIN_ALLOWED_
 public class MeasurementService extends Service implements SensorEventListener {
 
     public final static int SENS_ACCELEROMETER = Sensor.TYPE_ACCELEROMETER;
+
+    // For test only
+    public static final int SAMPLING_RATE_IN_MILLIS = 200000;
 
     public static final String MESSAGE_PACKAGE_ID = "message_package_id";
 
@@ -62,6 +65,9 @@ public class MeasurementService extends Service implements SensorEventListener {
     @Inject
     WearSharedPrefsController mSharedPrefsController;
 
+    @Inject
+    WearConfigController mConfigController;
+
     private Sensor mAccelerometerSensor;
 
     private AccelerometerSampleData mLastEventData;
@@ -73,11 +79,18 @@ public class MeasurementService extends Service implements SensorEventListener {
         super.onCreate();
         MyWearApplication.getApplicationComponent().inject(this);
         initSensors();
+        mEventBus.register(this);
         startThread();
         resetPackageValues();
         mSharedPrefsController.setMessagePackageIndex(0);
         startMeasurement();
         mEventBus.postSticky(new MeasurementServiceStatus(true));
+    }
+
+    @Subscribe
+    public void onSamplingrateUpdated(UpdateRateMessage updateRateMessage){
+        stopMeasurement();
+        startMeasurement();
     }
 
     private void startThread() {
@@ -109,15 +122,19 @@ public class MeasurementService extends Service implements SensorEventListener {
             Timber.d("sensors are valid, registering listeners");
             Handler handler = new Handler(handlerThread.getLooper());
             // This buffer is max 300 on Moto 360, so we use 250;
-            int maxSamplesBuffer = 300 * SENSOR_DELAY_GAME;
+            int maxSamplesBuffer = 250 * SAMPLING_RATE_IN_MILLIS;
             mSensorManager.registerListener(this,
                     mAccelerometerSensor,
-                    SENSOR_DELAY_GAME,
+                    SAMPLING_RATE_IN_MILLIS,
                     maxSamplesBuffer,
                     handler);
         } else {
             Timber.w("sensors are null");
         }
+    }
+
+    private void stopMeasurement(){
+        mSensorManager.unregisterListener(this);
     }
 
     private boolean checkNotNull() {
@@ -134,8 +151,9 @@ public class MeasurementService extends Service implements SensorEventListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mSensorManager.unregisterListener(this);
+        stopMeasurement();
         stopThread();
+        mEventBus.unregister(this);
         mEventBus.postSticky(new MeasurementServiceStatus(false));
     }
 
@@ -161,7 +179,7 @@ public class MeasurementService extends Service implements SensorEventListener {
                 newEvent.values);
 
         if (DefaultConfiguration.LOG_EACH_SAMPLE) {
-            logOutOfRangeEventData(newEventData, calculateTimeDiff(newEventData));
+            logData(newEventData, calculateTimeDiff(newEventData));
         }
 
         if (mCounter < DEFAULT_SAMPLES_PER_PACKAGE_LIMIT) {
@@ -222,12 +240,12 @@ public class MeasurementService extends Service implements SensorEventListener {
         mCounter++;
     }
 
-    private void logOutOfRangeEventData(AccelerometerSampleData newEventData, long diff) {
-        if (diff > MAX_ALLOWED_SAMPLES_DIFF_IN_MILLIS
-                || diff < MIN_ALLOWED_SAMPLES_DIFF_IN_MILLIS) {
+    private void logData(AccelerometerSampleData newEventData, long diff) {
+//        if (diff > MAX_ALLOWED_SAMPLES_DIFF_IN_MILLIS
+//                || diff < MIN_ALLOWED_SAMPLES_DIFF_IN_MILLIS) {
             Timber.d("new accelerometer event, timestamp: %s, time difference: %s milliseconds",
                     newEventData.getTimestamp(), diff);
-        }
+//        }
     }
 
     private long calculateTimeDiff(AccelerometerSampleData newEventData) {

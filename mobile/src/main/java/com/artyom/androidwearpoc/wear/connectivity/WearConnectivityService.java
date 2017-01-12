@@ -24,6 +24,7 @@ import java.util.Set;
 
 import timber.log.Timber;
 
+import static com.artyom.androidwearpoc.shared.CommonConstants.WATCH_CAPABILITY;
 import static com.artyom.androidwearpoc.wear.connectivity.ConnectivityStatusIndicatorType.ConnectedToWatch;
 import static com.artyom.androidwearpoc.wear.connectivity.ConnectivityStatusIndicatorType.NotConnectedToWatch;
 import static com.artyom.androidwearpoc.wear.connectivity.ConnectivityStatusIndicatorType.Unknown;
@@ -38,8 +39,6 @@ public class WearConnectivityService extends Service
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         CapabilityApi.CapabilityListener {
-
-    public static final String WATCH_CAPABILITY = "fox_watch_capability";
 
     private ConnectivityStatusNotificationController mConnectivityStatusNotificationController;
 

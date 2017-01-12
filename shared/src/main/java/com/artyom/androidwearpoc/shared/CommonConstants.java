@@ -8,4 +8,14 @@ public class CommonConstants {
 
     public static final String SENSORS_MESSAGE = "sensors_message";
 
+    public static final String WATCH_CAPABILITY = "fox_watch_capability";
+
+    public static final String UPDATE_SAMPLING_RATE_PATH = "message/update_rate";
+
+    public static final String SAMPLING_RATE = "sampling_rate";
+
+    public static final String STRING_NOT_FOUND = "not_found";
+
+    public static final int NUMBER_NOT_FOUND = -1;
+
 }

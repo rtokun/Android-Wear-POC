@@ -13,16 +13,13 @@ import javax.inject.Inject;
 
 import timber.log.Timber;
 
+import static com.artyom.androidwearpoc.shared.CommonConstants.NUMBER_NOT_FOUND;
+import static com.artyom.androidwearpoc.shared.CommonConstants.STRING_NOT_FOUND;
+
 /**
  * Created by Artyom-IDEO on 10-Jan-17.
  */
 public class SharedPrefsController {
-
-    public static final String SAMPLING_RATE = "sampling_rate";
-
-    public static final String STRING_NOT_FOUND = "not_found";
-
-    public static final int NUMBER_NOT_FOUND = -1;
 
     private Context mApplicationContext;
 
