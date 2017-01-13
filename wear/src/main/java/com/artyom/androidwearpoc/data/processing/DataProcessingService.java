@@ -19,7 +19,6 @@ import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.WearGoogleApiModule;
 import com.artyom.androidwearpoc.data.DataTransferHolder;
-import com.artyom.androidwearpoc.measurement.MeasurementService;
 import com.artyom.androidwearpoc.shared.enums.DataTransferType;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
@@ -31,6 +30,7 @@ import javax.inject.Inject;
 
 import timber.log.Timber;
 
+import static com.artyom.androidwearpoc.shared.CommonConstants.MESSAGE_PACKAGE_ID;
 import static com.artyom.androidwearpoc.shared.CommonConstants.SENSORS_MESSAGE;
 import static com.artyom.androidwearpoc.shared.DefaultConfiguration.DATA_TRANSFER_TYPE;
 
@@ -75,7 +75,7 @@ public class DataProcessingService extends IntentService implements GoogleApiCli
 
             Bundle bundle = intent.getExtras();
 
-            long messagePackageId = bundle.getLong(MeasurementService.MESSAGE_PACKAGE_ID, -1);
+            long messagePackageId = bundle.getLong(MESSAGE_PACKAGE_ID, -1);
 
             // Retrieving message package from data holder matching the ID
             MessagePackage messagePackage = mDataTransferHolder

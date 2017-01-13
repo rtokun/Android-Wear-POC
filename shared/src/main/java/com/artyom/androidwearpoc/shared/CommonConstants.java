@@ -18,4 +18,7 @@ public class CommonConstants {
 
     public static final int NUMBER_NOT_FOUND = -1;
 
+    public static final String MESSAGE_PACKAGE_ID = "message_package_id";
+
+
 }

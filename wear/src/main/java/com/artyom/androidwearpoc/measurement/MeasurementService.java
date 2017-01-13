@@ -34,6 +34,7 @@ import javax.inject.Inject;
 
 import timber.log.Timber;
 
+import static com.artyom.androidwearpoc.shared.CommonConstants.MESSAGE_PACKAGE_ID;
 import static com.artyom.androidwearpoc.shared.DefaultConfiguration.DEFAULT_SAMPLES_PER_PACKAGE_LIMIT;
 
 /**
@@ -45,9 +46,7 @@ public class MeasurementService extends Service implements SensorEventListener {
     public final static int SENS_ACCELEROMETER = Sensor.TYPE_ACCELEROMETER;
 
     // For test only
-    public static final int SAMPLING_RATE_IN_MILLIS = 200000;
-
-    public static final String MESSAGE_PACKAGE_ID = "message_package_id";
+//    public static final int SAMPLING_RATE_IN_MILLIS = 200000;
 
     private static int mCounter;
 
@@ -88,7 +87,7 @@ public class MeasurementService extends Service implements SensorEventListener {
     }
 
     @Subscribe
-    public void onSamplingrateUpdated(UpdateRateMessage updateRateMessage){
+    public void onSamplingrateUpdated(UpdateRateMessage updateRateMessage) {
         stopMeasurement();
         startMeasurement();
     }
@@ -122,10 +121,10 @@ public class MeasurementService extends Service implements SensorEventListener {
             Timber.d("sensors are valid, registering listeners");
             Handler handler = new Handler(handlerThread.getLooper());
             // This buffer is max 300 on Moto 360, so we use 250;
-            int maxSamplesBuffer = 250 * SAMPLING_RATE_IN_MILLIS;
+            int maxSamplesBuffer = 250 * mConfigController.getSamplingRateMicrosecond();
             mSensorManager.registerListener(this,
                     mAccelerometerSensor,
-                    SAMPLING_RATE_IN_MILLIS,
+                    mConfigController.getSamplingRateMicrosecond(),
                     maxSamplesBuffer,
                     handler);
         } else {
@@ -133,7 +132,7 @@ public class MeasurementService extends Service implements SensorEventListener {
         }
     }
 
-    private void stopMeasurement(){
+    private void stopMeasurement() {
         mSensorManager.unregisterListener(this);
     }
 
@@ -243,8 +242,8 @@ public class MeasurementService extends Service implements SensorEventListener {
     private void logData(AccelerometerSampleData newEventData, long diff) {
 //        if (diff > MAX_ALLOWED_SAMPLES_DIFF_IN_MILLIS
 //                || diff < MIN_ALLOWED_SAMPLES_DIFF_IN_MILLIS) {
-            Timber.d("new accelerometer event, timestamp: %s, time difference: %s milliseconds",
-                    newEventData.getTimestamp(), diff);
+        Timber.d("new accelerometer event, timestamp: %s, time difference: %s milliseconds",
+                newEventData.getTimestamp(), diff);
 //        }
     }
 
