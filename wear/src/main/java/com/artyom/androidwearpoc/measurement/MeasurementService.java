@@ -1,6 +1,7 @@
 package com.artyom.androidwearpoc.measurement;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.Sensor;
@@ -11,6 +12,7 @@ import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 
 import com.artyom.androidwearpoc.MyWearApplication;
@@ -28,7 +30,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -73,6 +74,10 @@ public class MeasurementService extends Service implements SensorEventListener {
 
     protected HandlerThread handlerThread;
 
+    private Long mFirstSampleTsDiff;
+
+    private PowerManager.WakeLock mWakeLock;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -80,10 +85,26 @@ public class MeasurementService extends Service implements SensorEventListener {
         initSensors();
         mEventBus.register(this);
         startThread();
+        acquireWakeLock();
         resetPackageValues();
         mSharedPrefsController.setMessagePackageIndex(0);
         startMeasurement();
         mEventBus.postSticky(new MeasurementServiceStatus(true));
+    }
+
+    private void acquireWakeLock() {
+        if (mWakeLock == null || !mWakeLock.isHeld()) {
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SensorAdapter Lock");
+            mWakeLock.acquire();
+        }
+    }
+
+    private void releaseWakeLock(){
+        if (mWakeLock != null && !mWakeLock.isHeld()) {
+            mWakeLock.release();
+            mWakeLock = null;
+        }
     }
 
     @Subscribe
@@ -104,6 +125,7 @@ public class MeasurementService extends Service implements SensorEventListener {
     private void resetPackageValues() {
         mCounter = 0;
         mAccelerometerSensorSamples = new ArrayList<>();
+        mFirstSampleTsDiff = null;
     }
 
     private void initSensors() {
@@ -151,6 +173,7 @@ public class MeasurementService extends Service implements SensorEventListener {
     public void onDestroy() {
         super.onDestroy();
         stopMeasurement();
+        releaseWakeLock();
         stopThread();
         mEventBus.unregister(this);
         mEventBus.postSticky(new MeasurementServiceStatus(false));
@@ -171,10 +194,16 @@ public class MeasurementService extends Service implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent newEvent) {
 
-        long timestampInMillis = TimeUnit.NANOSECONDS.toMillis(newEvent.timestamp);
+        if(mFirstSampleTsDiff == null){
+            // event.timestamp is counted from the time the device started
+            // in order to report a real time stamp we calculate the difference
+            long millis = System.currentTimeMillis();
+            long nanos = newEvent.timestamp;
+            mFirstSampleTsDiff = millis - nanos / 1000000;
+        }
 
         AccelerometerSampleData newEventData = new AccelerometerSampleData(
-                timestampInMillis,
+                newEvent.timestamp / 1000000 + mFirstSampleTsDiff,
                 newEvent.values);
 
         if (DefaultConfiguration.LOG_EACH_SAMPLE) {
