@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
 import com.artyom.androidwearpoc.MyWearApplication;
@@ -39,7 +40,8 @@ import static com.artyom.androidwearpoc.shared.CommonConstants.MESSAGE_PACKAGE_I
 import static com.artyom.androidwearpoc.shared.DefaultConfiguration.DEFAULT_SAMPLES_PER_PACKAGE_LIMIT;
 
 /**
- * Created by Artyom-IDEO on 25-Dec-16.
+ * Created by Artyom-IDEO on 25-Dec-16. Serive in charge of measure the accelerometer and pack the
+ * samples
  */
 
 public class MeasurementService extends Service implements SensorEventListener {
@@ -74,8 +76,6 @@ public class MeasurementService extends Service implements SensorEventListener {
 
     protected HandlerThread handlerThread;
 
-    private Long mFirstSampleTsDiff;
-
     private PowerManager.WakeLock mWakeLock;
 
     @Override
@@ -100,13 +100,14 @@ public class MeasurementService extends Service implements SensorEventListener {
         }
     }
 
-    private void releaseWakeLock(){
+    private void releaseWakeLock() {
         if (mWakeLock != null && !mWakeLock.isHeld()) {
             mWakeLock.release();
             mWakeLock = null;
         }
     }
 
+    @SuppressWarnings("unused")
     @Subscribe
     public void onSamplingRateUpdated(UpdateRateMessage updateRateMessage) {
         stopMeasurement();
@@ -125,7 +126,6 @@ public class MeasurementService extends Service implements SensorEventListener {
     private void resetPackageValues() {
         mCounter = 0;
         mAccelerometerSensorSamples = new ArrayList<>();
-        mFirstSampleTsDiff = null;
     }
 
     private void initSensors() {
@@ -194,26 +194,18 @@ public class MeasurementService extends Service implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent newEvent) {
 
-        if(mFirstSampleTsDiff == null){
-            // event.timestamp is counted from the time the device started
-            // in order to report a real time stamp we calculate the difference
-            long millis = System.currentTimeMillis();
-            long nanos = newEvent.timestamp;
-            mFirstSampleTsDiff = millis - nanos / 1000000;
-        }
-
         AccelerometerSampleData newEventData = new AccelerometerSampleData(
-                newEvent.timestamp / 1000000 + mFirstSampleTsDiff,
+                System.currentTimeMillis() + ((newEvent.timestamp - SystemClock.elapsedRealtimeNanos()) / 1000000L),
                 newEvent.values);
 
         if (DefaultConfiguration.LOG_EACH_SAMPLE) {
             logData(newEventData, calculateTimeDiff(newEventData));
         }
 
-        if (mCounter < DEFAULT_SAMPLES_PER_PACKAGE_LIMIT) {
-            addNewEventToPackage(newEventData);
-            updateCurrentValues(newEventData);
-        } else {
+        addNewEventToPackage(newEventData);
+        updateCurrentValues(newEventData);
+
+        if (mCounter >= DEFAULT_SAMPLES_PER_PACKAGE_LIMIT) {
             float batteryPercentage = getBatteryStatus();
             sendPackageToMobileDevice(batteryPercentage);
             resetPackageValues();
