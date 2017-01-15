@@ -13,10 +13,10 @@ public class DefaultConfiguration {
     public static final Enum DATA_TRANSFER_TYPE = ASSET;
 
     // 50 samples a second * 60 seconds * X minutes
-    public static final int DEFAULT_SAMPLES_PER_PACKAGE_LIMIT = 50 * 60 * 5;
+//    public static final int DEFAULT_SAMPLES_PER_PACKAGE_LIMIT = 50 * 60 * 5;
 
     // 50 samples a second * 30 seconds
-//    public static final int DEFAULT_SAMPLES_PER_PACKAGE_LIMIT = 50 * 30;
+    public static final int DEFAULT_SAMPLES_PER_PACKAGE_LIMIT = 50 * 30;
 
     public static final boolean LOG_EACH_SAMPLE = false;
 

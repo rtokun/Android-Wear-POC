@@ -1,9 +1,12 @@
 package com.artyom.androidwearpoc.ui;
 
+import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,66 +22,91 @@ import java.io.File;
  * Created by tomerlev on 28/12/2016.
  */
 
-public  class ExportFileDialog extends DialogFragment{
+public class ExportFileDialog extends DialogFragment {
 
-    private static Context mContext;
     private boolean mSuccess;
+
     private String mText;
+
     private String mPath;
 
-    public static ExportFileDialog newInstance(Context context,
-                                               boolean success,
+    public static final String SUCCESS_KEY = "success";
+    public static final String TEXT_KEY = "text";
+    public static final String PATH_KEY = "path";
+
+    private ExportFileDialogInteractionInterface mInteractionInterface;
+
+    private DialogInterface.OnClickListener mNegativeOnClickListener = new DialogInterface.OnClickListener() {
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            dismiss();
+        }
+    };
+
+    public static ExportFileDialog newInstance(boolean success,
                                                String text,
-                                               String accSamplesFilePath){
+                                               String accSamplesFilePath) {
         ExportFileDialog dialog = new ExportFileDialog();
 
         Bundle args = new Bundle();
-        args.putString("text", text);
-        args.putBoolean("success", success);
-        args.putString("path", accSamplesFilePath);
+        args.putString(TEXT_KEY, text);
+        args.putBoolean(SUCCESS_KEY, success);
+        args.putString(PATH_KEY, accSamplesFilePath);
         dialog.setArguments(args);
 
-        mContext = context;
         return dialog;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mSuccess = getArguments().getBoolean("success");
-        mText = getArguments().getString("text");
-        mPath = getArguments().getString("path");
+        mSuccess = getArguments().getBoolean(SUCCESS_KEY);
+        mText = getArguments().getString(TEXT_KEY);
+        mPath = getArguments().getString(PATH_KEY);
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.export_file_dialog,container,false);
-        TextView text = (TextView)view.findViewById(R.id.textViewExportDialog);
-        Button send = (Button)view.findViewById(R.id.buttonSend);
-        Button close = (Button)view.findViewById(R.id.buttonClose);
+    public void onAttach(Context context) {
+        super.onAttach(context);
 
-        text.setText(mText);
-
-        if(!mSuccess){
-            send.setVisibility(View.GONE);
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mInteractionInterface = (ExportFileDialogInteractionInterface) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement ExportFileDialogInteractionListener");
         }
-        send.setOnClickListener(new View.OnClickListener() {
+    }
 
-            @Override
-            public void onClick(View v) {
-                EmailSender.sendFileInEmail(mContext,new File(mPath));
-                ExportFileDialog.this.dismiss();
-            }
-        });
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        if (mSuccess){
+            return new AlertDialog.Builder(getActivity())
+                    .setTitle("Share Logs")
+                    .setMessage(mText)
+                    .setPositiveButton(R.string.alert_dialog_share,
+                            new DialogInterface.OnClickListener() {
 
-        close.setOnClickListener(new View.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    mInteractionInterface.onShareClick(mPath);
+                                    dismiss();
+                                }
+                            }
+                    )
+                    .setNegativeButton(R.string.alert_dialog_close, mNegativeOnClickListener)
+                    .create();
+        } else {
+            return new AlertDialog.Builder(getActivity())
+                    .setTitle("No records")
+                    .setMessage(mText)
+                    .setNegativeButton(R.string.alert_dialog_close, mNegativeOnClickListener)
+                    .create();
+        }
+    }
 
-            @Override
-            public void onClick(View v) {
-                ExportFileDialog.this.dismiss();
-            }
-        });
-        return view;
+    public interface ExportFileDialogInteractionInterface {
+        void onShareClick(String pathToFile);
     }
 }

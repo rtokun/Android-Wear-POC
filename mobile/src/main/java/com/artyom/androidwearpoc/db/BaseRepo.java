@@ -23,6 +23,7 @@ public abstract class BaseRepo<T extends RealmObject> {
         mRealm.beginTransaction();
         mRealm.copyToRealm(sample);
         mRealm.commitTransaction();
+        mRealm.close();
         Timber.i("Sample of type %s has been saved to db", clazz);
     }
 
@@ -32,6 +33,7 @@ public abstract class BaseRepo<T extends RealmObject> {
         mRealm.beginTransaction();
         mRealm.copyToRealm(samples);
         mRealm.commitTransaction();
+        mRealm.close();
         Timber.i("All of type %s has been saved to db", clazz);
     }
 
@@ -41,12 +43,16 @@ public abstract class BaseRepo<T extends RealmObject> {
         realm.beginTransaction();
         realm.delete(clazz);
         realm.commitTransaction();
+        realm.close();
         Timber.i("All samples of type %s has been deleted", clazz);
     }
 
     public long count(){
         Timber.i("Counting samples of type %s ...", clazz);
         Realm realm = Realm.getDefaultInstance();
-        return realm.where(clazz).count();
+        long amount = realm.where(clazz).count();
+        realm.close();
+        return amount;
+
     }
 }

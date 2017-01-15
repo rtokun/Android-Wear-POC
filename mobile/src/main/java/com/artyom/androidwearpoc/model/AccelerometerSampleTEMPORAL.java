@@ -1,5 +1,7 @@
 package com.artyom.androidwearpoc.model;
 
+import java.util.Date;
+
 import io.realm.RealmObject;
 
 
@@ -12,16 +14,19 @@ public class AccelerometerSampleTEMPORAL extends RealmObject {
     private float y;
     private float z;
     private long ts;
+    private String ds;
 
     public AccelerometerSampleTEMPORAL() {
     }
 
-    public AccelerometerSampleTEMPORAL(int messageIndex, float x, float y, float z, long ts) {
+    public AccelerometerSampleTEMPORAL(int messageIndex, float x, float y, float z, long ts,
+                                       String dateString) {
         this.messageIndex = messageIndex;
         this.x = x;
         this.y = y;
         this.z = z;
         this.ts = ts;
+        ds = dateString;
     }
 
     public int getMessageIndex() {
@@ -62,6 +67,14 @@ public class AccelerometerSampleTEMPORAL extends RealmObject {
 
     public long getTs() {
         return ts;
+    }
+
+    public String getDs() {
+        return ds;
+    }
+
+    public void setDs(String ds) {
+        this.ds = ds;
     }
 }
 

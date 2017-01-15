@@ -22,13 +22,16 @@ import timber.log.Timber;
 /**
  * Created by tomerlev on 27/12/2016.
  */
-public class CSVExportTask extends AsyncTask<Void,Integer,Boolean> {
+public class CSVExportTask extends AsyncTask<Void, Integer, Boolean> {
 
     private File mExportFile;
+
     private ProgressBar mProgressBar;
+
     private Callback mCallback;
 
-    public  interface Callback{
+    public interface Callback {
+
         void onSuccess(File exportFile);
 
         void onFailure(String message);
@@ -71,8 +74,9 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Boolean> {
 
             final int numSamples = result.size();
 
-            if(numSamples == 0){
+            if (numSamples == 0) {
                 mCallback.onNoData();
+                realm.close();
                 return false;
             }
 
@@ -81,7 +85,12 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Boolean> {
             FileWriter filewriter = new FileWriter(mExportFile);
             bw = new BufferedWriter(filewriter);
 
-            publishProgress(0,numSamples);
+            publishProgress(0, numSamples);
+
+            AccelerometerSampleTEMPORAL previousSample = null;
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("date, timestamp, diff, x, y, z, package index\n");
 
             // Write the string to the file
             for (int i = 1; i < numSamples; i++) {
@@ -89,42 +98,64 @@ public class CSVExportTask extends AsyncTask<Void,Integer,Boolean> {
 
                 //TODO: revert back to - AccelerometerSample sample = result.get(i);
                 AccelerometerSampleTEMPORAL sample = result.get(i);
-                StringBuffer sb = new StringBuffer();
-                sb.append(sample.getTs());
-                sb.append(" ,");
-                sb.append(String.valueOf(sample.getX()));
-                sb.append(" ,");
-                sb.append(String.valueOf(sample.getY()));
-                sb.append(" ,");
-                sb.append(String.valueOf(sample.getZ()));
-                //TODO: remove 2 lines below
-                sb.append(" ,");
-                sb.append(String.valueOf(sample.getMessageIndex()));
-                //end
-                sb.append("\n");
-                bw.write(sb.toString());
+                String timeStampDifference = calculateDiff(previousSample, sample);
+
+                sb.append(sample.getDs())
+                        .append(" ,")
+
+                        .append(sample.getTs())
+                        .append(" ,")
+
+                        .append(timeStampDifference)
+                        .append(" ,")
+
+                        .append(String.valueOf(sample.getX()))
+                        .append(" ,")
+
+                        .append(String.valueOf(sample.getY()))
+                        .append(" ,")
+
+                        .append(String.valueOf(sample.getZ()))
+                        //TODO: remove 2 lines below
+                        .append(" ,")
+                        .append(String.valueOf(sample.getMessageIndex()))
+                        //end
+                        .append("\n");
+
+                previousSample = sample;
             }
+            bw.write(sb.toString());
             bw.flush();
             bw.close();
+            realm.close();
             Timber.i("CSV file saved to: %s", mExportFile.getAbsolutePath());
         } catch (IOException e) {
             Timber.e("Unable to write export file, error: %s", e.getMessage());
             mCallback.onFailure(e.getMessage());
         }
+
         return true;
+    }
+
+    private String calculateDiff(AccelerometerSampleTEMPORAL previousSample, AccelerometerSampleTEMPORAL newSample) {
+        String diff = "null";
+        if (previousSample != null && newSample != null) {
+            diff = String.valueOf(newSample.getTs() - previousSample.getTs());
+        }
+        return diff;
     }
 
     @Override
     protected void onPostExecute(Boolean success) {
         mProgressBar.setVisibility(View.GONE);
-        if(success && mExportFile != null){
+        if (success && mExportFile != null) {
             mCallback.onSuccess(mExportFile);
         }
     }
 
     @Override
     protected void onProgressUpdate(Integer... values) {
-        if(values[0] == 0) {
+        if (values[0] == 0) {
             mProgressBar.setMax(values[1]);
             mProgressBar.setVisibility(View.VISIBLE);
         }

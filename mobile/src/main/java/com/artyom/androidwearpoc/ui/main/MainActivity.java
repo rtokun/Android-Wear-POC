@@ -29,7 +29,9 @@ import com.artyom.androidwearpoc.db.AccelerometerSamplesRepo;
 import com.artyom.androidwearpoc.db.BatteryLevelSamplesRepo;
 import com.artyom.androidwearpoc.events.MessageEvent;
 import com.artyom.androidwearpoc.export.CSVExportTask;
+import com.artyom.androidwearpoc.export.EmailSender;
 import com.artyom.androidwearpoc.ui.ExportFileDialog;
+import com.artyom.androidwearpoc.ui.ExportFileDialog.ExportFileDialogInteractionInterface;
 import com.artyom.androidwearpoc.ui.utils.Conversions;
 import com.artyom.androidwearpoc.util.ConfigController;
 import com.bytesizebit.androidutils.KeyboardUtils;
@@ -44,7 +46,8 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 
 public class MainActivity extends BaseEventActivity implements
-        View.OnClickListener {
+        View.OnClickListener,
+        ExportFileDialogInteractionInterface {
 
     public static final int MY_PERMISSIONS_WRITE_EXTERNAL_STORAGE = 1001;
 
@@ -80,7 +83,7 @@ public class MainActivity extends BaseEventActivity implements
     }
 
     @Subscribe
-    public void onWearMessageEvent(MessageEvent messageEvent){
+    public void onWearMessageEvent(MessageEvent messageEvent) {
         Toast.makeText(this, messageEvent.getMessage(), Toast.LENGTH_LONG).show();
     }
 
@@ -111,7 +114,7 @@ public class MainActivity extends BaseEventActivity implements
 
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE){
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
                     KeyboardUtils.hideSoftKeyboard(MainActivity.this, mEDSamplingRate);
                     int newRate = Integer.valueOf(mEDSamplingRate.getText().toString());
                     if (isRateChanged(newRate)) {
@@ -194,7 +197,8 @@ public class MainActivity extends BaseEventActivity implements
             @Override
             public void onSuccess(File exportFile) {
                 Timber.i("Loading email dialog");
-                showCSVFileExportDialog(exportFile.getAbsolutePath(), true,
+                showCSVFileExportDialog(exportFile.getAbsolutePath(),
+                        true,
                         "Export file saved to device: " + exportFile.getAbsolutePath() +
                                 " \nSize in MB:" + Conversions.humanReadableByteCount(exportFile.length(), true) +
                                 "\nWant to share?");
@@ -229,7 +233,6 @@ public class MainActivity extends BaseEventActivity implements
 
         // Create and show the dialog.
         DialogFragment newFragment = ExportFileDialog.newInstance(
-                this,
                 success,
                 text,
                 accSamplesFilePath);
@@ -266,5 +269,10 @@ public class MainActivity extends BaseEventActivity implements
     public boolean isRateChanged(int newRate) {
         int savedRateInHz = mConfigController.getSamplingRate();
         return newRate != savedRateInHz;
+    }
+
+    @Override
+    public void onShareClick(String pathToFile) {
+        EmailSender.sendFileInEmail(this, new File(pathToFile));
     }
 }
