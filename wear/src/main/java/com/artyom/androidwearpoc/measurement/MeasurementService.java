@@ -108,7 +108,7 @@ public class MeasurementService extends Service implements SensorEventListener {
     }
 
     @Subscribe
-    public void onSamplingrateUpdated(UpdateRateMessage updateRateMessage) {
+    public void onSamplingRateUpdated(UpdateRateMessage updateRateMessage) {
         stopMeasurement();
         startMeasurement();
     }

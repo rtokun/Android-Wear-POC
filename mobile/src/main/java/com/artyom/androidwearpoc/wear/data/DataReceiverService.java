@@ -242,7 +242,8 @@ public class DataReceiverService extends WearableListenerService
     }
 
     private boolean packagesTimeDifferenceValid(long lastSampleOldMessageTimestamp, long firstSampleNewMessageTimestamp) {
-        return firstSampleNewMessageTimestamp - lastSampleOldMessageTimestamp <= MAX_ALLOWED_DIFF_BETWEEN_PACKAGES_IN_MILLIS;
+        return firstSampleNewMessageTimestamp - lastSampleOldMessageTimestamp <= MAX_ALLOWED_DIFF_BETWEEN_PACKAGES_IN_MILLIS
+                && firstSampleNewMessageTimestamp - lastSampleOldMessageTimestamp > 0;
     }
 
     @Override
