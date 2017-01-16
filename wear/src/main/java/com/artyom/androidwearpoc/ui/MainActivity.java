@@ -15,10 +15,9 @@ import com.artyom.androidwearpoc.R;
 import com.artyom.androidwearpoc.base.BaseEventActivity;
 import com.artyom.androidwearpoc.measurement.MeasurementServiceController;
 import com.artyom.androidwearpoc.shared.models.MeasurementServiceStatus;
-import com.artyom.androidwearpoc.shared.models.UpdateRateMessage;
+import com.artyom.androidwearpoc.shared.models.UpdateNumberMessage;
 import com.artyom.androidwearpoc.util.WearConfigController;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -81,10 +80,10 @@ public class MainActivity extends BaseEventActivity implements View.OnClickListe
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onSamplingrateUpdated(UpdateRateMessage updateRateMessage){
+    public void onSamplingrateUpdated(UpdateNumberMessage updateNumberMessage){
         mTVRate.setText(String.format(Locale.getDefault(),
                 "Sampling rate: %d Hz",
-                updateRateMessage.getNewRate()));
+                updateNumberMessage.getNewNumber()));
     }
 
     private void updateUI() {

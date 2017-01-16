@@ -16,7 +16,7 @@ public class DefaultConfiguration {
     public static final int DEFAULT_SAMPLES_PER_PACKAGE_LIMIT = 50 * 60 * 5;
 
     // 50 samples a second * 30 seconds
-//    public static final int DEFAULT_SAMPLES_PER_PACKAGE_LIMIT = 50 * 30;
+//    public static final iFailed to allocatent DEFAULT_SAMPLES_PER_PACKAGE_LIMIT = 50 * 30;
 
     public static final boolean LOG_EACH_SAMPLE = false;
 

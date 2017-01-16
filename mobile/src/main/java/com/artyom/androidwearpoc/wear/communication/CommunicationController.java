@@ -13,6 +13,8 @@ public class CommunicationController {
     public static final String ACTION = "action_name";
     public static final String RATE = "sampling_rate";
     public static final String UPDATE_RATE_ACTION = "update_rate";
+    public static final String UPDATE_SAMPLES_PER_CHUNK_ACTION = "samples_per_chunk";
+    public static final String AMOUNT = "amount";
 
     public CommunicationController(Context applicationContext) {
         mContext = applicationContext;
@@ -25,4 +27,10 @@ public class CommunicationController {
         mContext.startService(updateRateIntent);
     }
 
+    public void updateSamplesPerChunk(int newLimit) {
+        Intent updateSamplesPerChunkIntent = new Intent(mContext, CommunicationService.class);
+        updateSamplesPerChunkIntent.putExtra(ACTION, UPDATE_SAMPLES_PER_CHUNK_ACTION);
+        updateSamplesPerChunkIntent.putExtra(AMOUNT, newLimit);
+        mContext.startService(updateSamplesPerChunkIntent);
+    }
 }

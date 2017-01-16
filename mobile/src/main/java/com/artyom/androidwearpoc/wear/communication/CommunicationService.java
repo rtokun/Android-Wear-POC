@@ -20,7 +20,7 @@ import android.support.annotation.Nullable;
 import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
-import com.artyom.androidwearpoc.shared.models.UpdateRateMessage;
+import com.artyom.androidwearpoc.shared.models.UpdateNumberMessage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -30,11 +30,14 @@ import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
 
+import static com.artyom.androidwearpoc.shared.CommonConstants.UPDATE_SAMPLES_PER_PACKAGE_PATH;
 import static com.artyom.androidwearpoc.shared.CommonConstants.UPDATE_SAMPLING_RATE_PATH;
 import static com.artyom.androidwearpoc.shared.CommonConstants.WATCH_CAPABILITY;
 import static com.artyom.androidwearpoc.wear.communication.CommunicationController.ACTION;
+import static com.artyom.androidwearpoc.wear.communication.CommunicationController.AMOUNT;
 import static com.artyom.androidwearpoc.wear.communication.CommunicationController.RATE;
 import static com.artyom.androidwearpoc.wear.communication.CommunicationController.UPDATE_RATE_ACTION;
+import static com.artyom.androidwearpoc.wear.communication.CommunicationController.UPDATE_SAMPLES_PER_CHUNK_ACTION;
 
 /**
  * Created by Artyom-IDEO on 12-Jan-17.
@@ -81,9 +84,59 @@ public class CommunicationService extends IntentService
                         sendUpdateRateMessageToWearable(newRate);
                     }
                     break;
+                case UPDATE_SAMPLES_PER_CHUNK_ACTION:
+                    int newLimit = intent.getIntExtra(AMOUNT, -1);
+                    if (newLimit != -1) {
+                        sendChunkLimitMessageToWearable(newLimit);
+                    }
+                    break;
             }
         } else {
             Timber.e("google client failed to connect");
+        }
+    }
+
+    private void sendChunkLimitMessageToWearable(int newLimit) {
+        CapabilityApi.GetCapabilityResult result =
+                Wearable.CapabilityApi.getCapability(
+                        mGoogleApiClient, WATCH_CAPABILITY,
+                        CapabilityApi.FILTER_REACHABLE).await();
+
+        Set<Node> nodes = result.getCapability().getNodes();
+        Timber.d("nodes amount from Capability Api: %s", nodes.size());
+
+        Node directlyConnectedNode = null;
+        for (Node node : nodes) {
+            if (node.isNearby()) {
+                directlyConnectedNode = node;
+            }
+        }
+
+        if (directlyConnectedNode == null) {
+            mEventBus.post(new com.artyom.androidwearpoc.events.MessageEvent("Failed to update " +
+                    "samples per chunk amount"));
+        } else {
+
+            UpdateNumberMessage message = new UpdateNumberMessage(newLimit);
+            byte[] serializedMessage = ParcelableUtil.marshall(message);
+
+            Wearable.MessageApi.sendMessage(mGoogleApiClient,
+                    directlyConnectedNode.getId(),
+                    UPDATE_SAMPLES_PER_PACKAGE_PATH,
+                    serializedMessage).setResultCallback(new ResultCallbacks<MessageApi.SendMessageResult>() {
+
+                @Override
+                public void onSuccess(@NonNull MessageApi.SendMessageResult sendMessageResult) {
+                    mEventBus.post(new com.artyom.androidwearpoc.events.MessageEvent
+                            ("Successfully sent a message to watch"));
+                }
+
+                @Override
+                public void onFailure(@NonNull Status status) {
+                    mEventBus.post(new com.artyom.androidwearpoc.events.MessageEvent("Failed to update " +
+                            "samples per package amount"));
+                }
+            });
         }
     }
 
@@ -109,7 +162,7 @@ public class CommunicationService extends IntentService
                     "sampling rate"));
         } else {
 
-            UpdateRateMessage message = new UpdateRateMessage(newRate);
+            UpdateNumberMessage message = new UpdateNumberMessage(newRate);
             byte[] serializedMessage = ParcelableUtil.marshall(message);
 
             Wearable.MessageApi.sendMessage(mGoogleApiClient,

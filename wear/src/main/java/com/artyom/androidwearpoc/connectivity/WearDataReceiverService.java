@@ -12,7 +12,7 @@ import android.support.annotation.Nullable;
 import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.WearGoogleApiModule;
-import com.artyom.androidwearpoc.shared.models.UpdateRateMessage;
+import com.artyom.androidwearpoc.shared.models.UpdateNumberMessage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
 import com.artyom.androidwearpoc.util.WearConfigController;
 
@@ -70,8 +70,8 @@ public class WearDataReceiverService extends WearableListenerService
     }
 
     private int getNewSamplingRate(byte[] data) {
-        UpdateRateMessage message = ParcelableUtil.unmarshall(data, UpdateRateMessage.CREATOR);
-        return message.getNewRate();
+        UpdateNumberMessage message = ParcelableUtil.unmarshall(data, UpdateNumberMessage.CREATOR);
+        return message.getNewNumber();
     }
 
     @Override

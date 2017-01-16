@@ -63,6 +63,8 @@ public class MainActivity extends BaseEventActivity implements
 
     private TextInputEditText mEDSamplingRate;
 
+    private TextInputEditText mEDSamplesPerChunk;
+
     private CoordinatorLayout mMainCoordinatorLayout;
 
     private AccelerometerSamplesRepo mAccelerometerSamplesRepo;
@@ -104,6 +106,9 @@ public class MainActivity extends BaseEventActivity implements
 
         int samplingRate = mConfigController.getSamplingRate();
         mEDSamplingRate.setText(String.valueOf(samplingRate));
+
+        int samplesPerChunk = mConfigController.getSamplesPerChunk();
+        mEDSamplesPerChunk.setText(String.valueOf(samplesPerChunk));
     }
 
     private void setListeners() {
@@ -119,13 +124,35 @@ public class MainActivity extends BaseEventActivity implements
                     int newRate = Integer.valueOf(mEDSamplingRate.getText().toString());
                     if (isRateChanged(newRate)) {
                         mConfigController.updateSamplingRate(newRate);
-                        Toast.makeText(MainActivity.this, "Updating sampling rate", Toast.LENGTH_LONG)
+                        Toast.makeText(MainActivity.this, "Updating sampling rate", Toast.LENGTH_SHORT)
                                 .show();
                     }
                 }
                 return false;
             }
         });
+        mEDSamplesPerChunk.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    KeyboardUtils.hideSoftKeyboard(MainActivity.this, mEDSamplesPerChunk);
+                    int newLimit = Integer.valueOf(mEDSamplesPerChunk.getText().toString());
+                    if (isLimitChanged(newLimit)) {
+                        mConfigController.updateSamplesPerChunk(newLimit);
+                        Toast.makeText(MainActivity.this, "Updating samples per chunk limit", Toast
+                                .LENGTH_SHORT)
+                                .show();
+                    }
+                }
+                return false;
+            }
+        });
+    }
+
+    private boolean isLimitChanged(int newLimit) {
+        int previous = mConfigController.getSamplesPerChunk();
+        return newLimit != previous;
     }
 
     private void findViews() {
@@ -136,6 +163,7 @@ public class MainActivity extends BaseEventActivity implements
         mMainCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.main_coordinator_layout);
         mTvVersion = (TextView) findViewById(R.id.tv_version);
         mEDSamplingRate = (TextInputEditText) findViewById(R.id.ed_rate);
+        mEDSamplesPerChunk = (TextInputEditText) findViewById(R.id.ed_samples_limit);
     }
 
     private boolean requestRequiredPermissions() {

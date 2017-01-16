@@ -23,7 +23,7 @@ import com.artyom.androidwearpoc.shared.DefaultConfiguration;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 import com.artyom.androidwearpoc.shared.models.MeasurementServiceStatus;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
-import com.artyom.androidwearpoc.shared.models.UpdateRateMessage;
+import com.artyom.androidwearpoc.shared.models.UpdateNumberMessage;
 import com.artyom.androidwearpoc.util.WearConfigController;
 import com.artyom.androidwearpoc.util.WearSharedPrefsController;
 
@@ -109,7 +109,7 @@ public class MeasurementService extends Service implements SensorEventListener {
 
     @SuppressWarnings("unused")
     @Subscribe
-    public void onSamplingRateUpdated(UpdateRateMessage updateRateMessage) {
+    public void onSamplingRateUpdated(UpdateNumberMessage updateNumberMessage) {
         stopMeasurement();
         startMeasurement();
     }

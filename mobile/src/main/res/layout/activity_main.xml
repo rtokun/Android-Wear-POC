@@ -63,20 +63,11 @@
         style="?android:attr/progressBarStyleHorizontal"
         />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical|start"
-        android:layout_below="@id/buttonCountSamples"
-        android:orientation="horizontal"
-        android:layout_marginTop="8dp"
-        android:descendantFocusability="beforeDescendants"
-        android:focusableInTouchMode="true"
-        >
-
       <android.support.design.widget.TextInputLayout
           android:layout_width="200dp"
+          android:id="@+id/til_rate"
           android:layout_height="wrap_content"
+          android:layout_below="@id/buttonCountSamples"
           >
 
 
@@ -91,7 +82,24 @@
 
       </android.support.design.widget.TextInputLayout>
 
-    </LinearLayout>
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="200dp"
+        android:id="@+id/til_samples_per_chunk"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/til_rate"
+        >
+
+
+      <android.support.design.widget.TextInputEditText
+          android:id="@+id/ed_samples_limit"
+          android:layout_height="wrap_content"
+          android:hint="Samples per chunks"
+          android:inputType="number"
+          android:singleLine="true"
+          android:layout_width="match_parent"
+          />
+
+    </android.support.design.widget.TextInputLayout>
 
   </RelativeLayout>
 

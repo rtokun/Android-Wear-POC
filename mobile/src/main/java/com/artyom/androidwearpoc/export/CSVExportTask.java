@@ -82,7 +82,7 @@ public class CSVExportTask extends AsyncTask<Void, Integer, Boolean> {
 
             createFile();
 
-            FileWriter filewriter = new FileWriter(mExportFile);
+            FileWriter filewriter = new FileWriter(mExportFile, true);
             bw = new BufferedWriter(filewriter);
 
             publishProgress(0, numSamples);
@@ -118,14 +118,14 @@ public class CSVExportTask extends AsyncTask<Void, Integer, Boolean> {
                         .append(String.valueOf(sample.getZ()))
                         //TODO: remove 2 lines below
                         .append(" ,")
-                        .append(String.valueOf(sample.getMessageIndex()))
+                        .append(String.valueOf(sample.getMessageIndex()));
                         //end
-                        .append("\n");
 
+                bw.write(sb.toString());
+                bw.newLine();
+                sb.setLength(0);
                 previousSample = sample;
             }
-            bw.write(sb.toString());
-            bw.flush();
             bw.close();
             realm.close();
             Timber.i("CSV file saved to: %s", mExportFile.getAbsolutePath());

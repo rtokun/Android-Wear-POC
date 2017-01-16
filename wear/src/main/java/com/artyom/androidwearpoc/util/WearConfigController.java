@@ -1,7 +1,7 @@
 package com.artyom.androidwearpoc.util;
 
 import com.artyom.androidwearpoc.shared.DefaultConfiguration;
-import com.artyom.androidwearpoc.shared.models.UpdateRateMessage;
+import com.artyom.androidwearpoc.shared.models.UpdateNumberMessage;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -50,7 +50,7 @@ public class WearConfigController {
     }
 
     private void notifySamplingRateChanged(int newSamplingRate) {
-        mEventBus.post(new UpdateRateMessage(newSamplingRate));
+        mEventBus.post(new UpdateNumberMessage(newSamplingRate));
     }
 
 }

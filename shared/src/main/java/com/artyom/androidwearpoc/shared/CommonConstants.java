@@ -12,7 +12,12 @@ public class CommonConstants {
 
     public static final String UPDATE_SAMPLING_RATE_PATH = "message/update_rate";
 
+    public static final String UPDATE_SAMPLES_PER_PACKAGE_PATH =
+            "message/update_samples_per_package";
+
     public static final String SAMPLING_RATE = "sampling_rate";
+
+    public static final String SAMPLES_PER_CHUNK = "samples_per_chunk";
 
     public static final String STRING_NOT_FOUND = "not_found";
 

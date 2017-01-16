@@ -4,6 +4,7 @@ import com.artyom.androidwearpoc.shared.DefaultConfiguration;
 import com.artyom.androidwearpoc.wear.communication.CommunicationController;
 
 import static com.artyom.androidwearpoc.shared.CommonConstants.NUMBER_NOT_FOUND;
+import static com.artyom.androidwearpoc.shared.CommonConstants.SAMPLES_PER_CHUNK;
 import static com.artyom.androidwearpoc.shared.CommonConstants.SAMPLING_RATE;
 
 /**
@@ -18,6 +19,7 @@ public class ConfigController {
 
     private Integer mSamplingRate;
 
+    private Integer mSamplesPerChunk;
 
     public ConfigController(SharedPrefsController sharedPrefsController,
                             CommunicationController communicationController) {
@@ -28,6 +30,7 @@ public class ConfigController {
 
     private void loadConfigurationValues() {
         mSamplingRate = mSharedPrefsController.getIntPreference(SAMPLING_RATE);
+        mSamplesPerChunk = mSharedPrefsController.getIntPreference(SAMPLES_PER_CHUNK);
     }
 
     public int getSamplingRate() {
@@ -48,4 +51,25 @@ public class ConfigController {
     private void notifySamplingRateChanged(int newSamplingRate) {
         mCommunicationController.updateSamplingRate(newSamplingRate);
     }
+
+    public int getSamplesPerChunk(){
+        if (mSamplesPerChunk == NUMBER_NOT_FOUND) {
+            mSamplesPerChunk = DefaultConfiguration.DEFAULT_SAMPLES_PER_PACKAGE_LIMIT;
+        }
+        return mSamplesPerChunk;
+    }
+
+    public void updateSamplesPerChunk(int newLimit){
+        if (newLimit != mSamplesPerChunk) {
+            mSamplesPerChunk = newLimit;
+            mSharedPrefsController.setIntPreference(SAMPLES_PER_CHUNK, mSamplesPerChunk);
+            notifySamplesPerChunkChanged(newLimit);
+        }
+    }
+
+    private void notifySamplesPerChunkChanged(int newLimit) {
+        mCommunicationController.updateSamplesPerChunk(newLimit);
+    }
+
+
 }
