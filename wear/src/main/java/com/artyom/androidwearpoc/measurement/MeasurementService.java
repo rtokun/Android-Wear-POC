@@ -196,7 +196,9 @@ public class MeasurementService extends Service implements SensorEventListener {
 
         AccelerometerSampleData newEventData = new AccelerometerSampleData(
                 System.currentTimeMillis() + ((newEvent.timestamp - SystemClock.elapsedRealtimeNanos()) / 1000000L),
-                newEvent.values);
+                newEvent.values[0],
+                newEvent.values[1],
+                newEvent.values[2]);
 
         if (DefaultConfiguration.LOG_EACH_SAMPLE) {
             logData(newEventData, calculateTimeDiff(newEventData));

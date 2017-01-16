@@ -19,11 +19,10 @@ public class AccelerometerSamplesConverter {
     public static List<AccelerometerSample> convert(List<AccelerometerSampleData> samples) {
         List<AccelerometerSample> convertedSamples = new LinkedList<>();
         for (AccelerometerSampleData sample : samples) {
-            float[] values = sample.getValues();
             convertedSamples.add(new AccelerometerSample(
-                    values[0],
-                    values[1],
-                    values[2],
+                    sample.getX(),
+                    sample.getY(),
+                    sample.getZ(),
                     sample.getTimestamp()));
         }
         return convertedSamples;
@@ -35,11 +34,10 @@ public class AccelerometerSamplesConverter {
         SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.getDefault());
         List<AccelerometerSampleTEMPORAL> convertedSamples = new LinkedList<>();
         for (AccelerometerSampleData sample : samples) {
-            float[] values = sample.getValues();
             convertedSamples.add(new AccelerometerSampleTEMPORAL(messageIndex,
-                    values[0],
-                    values[1],
-                    values[2],
+                    sample.getX(),
+                    sample.getY(),
+                    sample.getZ(),
                     sample.getTimestamp(),
                     DateUtils.millisecondsToString(sample.getTimestamp(), sdf)));
         }

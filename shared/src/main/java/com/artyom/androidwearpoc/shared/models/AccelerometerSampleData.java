@@ -4,31 +4,34 @@ import android.os.Parcel;
 
 public class AccelerometerSampleData extends BaseSensorSampleData {
 
-    private float[] values;
+    private float x;
 
-    public AccelerometerSampleData(long timestamp, float[] values) {
+    private float y;
+
+    private float z;
+
+    public AccelerometerSampleData(long timestamp, float x, float y, float z) {
         super(timestamp);
-        this.values = values;
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
     public AccelerometerSampleData(Parcel in) {
         super(in);
-        values = in.createFloatArray();
+        x = in.readFloat();
+        y = in.readFloat();
+        z = in.readFloat();
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(timestamp);
-        dest.writeFloatArray(values);
+        dest.writeFloat(x);
+        dest.writeFloat(y);
+        dest.writeFloat(z);
     }
 
-    public float[] getValues() {
-        return values;
-    }
-
-    public void setValues(float[] values) {
-        this.values = values;
-    }
 
     public static final Creator<AccelerometerSampleData> CREATOR = new Creator<AccelerometerSampleData>() {
 
@@ -43,5 +46,27 @@ public class AccelerometerSampleData extends BaseSensorSampleData {
         }
     };
 
+    public float getX() {
+        return x;
+    }
 
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public void setY(float y) {
+        this.y = y;
+    }
+
+    public float getZ() {
+        return z;
+    }
+
+    public void setZ(float z) {
+        this.z = z;
+    }
 }
