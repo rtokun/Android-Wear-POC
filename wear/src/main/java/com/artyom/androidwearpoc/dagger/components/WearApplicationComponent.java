@@ -10,6 +10,7 @@ import com.artyom.androidwearpoc.dagger.modules.WearUtilsModule;
 import com.artyom.androidwearpoc.dagger.scopes.ForApplication;
 import com.artyom.androidwearpoc.data.processing.DataProcessingService;
 import com.artyom.androidwearpoc.measurement.MeasurementService;
+import com.artyom.androidwearpoc.measurement.MeasurementServiceController;
 import com.artyom.androidwearpoc.ui.MainActivity;
 import com.artyom.androidwearpoc.util.WearConfigController;
 
@@ -28,6 +29,8 @@ import dagger.Component;
         WearSharedPrefsModule.class,
         WearConfigurationModule.class})
 public interface WearApplicationComponent {
+
+    MeasurementServiceController getMeasurementServiceController();
 
     EventBus getEventBus();
 

@@ -31,4 +31,9 @@ public class MeasurementServiceController {
         Intent measurementService = new Intent(mApplicationContext, MeasurementService.class);
         mApplicationContext.stopService(measurementService);
     }
+
+    public void resetMeasurementService() {
+        stopMeasurementService();
+        startMeasurementService();
+    }
 }

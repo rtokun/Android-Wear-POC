@@ -1,11 +1,13 @@
 package com.artyom.androidwearpoc.util;
 
 import com.artyom.androidwearpoc.shared.DefaultConfiguration;
-import com.artyom.androidwearpoc.shared.models.UpdateNumberMessage;
+import com.artyom.androidwearpoc.shared.models.UpdateChunkLimitMessage;
+import com.artyom.androidwearpoc.shared.models.UpdateSamplingRateMessage;
 
 import org.greenrobot.eventbus.EventBus;
 
 import static com.artyom.androidwearpoc.shared.CommonConstants.NUMBER_NOT_FOUND;
+import static com.artyom.androidwearpoc.shared.CommonConstants.SAMPLES_PER_CHUNK;
 import static com.artyom.androidwearpoc.shared.CommonConstants.SAMPLING_RATE;
 
 /**
@@ -14,6 +16,8 @@ import static com.artyom.androidwearpoc.shared.CommonConstants.SAMPLING_RATE;
 public class WearConfigController {
 
     private int mSamplingRate;
+
+    private int mSamplesPerChunk;
 
     private WearSharedPrefsController mSharedPrefsController;
 
@@ -27,6 +31,14 @@ public class WearConfigController {
 
     private void loadConfigurationValues() {
         mSamplingRate = mSharedPrefsController.getIntPreference(SAMPLING_RATE);
+        mSamplesPerChunk = mSharedPrefsController.getIntPreference(SAMPLES_PER_CHUNK);
+    }
+
+    public int getSamplesPerChunk() {
+        if (mSamplesPerChunk == NUMBER_NOT_FOUND) {
+            mSamplesPerChunk = DefaultConfiguration.DEFAULT_SAMPLES_PER_PACKAGE_LIMIT;
+        }
+        return mSamplesPerChunk;
     }
 
     public int getSamplingRate() {
@@ -50,7 +62,18 @@ public class WearConfigController {
     }
 
     private void notifySamplingRateChanged(int newSamplingRate) {
-        mEventBus.post(new UpdateNumberMessage(newSamplingRate));
+        mEventBus.post(new UpdateSamplingRateMessage(newSamplingRate));
     }
 
+    public void updateUpdateSamplesPerChunk(int newLimit) {
+        if (newLimit != mSamplesPerChunk) {
+            mSamplesPerChunk = newLimit;
+            mSharedPrefsController.setIntPreference(SAMPLES_PER_CHUNK, mSamplesPerChunk);
+            notifySamplesPerChunkChanged(newLimit);
+        }
+    }
+
+    private void notifySamplesPerChunkChanged(int newLimit) {
+        mEventBus.post(new UpdateChunkLimitMessage(newLimit));
+    }
 }

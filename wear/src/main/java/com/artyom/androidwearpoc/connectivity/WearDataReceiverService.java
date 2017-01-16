@@ -12,12 +12,17 @@ import android.support.annotation.Nullable;
 import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.WearGoogleApiModule;
-import com.artyom.androidwearpoc.shared.models.UpdateNumberMessage;
+import com.artyom.androidwearpoc.measurement.MeasurementServiceController;
+import com.artyom.androidwearpoc.shared.models.UpdateChunkLimitMessage;
+import com.artyom.androidwearpoc.shared.models.UpdateSamplingRateMessage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
 import com.artyom.androidwearpoc.util.WearConfigController;
 
 import timber.log.Timber;
 
+import static com.artyom.androidwearpoc.shared.CommonConstants.RESET_MEASUREMENT_PATH;
+import static com.artyom.androidwearpoc.shared.CommonConstants.START_MEASUREMENT_PATH;
+import static com.artyom.androidwearpoc.shared.CommonConstants.UPDATE_SAMPLES_PER_PACKAGE_PATH;
 import static com.artyom.androidwearpoc.shared.CommonConstants.UPDATE_SAMPLING_RATE_PATH;
 
 /**
@@ -37,6 +42,8 @@ public class WearDataReceiverService extends WearableListenerService
 
     private String mLocalNodeId;
 
+    private MeasurementServiceController mMeasurementServiceController;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -46,8 +53,11 @@ public class WearDataReceiverService extends WearableListenerService
                 .build()
                 .googleApiClient();
 
-        mConfigController = MyWearApplication.getApplicationComponent()
+        mConfigController = ((MyWearApplication)getApplication()).getApplicationComponent()
                 .getWearConfigController();
+
+        mMeasurementServiceController = ((MyWearApplication)getApplication()).getApplicationComponent()
+                .getMeasurementServiceController();
     }
 
     @Override
@@ -63,15 +73,30 @@ public class WearDataReceiverService extends WearableListenerService
 
         switch (messageEvent.getPath()){
             case UPDATE_SAMPLING_RATE_PATH:
-                int newSamplingRate = getNewSamplingRate(messageEvent.getData());
+                int newSamplingRate = getRate(messageEvent.getData());
                 mConfigController.updateSamplingRate(newSamplingRate);
+                break;
+            case UPDATE_SAMPLES_PER_PACKAGE_PATH:
+                int newLimit = getLimit(messageEvent.getData());
+                mConfigController.updateUpdateSamplesPerChunk(newLimit);
+                break;
+            case START_MEASUREMENT_PATH:
+                mMeasurementServiceController.startMeasurementService();
+                break;
+            case RESET_MEASUREMENT_PATH:
+                mMeasurementServiceController.resetMeasurementService();
                 break;
         }
     }
 
-    private int getNewSamplingRate(byte[] data) {
-        UpdateNumberMessage message = ParcelableUtil.unmarshall(data, UpdateNumberMessage.CREATOR);
-        return message.getNewNumber();
+    private int getLimit(byte[] data) {
+        UpdateChunkLimitMessage message = ParcelableUtil.unmarshall(data, UpdateChunkLimitMessage.CREATOR);
+        return message.getSamplesPerChunk();
+    }
+
+    private int getRate(byte[] data) {
+        UpdateSamplingRateMessage message = ParcelableUtil.unmarshall(data, UpdateSamplingRateMessage.CREATOR);
+        return message.getSamplingRate();
     }
 
     @Override

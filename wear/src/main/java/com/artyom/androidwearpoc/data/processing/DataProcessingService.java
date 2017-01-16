@@ -64,7 +64,7 @@ public class DataProcessingService extends IntentService implements GoogleApiCli
                 .build()
                 .googleApiClient();
 
-        MyWearApplication.getApplicationComponent().inject(this);
+        ((MyWearApplication)getApplication()).getApplicationComponent().inject(this);
     }
 
     @Override

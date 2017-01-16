@@ -3,14 +3,17 @@ package com.artyom.androidwearpoc.dagger.components;
 import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.dagger.modules.ConfigurationModule;
 import com.artyom.androidwearpoc.dagger.modules.EventBusModule;
+import com.artyom.androidwearpoc.dagger.modules.LogModule;
 import com.artyom.androidwearpoc.dagger.modules.NotificationModule;
 import com.artyom.androidwearpoc.dagger.modules.ReportModule;
 import com.artyom.androidwearpoc.dagger.modules.SharedPrefsModule;
 import com.artyom.androidwearpoc.dagger.scopes.ForApplication;
+import com.artyom.androidwearpoc.report.MyLogger;
 import com.artyom.androidwearpoc.report.ReportController;
 import com.artyom.androidwearpoc.ui.main.MainActivity;
 import com.artyom.androidwearpoc.util.ConfigController;
 import com.artyom.androidwearpoc.util.SharedPrefsController;
+import com.artyom.androidwearpoc.wear.communication.CommunicationController;
 import com.artyom.androidwearpoc.wear.connectivity.ConnectivityStatusNotificationController;
 
 import org.greenrobot.eventbus.EventBus;
@@ -25,12 +28,17 @@ import dagger.Component;
         ReportModule.class,
         SharedPrefsModule.class,
         ConfigurationModule.class,
-        EventBusModule.class})
+        EventBusModule.class,
+        LogModule.class})
 public interface MobileApplicationComponent {
+
+    MyLogger getMyLogger();
 
     EventBus getEventBus();
 
     ConfigController getConfigController();
+
+    CommunicationController getCommunicationController();
 
     ConnectivityStatusNotificationController getConnectivityStatusNotificationController();
 

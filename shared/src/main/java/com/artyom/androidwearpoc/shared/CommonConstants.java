@@ -15,6 +15,12 @@ public class CommonConstants {
     public static final String UPDATE_SAMPLES_PER_PACKAGE_PATH =
             "message/update_samples_per_package";
 
+    public static final String START_MEASUREMENT_PATH =
+            "message/start_measurement";
+
+    public static final String RESET_MEASUREMENT_PATH =
+            "message/reset_measurement";
+
     public static final String SAMPLING_RATE = "sampling_rate";
 
     public static final String SAMPLES_PER_CHUNK = "samples_per_chunk";

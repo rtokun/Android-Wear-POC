@@ -20,7 +20,8 @@ import android.support.annotation.Nullable;
 import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
-import com.artyom.androidwearpoc.shared.models.UpdateNumberMessage;
+import com.artyom.androidwearpoc.shared.models.UpdateChunkLimitMessage;
+import com.artyom.androidwearpoc.shared.models.UpdateSamplingRateMessage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -30,12 +31,16 @@ import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
 
+import static com.artyom.androidwearpoc.shared.CommonConstants.RESET_MEASUREMENT_PATH;
+import static com.artyom.androidwearpoc.shared.CommonConstants.START_MEASUREMENT_PATH;
 import static com.artyom.androidwearpoc.shared.CommonConstants.UPDATE_SAMPLES_PER_PACKAGE_PATH;
 import static com.artyom.androidwearpoc.shared.CommonConstants.UPDATE_SAMPLING_RATE_PATH;
 import static com.artyom.androidwearpoc.shared.CommonConstants.WATCH_CAPABILITY;
 import static com.artyom.androidwearpoc.wear.communication.CommunicationController.ACTION;
 import static com.artyom.androidwearpoc.wear.communication.CommunicationController.AMOUNT;
 import static com.artyom.androidwearpoc.wear.communication.CommunicationController.RATE;
+import static com.artyom.androidwearpoc.wear.communication.CommunicationController.RESET_MEASUREMENT;
+import static com.artyom.androidwearpoc.wear.communication.CommunicationController.START_MEASUREMENT;
 import static com.artyom.androidwearpoc.wear.communication.CommunicationController.UPDATE_RATE_ACTION;
 import static com.artyom.androidwearpoc.wear.communication.CommunicationController.UPDATE_SAMPLES_PER_CHUNK_ACTION;
 
@@ -90,9 +95,97 @@ public class CommunicationService extends IntentService
                         sendChunkLimitMessageToWearable(newLimit);
                     }
                     break;
+                case START_MEASUREMENT:
+                    sendStartMeasurement();
+                    break;
+                case RESET_MEASUREMENT:
+                    sendResetMeasurement();
+                    break;
             }
         } else {
             Timber.e("google client failed to connect");
+        }
+    }
+
+    private void sendResetMeasurement() {
+        CapabilityApi.GetCapabilityResult result =
+                Wearable.CapabilityApi.getCapability(
+                        mGoogleApiClient, WATCH_CAPABILITY,
+                        CapabilityApi.FILTER_REACHABLE).await();
+
+        Set<Node> nodes = result.getCapability().getNodes();
+        Timber.d("nodes amount from Capability Api: %s", nodes.size());
+
+        Node directlyConnectedNode = null;
+        for (Node node : nodes) {
+            if (node.isNearby()) {
+                directlyConnectedNode = node;
+            }
+        }
+
+        if (directlyConnectedNode == null) {
+            mEventBus.post(new com.artyom.androidwearpoc.events.MessageEvent("Failed to reset " +
+                    "measurement service"));
+        } else {
+
+            Wearable.MessageApi.sendMessage(mGoogleApiClient,
+                    directlyConnectedNode.getId(),
+                    RESET_MEASUREMENT_PATH,
+                    null)
+                    .setResultCallback(new ResultCallbacks<MessageApi.SendMessageResult>() {
+
+                        @Override
+                        public void onSuccess(@NonNull MessageApi.SendMessageResult sendMessageResult) {
+                            Timber.d("sent a message to wear to reset measurement");
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Status status) {
+                            mEventBus.post(new com.artyom.androidwearpoc.events.MessageEvent("Failed to reset " +
+                                    "measurement service"));
+                        }
+                    });
+        }
+    }
+
+    private void sendStartMeasurement() {
+        CapabilityApi.GetCapabilityResult result =
+                Wearable.CapabilityApi.getCapability(
+                        mGoogleApiClient, WATCH_CAPABILITY,
+                        CapabilityApi.FILTER_REACHABLE).await();
+
+        Set<Node> nodes = result.getCapability().getNodes();
+        Timber.d("nodes amount from Capability Api: %s", nodes.size());
+
+        Node directlyConnectedNode = null;
+        for (Node node : nodes) {
+            if (node.isNearby()) {
+                directlyConnectedNode = node;
+            }
+        }
+
+        if (directlyConnectedNode == null) {
+            mEventBus.post(new com.artyom.androidwearpoc.events.MessageEvent("Failed to" +
+                    " start automatic measurement, launch the wear app"));
+        } else {
+
+            Wearable.MessageApi.sendMessage(mGoogleApiClient,
+                    directlyConnectedNode.getId(),
+                    START_MEASUREMENT_PATH,
+                    null)
+                    .setResultCallback(new ResultCallbacks<MessageApi.SendMessageResult>() {
+
+                        @Override
+                        public void onSuccess(@NonNull MessageApi.SendMessageResult sendMessageResult) {
+                            Timber.d("sent a message to wear to start measurement");
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Status status) {
+                            mEventBus.post(new com.artyom.androidwearpoc.events.MessageEvent("Failed to " +
+                                    "start automatic measurement, launch the wear app"));
+                        }
+                    });
         }
     }
 
@@ -117,7 +210,7 @@ public class CommunicationService extends IntentService
                     "samples per chunk amount"));
         } else {
 
-            UpdateNumberMessage message = new UpdateNumberMessage(newLimit);
+            UpdateChunkLimitMessage message = new UpdateChunkLimitMessage(newLimit);
             byte[] serializedMessage = ParcelableUtil.marshall(message);
 
             Wearable.MessageApi.sendMessage(mGoogleApiClient,
@@ -162,7 +255,7 @@ public class CommunicationService extends IntentService
                     "sampling rate"));
         } else {
 
-            UpdateNumberMessage message = new UpdateNumberMessage(newRate);
+            UpdateSamplingRateMessage message = new UpdateSamplingRateMessage(newRate);
             byte[] serializedMessage = ParcelableUtil.marshall(message);
 
             Wearable.MessageApi.sendMessage(mGoogleApiClient,

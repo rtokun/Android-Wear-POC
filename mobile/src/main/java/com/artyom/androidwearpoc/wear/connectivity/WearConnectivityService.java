@@ -19,6 +19,7 @@ import android.support.annotation.Nullable;
 import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
+import com.artyom.androidwearpoc.wear.communication.CommunicationController;
 
 import java.util.Set;
 
@@ -43,6 +44,8 @@ public class WearConnectivityService extends Service
     private ConnectivityStatusNotificationController mConnectivityStatusNotificationController;
 
     private GoogleApiClient mGoogleApiClient;
+
+    private CommunicationController mCommunicationController;
 
     @Override
     public void onCreate() {
@@ -72,6 +75,10 @@ public class WearConnectivityService extends Service
                 .googleApiModule(new GoogleApiModule(this.getApplicationContext(), this, this))
                 .build()
                 .googleApiClient();
+
+        mCommunicationController = MyMobileApplication
+                .getApplicationComponent()
+                .getCommunicationController();
     }
 
 
@@ -129,6 +136,7 @@ public class WearConnectivityService extends Service
                             mConnectivityStatusNotificationController.sendNotification(NotConnectedToWatch);
                         } else {
                             mConnectivityStatusNotificationController.sendNotification(ConnectedToWatch);
+                            mCommunicationController.startMeasurementService();
                         }
                     }
 
@@ -172,6 +180,7 @@ public class WearConnectivityService extends Service
             mConnectivityStatusNotificationController.sendNotification(NotConnectedToWatch);
         } else {
             mConnectivityStatusNotificationController.sendNotification(ConnectedToWatch);
+            mCommunicationController.startMeasurementService();
         }
     }
 }
