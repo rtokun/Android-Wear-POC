@@ -53,7 +53,7 @@ public class MainActivity extends BaseEventActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MyWearApplication.getApplicationComponent().inject(this);
+        ((MyWearApplication)getApplication()).getApplicationComponent().inject(this);
         setContentView(R.layout.activity_main);
         findViews();
         setListeners();
@@ -63,6 +63,12 @@ public class MainActivity extends BaseEventActivity implements View.OnClickListe
     protected void onStart() {
         setLoadingUI(true);
         super.onStart();
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        mMeasurementServiceController.startMeasurementService();
     }
 
     private void setLoadingUI(boolean loadingVisible) {

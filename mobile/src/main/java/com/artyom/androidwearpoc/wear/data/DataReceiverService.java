@@ -27,6 +27,7 @@ import com.artyom.androidwearpoc.model.AccelerometerSampleTEMPORAL;
 import com.artyom.androidwearpoc.model.BatteryLevelSample;
 import com.artyom.androidwearpoc.model.MessageData;
 import com.artyom.androidwearpoc.model.converter.AccelerometerSamplesConverter;
+import com.artyom.androidwearpoc.report.MyLogger;
 import com.artyom.androidwearpoc.report.ReportController;
 import com.artyom.androidwearpoc.report.log.DataMismatchEvent;
 import com.artyom.androidwearpoc.shared.DefaultConfiguration;
@@ -35,10 +36,13 @@ import com.artyom.androidwearpoc.shared.models.MessagePackage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
 import com.artyom.androidwearpoc.util.ConfigController;
 import com.artyom.androidwearpoc.util.SharedPrefsController;
+import com.bytesizebit.androidutils.DateUtils;
 
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -71,6 +75,8 @@ public class DataReceiverService extends WearableListenerService
 
     private ConfigController mConfigController;
 
+    private MyLogger mMyLogger;
+
     @Inject
     AccelerometerSamplesRepo mAccelerometerSamplesRepo;
 
@@ -89,6 +95,7 @@ public class DataReceiverService extends WearableListenerService
 
         mSharedPrefsController = applicationComponent.getSharedPrefsController();
         mReportController = applicationComponent.getReportController();
+        mMyLogger = applicationComponent.getMyLogger();
         mGoogleApiClient = DaggerGoogleComponent
                 .builder()
                 .googleApiModule(new GoogleApiModule(this.getApplicationContext(), this, this))
@@ -158,6 +165,9 @@ public class DataReceiverService extends WearableListenerService
         }
 
         if (messagePackage != null) {
+
+            mMyLogger.logChunkToFile(messagePackage);
+
             Timber.d("received package, package index: %s, package amount: %s", messagePackage
                     .getIndex(), messagePackage.getAccelerometerSamples().size());
 

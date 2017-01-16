@@ -2,15 +2,11 @@ package com.artyom.androidwearpoc;
 
 import android.app.Application;
 import android.content.Intent;
-import android.os.Handler;
 
 import com.artyom.androidwearpoc.dagger.components.DaggerWearApplicationComponent;
 import com.artyom.androidwearpoc.dagger.components.WearApplicationComponent;
 import com.artyom.androidwearpoc.dagger.modules.WearApplicationContextModule;
 import com.artyom.androidwearpoc.error.ErrorProcessingService;
-import com.artyom.androidwearpoc.measurement.MeasurementServiceController;
-
-import javax.inject.Inject;
 
 import timber.log.Timber;
 
@@ -20,10 +16,7 @@ import timber.log.Timber;
 
 public class MyWearApplication extends Application {
 
-    @Inject
-    MeasurementServiceController mMeasurementServiceController;
-
-    private static WearApplicationComponent mApplicationComponent;
+    private WearApplicationComponent mApplicationComponent;
 
     // Android Wear's default UncaughtExceptionHandler
     private Thread.UncaughtExceptionHandler mDefaultUEH;
@@ -33,8 +26,6 @@ public class MyWearApplication extends Application {
         super.onCreate();
         initExceptionHandler();
         initTimber();
-        createDaggerApplicationController();
-        startAppComponents();
     }
 
     private void initExceptionHandler() {
@@ -47,12 +38,6 @@ public class MyWearApplication extends Application {
                 .builder()
                 .wearApplicationContextModule(new WearApplicationContextModule(this))
                 .build();
-
-        mApplicationComponent.inject(this);
-    }
-
-    private void startAppComponents() {
-        mMeasurementServiceController.startMeasurementService();
     }
 
     private void initTimber() {
@@ -61,11 +46,15 @@ public class MyWearApplication extends Application {
         }
     }
 
-    public static WearApplicationComponent getApplicationComponent() {
+    public WearApplicationComponent getApplicationComponent() {
+        if (mApplicationComponent == null) {
+            createDaggerApplicationController();
+        }
         return mApplicationComponent;
     }
 
     private Thread.UncaughtExceptionHandler mWearUEH = new Thread.UncaughtExceptionHandler() {
+
         @Override
         public void uncaughtException(final Thread thread, final Throwable ex) {
 

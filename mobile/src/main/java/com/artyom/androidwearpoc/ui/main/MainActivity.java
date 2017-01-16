@@ -30,10 +30,12 @@ import com.artyom.androidwearpoc.db.BatteryLevelSamplesRepo;
 import com.artyom.androidwearpoc.events.MessageEvent;
 import com.artyom.androidwearpoc.export.CSVExportTask;
 import com.artyom.androidwearpoc.export.EmailSender;
+import com.artyom.androidwearpoc.report.MyLogger;
 import com.artyom.androidwearpoc.ui.ExportFileDialog;
 import com.artyom.androidwearpoc.ui.ExportFileDialog.ExportFileDialogInteractionInterface;
 import com.artyom.androidwearpoc.ui.utils.Conversions;
 import com.artyom.androidwearpoc.util.ConfigController;
+import com.artyom.androidwearpoc.wear.communication.CommunicationController;
 import com.bytesizebit.androidutils.KeyboardUtils;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -73,6 +75,10 @@ public class MainActivity extends BaseEventActivity implements
 
     private ConfigController mConfigController;
 
+    private CommunicationController mCommunicationController;
+
+    private MyLogger mMyLogger;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,6 +105,11 @@ public class MainActivity extends BaseEventActivity implements
 
         mConfigController = MyMobileApplication.getApplicationComponent()
                 .getConfigController();
+
+        mCommunicationController = MyMobileApplication.getApplicationComponent()
+                .getCommunicationController();
+        mMyLogger = MyMobileApplication.getApplicationComponent()
+                .getMyLogger();
     }
 
     private void initUI() {
@@ -270,7 +281,12 @@ public class MainActivity extends BaseEventActivity implements
     public void deleteAllData() {
         mAccelerometerSamplesRepo.deleteAll();
         mBatteryLevelSamplesRepo.deleteAll();
+        deleteLogsFile();
         Toast.makeText(this, "All data has been deleted", Toast.LENGTH_LONG).show();
+    }
+
+    private void deleteLogsFile() {
+        mMyLogger.deleteLogs();
     }
 
     public void countSamples() {
@@ -287,11 +303,16 @@ public class MainActivity extends BaseEventActivity implements
                 break;
             case R.id.buttonDeleteAllData:
                 deleteAllData();
+                resetMeasurementService();
                 break;
             case R.id.buttonCountSamples:
                 countSamples();
                 break;
         }
+    }
+
+    private void resetMeasurementService() {
+        mCommunicationController.resetMeasurementService();
     }
 
     public boolean isRateChanged(int newRate) {

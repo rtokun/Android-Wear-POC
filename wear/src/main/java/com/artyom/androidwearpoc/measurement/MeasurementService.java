@@ -82,7 +82,7 @@ public class MeasurementService extends Service implements SensorEventListener {
     @Override
     public void onCreate() {
         super.onCreate();
-        MyWearApplication.getApplicationComponent().inject(this);
+        ((MyWearApplication)getApplication()).getApplicationComponent().inject(this);
         initSensors();
         mEventBus.register(this);
         startThread();

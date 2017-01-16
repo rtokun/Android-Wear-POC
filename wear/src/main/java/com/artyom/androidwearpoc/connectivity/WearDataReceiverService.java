@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.WearGoogleApiModule;
+import com.artyom.androidwearpoc.measurement.MeasurementServiceController;
 import com.artyom.androidwearpoc.shared.models.UpdateChunkLimitMessage;
 import com.artyom.androidwearpoc.shared.models.UpdateSamplingRateMessage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
@@ -19,6 +20,8 @@ import com.artyom.androidwearpoc.util.WearConfigController;
 
 import timber.log.Timber;
 
+import static com.artyom.androidwearpoc.shared.CommonConstants.RESET_MEASUREMENT_PATH;
+import static com.artyom.androidwearpoc.shared.CommonConstants.START_MEASUREMENT_PATH;
 import static com.artyom.androidwearpoc.shared.CommonConstants.UPDATE_SAMPLES_PER_PACKAGE_PATH;
 import static com.artyom.androidwearpoc.shared.CommonConstants.UPDATE_SAMPLING_RATE_PATH;
 
@@ -39,6 +42,8 @@ public class WearDataReceiverService extends WearableListenerService
 
     private String mLocalNodeId;
 
+    private MeasurementServiceController mMeasurementServiceController;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -48,8 +53,11 @@ public class WearDataReceiverService extends WearableListenerService
                 .build()
                 .googleApiClient();
 
-        mConfigController = MyWearApplication.getApplicationComponent()
+        mConfigController = ((MyWearApplication)getApplication()).getApplicationComponent()
                 .getWearConfigController();
+
+        mMeasurementServiceController = ((MyWearApplication)getApplication()).getApplicationComponent()
+                .getMeasurementServiceController();
     }
 
     @Override
@@ -71,6 +79,12 @@ public class WearDataReceiverService extends WearableListenerService
             case UPDATE_SAMPLES_PER_PACKAGE_PATH:
                 int newLimit = getLimit(messageEvent.getData());
                 mConfigController.updateUpdateSamplesPerChunk(newLimit);
+                break;
+            case START_MEASUREMENT_PATH:
+                mMeasurementServiceController.startMeasurementService();
+                break;
+            case RESET_MEASUREMENT_PATH:
+                mMeasurementServiceController.resetMeasurementService();
                 break;
         }
     }

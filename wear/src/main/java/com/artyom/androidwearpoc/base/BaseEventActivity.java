@@ -19,7 +19,7 @@ public class BaseEventActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mEventBus = MyWearApplication.getApplicationComponent()
+        mEventBus = ((MyWearApplication)getApplication()).getApplicationComponent()
                 .getEventBus();
     }
 

@@ -14,6 +14,8 @@ public class CommunicationController {
     public static final String RATE = "sampling_rate";
     public static final String UPDATE_RATE_ACTION = "update_rate";
     public static final String UPDATE_SAMPLES_PER_CHUNK_ACTION = "samples_per_chunk";
+    public static final String START_MEASUREMENT = "start_measurement";
+    public static final String RESET_MEASUREMENT = "reset_measurement";
     public static final String AMOUNT = "amount";
 
     public CommunicationController(Context applicationContext) {
@@ -32,5 +34,17 @@ public class CommunicationController {
         updateSamplesPerChunkIntent.putExtra(ACTION, UPDATE_SAMPLES_PER_CHUNK_ACTION);
         updateSamplesPerChunkIntent.putExtra(AMOUNT, newLimit);
         mContext.startService(updateSamplesPerChunkIntent);
+    }
+
+    public void startMeasurementService() {
+        Intent startServiceIntent = new Intent(mContext, CommunicationService.class);
+        startServiceIntent.putExtra(ACTION, START_MEASUREMENT);
+        mContext.startService(startServiceIntent);
+    }
+
+    public void resetMeasurementService() {
+        Intent resetServiceIntent = new Intent(mContext, CommunicationService.class);
+        resetServiceIntent.putExtra(ACTION, RESET_MEASUREMENT);
+        mContext.startService(resetServiceIntent);
     }
 }
