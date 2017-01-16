@@ -33,6 +33,7 @@ import com.artyom.androidwearpoc.shared.DefaultConfiguration;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
+import com.artyom.androidwearpoc.util.ConfigController;
 import com.artyom.androidwearpoc.util.SharedPrefsController;
 
 import java.io.InputStream;
@@ -68,6 +69,8 @@ public class DataReceiverService extends WearableListenerService
 
     private ReportController mReportController;
 
+    private ConfigController mConfigController;
+
     @Inject
     AccelerometerSamplesRepo mAccelerometerSamplesRepo;
 
@@ -91,6 +94,7 @@ public class DataReceiverService extends WearableListenerService
                 .googleApiModule(new GoogleApiModule(this.getApplicationContext(), this, this))
                 .build()
                 .googleApiClient();
+        mConfigController = applicationComponent.getConfigController();
     }
 
     @Override
@@ -222,8 +226,8 @@ public class DataReceiverService extends WearableListenerService
         DataMismatchEvent dataMismatchEvent = new DataMismatchEvent();
         boolean isDataValid = true;
 
-        if (newPackageSize != DEFAULT_SAMPLES_PER_PACKAGE_LIMIT) {
-            dataMismatchEvent.updateSamplesAmountMismatch(DEFAULT_SAMPLES_PER_PACKAGE_LIMIT, newPackageSize);
+        if (newPackageSize != mConfigController.getSamplesPerChunk()) {
+            dataMismatchEvent.updateSamplesAmountMismatch(mConfigController.getSamplesPerChunk(), newPackageSize);
             isDataValid = false;
         }
 

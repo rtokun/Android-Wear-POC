@@ -20,7 +20,8 @@ import android.support.annotation.Nullable;
 import com.artyom.androidwearpoc.MyMobileApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.GoogleApiModule;
-import com.artyom.androidwearpoc.shared.models.UpdateNumberMessage;
+import com.artyom.androidwearpoc.shared.models.UpdateChunkLimitMessage;
+import com.artyom.androidwearpoc.shared.models.UpdateSamplingRateMessage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -117,7 +118,7 @@ public class CommunicationService extends IntentService
                     "samples per chunk amount"));
         } else {
 
-            UpdateNumberMessage message = new UpdateNumberMessage(newLimit);
+            UpdateChunkLimitMessage message = new UpdateChunkLimitMessage(newLimit);
             byte[] serializedMessage = ParcelableUtil.marshall(message);
 
             Wearable.MessageApi.sendMessage(mGoogleApiClient,
@@ -162,7 +163,7 @@ public class CommunicationService extends IntentService
                     "sampling rate"));
         } else {
 
-            UpdateNumberMessage message = new UpdateNumberMessage(newRate);
+            UpdateSamplingRateMessage message = new UpdateSamplingRateMessage(newRate);
             byte[] serializedMessage = ParcelableUtil.marshall(message);
 
             Wearable.MessageApi.sendMessage(mGoogleApiClient,

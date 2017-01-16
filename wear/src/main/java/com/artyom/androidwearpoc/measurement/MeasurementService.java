@@ -23,7 +23,8 @@ import com.artyom.androidwearpoc.shared.DefaultConfiguration;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 import com.artyom.androidwearpoc.shared.models.MeasurementServiceStatus;
 import com.artyom.androidwearpoc.shared.models.MessagePackage;
-import com.artyom.androidwearpoc.shared.models.UpdateNumberMessage;
+import com.artyom.androidwearpoc.shared.models.UpdateChunkLimitMessage;
+import com.artyom.androidwearpoc.shared.models.UpdateSamplingRateMessage;
 import com.artyom.androidwearpoc.util.WearConfigController;
 import com.artyom.androidwearpoc.util.WearSharedPrefsController;
 
@@ -109,7 +110,14 @@ public class MeasurementService extends Service implements SensorEventListener {
 
     @SuppressWarnings("unused")
     @Subscribe
-    public void onSamplingRateUpdated(UpdateNumberMessage updateNumberMessage) {
+    public void onSamplingRateUpdated(UpdateSamplingRateMessage updateSamplingRateMessage) {
+        stopMeasurement();
+        startMeasurement();
+    }
+
+    @SuppressWarnings("unused")
+    @Subscribe
+    public void onSamplesPerPackageLimitUpdated(UpdateChunkLimitMessage chunkLimitMessage) {
         stopMeasurement();
         startMeasurement();
     }
@@ -205,7 +213,7 @@ public class MeasurementService extends Service implements SensorEventListener {
         addNewEventToPackage(newEventData);
         updateCurrentValues(newEventData);
 
-        if (mCounter >= DEFAULT_SAMPLES_PER_PACKAGE_LIMIT) {
+        if (mCounter >= mConfigController.getSamplesPerChunk()) {
             float batteryPercentage = getBatteryStatus();
             sendPackageToMobileDevice(batteryPercentage);
             resetPackageValues();
