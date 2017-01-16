@@ -15,6 +15,7 @@ import com.artyom.androidwearpoc.R;
 import com.artyom.androidwearpoc.base.BaseEventActivity;
 import com.artyom.androidwearpoc.measurement.MeasurementServiceController;
 import com.artyom.androidwearpoc.shared.models.MeasurementServiceStatus;
+import com.artyom.androidwearpoc.shared.models.UpdateChunkLimitMessage;
 import com.artyom.androidwearpoc.shared.models.UpdateSamplingRateMessage;
 import com.artyom.androidwearpoc.util.WearConfigController;
 
@@ -40,6 +41,8 @@ public class MainActivity extends BaseEventActivity implements View.OnClickListe
     private TextView mTVVersionCode;
 
     private TextView mTVRate;
+
+    private TextView mTVSamplesPerChunkLimit;
 
     private ProgressBar mPBLoading;
 
@@ -72,7 +75,6 @@ public class MainActivity extends BaseEventActivity implements View.OnClickListe
         }
     }
 
-
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     public void measurementServiceStatusUpdated(MeasurementServiceStatus status) {
         isMeasurementServiceRunning = status.isRunning();
@@ -86,18 +88,28 @@ public class MainActivity extends BaseEventActivity implements View.OnClickListe
                 updateSamplingRateMessage.getSamplingRate()));
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onSamplesPerChunkUpdated(UpdateChunkLimitMessage limitMessage){
+        mTVSamplesPerChunkLimit.setText(String.format(Locale.getDefault(),
+                "Sampling rate: %d",
+                limitMessage.getSamplesPerChunk()));
+    }
+
     private void updateUI() {
         if (isMeasurementServiceRunning) {
-            mTVTitle.setText("Measurement status:\nRecording");
+            mTVTitle.setText("Status: Recording");
             mImgBtnControlService.setImageResource(R.drawable.ic_pause_circle_outline_black_48dp);
         } else {
-            mTVTitle.setText("Measurement status:\nNot recording");
+            mTVTitle.setText("Status: Not recording");
             mImgBtnControlService.setImageResource(R.drawable.ic_play_circle_outline_black_48dp);
         }
         mTVVersionCode.setText("Version code: " + BuildConfig.VERSION_CODE);
         mTVRate.setText(String.format(Locale.getDefault(),
                 "Sampling rate: %d Hz",
                 mConfigController.getSamplingRate()));
+        mTVSamplesPerChunkLimit.setText(String.format(Locale.getDefault(),
+                "Samples per chunk: %d",
+                mConfigController.getSamplesPerChunk()));
         setLoadingUI(false);
     }
 
@@ -109,6 +121,7 @@ public class MainActivity extends BaseEventActivity implements View.OnClickListe
         mImgBtnControlService = (ImageButton) findViewById(R.id.img_view_control_service);
         mTVTitle = (TextView) findViewById(R.id.tv_title);
         mTVRate = (TextView) findViewById(R.id.tv_rate);
+        mTVSamplesPerChunkLimit = (TextView) findViewById(R.id.tv_samples_per_chunk_limit);
         mTVVersionCode = (TextView) findViewById(R.id.tv_version_code);
         mContentLayout = (FrameLayout) findViewById(R.id.fr_lay_content);
         mPBLoading = (ProgressBar) findViewById(R.id.pb_loading);

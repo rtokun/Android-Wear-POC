@@ -61,6 +61,15 @@
             android:textSize="16sp"
             />
 
+        <TextView
+            android:id="@+id/tv_samples_per_chunk_limit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            />
+
       </LinearLayout>
 
       <ImageButton
