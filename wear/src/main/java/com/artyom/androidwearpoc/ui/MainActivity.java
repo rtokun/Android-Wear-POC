@@ -57,18 +57,7 @@ public class MainActivity extends BaseEventActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         findViews();
         setListeners();
-    }
-
-    @Override
-    protected void onStart() {
         setLoadingUI(true);
-        super.onStart();
-    }
-
-    @Override
-    protected void onPostResume() {
-        super.onPostResume();
-        mMeasurementServiceController.startMeasurementService();
     }
 
     private void setLoadingUI(boolean loadingVisible) {

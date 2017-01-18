@@ -26,6 +26,13 @@ public class MyWearApplication extends Application {
         super.onCreate();
         initExceptionHandler();
         initTimber();
+        startMeasurementService();
+    }
+
+    private void startMeasurementService() {
+        getApplicationComponent()
+                .getMeasurementServiceController()
+                .startMeasurementService();
     }
 
     private void initExceptionHandler() {

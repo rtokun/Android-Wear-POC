@@ -1,5 +1,6 @@
 package com.artyom.androidwearpoc.measurement;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -17,8 +18,10 @@ import android.os.SystemClock;
 import android.support.annotation.Nullable;
 
 import com.artyom.androidwearpoc.MyWearApplication;
+import com.artyom.androidwearpoc.R;
 import com.artyom.androidwearpoc.data.DataTransferHolder;
 import com.artyom.androidwearpoc.data.processing.DataProcessingService;
+import com.artyom.androidwearpoc.log.MyWearLogger;
 import com.artyom.androidwearpoc.shared.DefaultConfiguration;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 import com.artyom.androidwearpoc.shared.models.MeasurementServiceStatus;
@@ -27,6 +30,7 @@ import com.artyom.androidwearpoc.shared.models.UpdateChunkLimitMessage;
 import com.artyom.androidwearpoc.shared.models.UpdateSamplingRateMessage;
 import com.artyom.androidwearpoc.util.WearConfigController;
 import com.artyom.androidwearpoc.util.WearSharedPrefsController;
+import com.bytesizebit.androidutils.DateUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -71,6 +75,9 @@ public class MeasurementService extends Service implements SensorEventListener {
     @Inject
     WearConfigController mConfigController;
 
+    @Inject
+    MyWearLogger mMyWearLogger;
+
     private Sensor mAccelerometerSensor;
 
     private AccelerometerSampleData mLastEventData;
@@ -83,14 +90,25 @@ public class MeasurementService extends Service implements SensorEventListener {
     public void onCreate() {
         super.onCreate();
         ((MyWearApplication)getApplication()).getApplicationComponent().inject(this);
+        mMyWearLogger.writeToLogFile(DateUtils.getCurrentTimeString() + " MeasurementService: " +
+                "onCreate");
         initSensors();
         mEventBus.register(this);
         startThread();
         acquireWakeLock();
         resetPackageValues();
         mSharedPrefsController.setMessagePackageIndex(0);
+        startForeground();
         startMeasurement();
         mEventBus.postSticky(new MeasurementServiceStatus(true));
+    }
+
+    private void startForeground() {
+        Notification.Builder builder = new Notification.Builder(this);
+        builder.setContentTitle("Sensor Dashboard");
+        builder.setContentText("Collecting sensor data..");
+        builder.setSmallIcon(R.drawable.ic_play_circle_outline_black_48dp);
+        startForeground(1, builder.build());
     }
 
     private void acquireWakeLock() {
@@ -102,7 +120,7 @@ public class MeasurementService extends Service implements SensorEventListener {
     }
 
     private void releaseWakeLock() {
-        if (mWakeLock != null && !mWakeLock.isHeld()) {
+        if (mWakeLock != null && mWakeLock.isHeld()) {
             mWakeLock.release();
             mWakeLock = null;
         }
@@ -174,12 +192,16 @@ public class MeasurementService extends Service implements SensorEventListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        mMyWearLogger.writeToLogFile(DateUtils.getCurrentTimeString() + " MeasurementService: " +
+                "onStartCommand");
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mMyWearLogger.writeToLogFile(DateUtils.getCurrentTimeString() + " MeasurementService: " +
+                "onDestroy");
         stopMeasurement();
         releaseWakeLock();
         stopThread();
@@ -227,6 +249,7 @@ public class MeasurementService extends Service implements SensorEventListener {
 
         long messagePackageId = System.currentTimeMillis();
         MessagePackage messagePackage = createMessagePackage(mAccelerometerSensorSamples, batteryPercentage);
+        mMyWearLogger.logChunkToFile(messagePackage);
 
         // Sending package in singleton holder
         mDataTransferHolder.getQueueOfMessagePackages().put(messagePackageId, messagePackage);
