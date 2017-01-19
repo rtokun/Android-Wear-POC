@@ -113,7 +113,10 @@ public class MainActivity extends BaseEventActivity implements
     }
 
     private void initUI() {
-        mTvVersion.setText("Version: " + BuildConfig.VERSION_NAME);
+        mTvVersion.setText("Application version: "
+                + BuildConfig.VERSION_NAME
+                + "."
+                + BuildConfig.VERSION_CODE);
 
         int samplingRate = mConfigController.getSamplingRate();
         mEDSamplingRate.setText(String.valueOf(samplingRate));

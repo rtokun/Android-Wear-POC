@@ -1,4 +1,4 @@
-package com.artyom.androidwearpoc.communication;
+package com.artyom.androidwearpoc.connectivity;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -7,10 +7,10 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.WearableListenerService;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
@@ -24,8 +24,6 @@ import com.artyom.androidwearpoc.util.WearConfigController;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.List;
-
 import timber.log.Timber;
 
 import static com.artyom.androidwearpoc.shared.CommonConstants.RESET_MEASUREMENT_PATH;
@@ -37,7 +35,7 @@ import static com.artyom.androidwearpoc.shared.CommonConstants.UPDATE_SAMPLING_R
  * Created by Artyom on 27/12/2016.
  */
 
-public class WearDataReceiverService extends WearableListenerService
+public class ConnectivityService extends WearableListenerService
         implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {

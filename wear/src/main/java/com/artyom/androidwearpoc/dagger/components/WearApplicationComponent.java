@@ -1,7 +1,9 @@
 package com.artyom.androidwearpoc.dagger.components;
 
 import com.artyom.androidwearpoc.MyWearApplication;
+import com.artyom.androidwearpoc.connectivity.ConnectivityController;
 import com.artyom.androidwearpoc.dagger.modules.WearConfigurationModule;
+import com.artyom.androidwearpoc.dagger.modules.WearConnectivityModule;
 import com.artyom.androidwearpoc.dagger.modules.WearDataHolderModule;
 import com.artyom.androidwearpoc.dagger.modules.WearEventBusModule;
 import com.artyom.androidwearpoc.dagger.modules.WearLogModule;
@@ -30,8 +32,11 @@ import dagger.Component;
         WearEventBusModule.class,
         WearSharedPrefsModule.class,
         WearConfigurationModule.class,
-        WearLogModule.class})
+        WearLogModule.class,
+        WearConnectivityModule.class})
 public interface WearApplicationComponent {
+
+    ConnectivityController getConnectivityController();
 
     MyWearLogger getMyWearLogger();
 

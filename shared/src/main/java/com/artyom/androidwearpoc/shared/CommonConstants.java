@@ -10,6 +10,8 @@ public class CommonConstants {
 
     public static final String WATCH_CAPABILITY = "fox_watch_capability";
 
+    public static final String MOBILE_CAPABILITY = "fox_mobile_capability";
+
     public static final String UPDATE_SAMPLING_RATE_PATH = "message/update_rate";
 
     public static final String UPDATE_SAMPLES_PER_PACKAGE_PATH =
@@ -30,6 +32,4 @@ public class CommonConstants {
     public static final int NUMBER_NOT_FOUND = -1;
 
     public static final String MESSAGE_PACKAGE_ID = "message_package_id";
-
-
 }
