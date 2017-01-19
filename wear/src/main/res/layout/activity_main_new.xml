@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.wearable.view.BoxInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg"
+    >
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="top"
+      android:gravity="center_horizontal|top"
+      android:orientation="vertical"
+      >
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:adjustViewBounds="true"
+        android:cropToPadding="true"
+        android:src="@drawable/app_logo"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center_vertical|end"
+        android:orientation="horizontal"
+        >
+
+      <ImageView
+          android:layout_marginEnd="4dp"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:src="@drawable/fox_logo"
+          />
+
+      <TextView
+          android:id="@+id/tv_app_version"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_alignParentEnd="true"
+          android:layout_centerVertical="true"
+          android:paddingEnd="8dp"
+          android:text="Bla bla bla"
+          android:textColor="@color/white"
+          android:textSize="14sp"
+          />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_connectivity_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:gravity="center_vertical"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        />
+
+  </LinearLayout>
+
+</android.support.wearable.view.BoxInsetLayout>

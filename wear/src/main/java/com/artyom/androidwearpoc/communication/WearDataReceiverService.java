@@ -1,22 +1,30 @@
-package com.artyom.androidwearpoc.connectivity;
+package com.artyom.androidwearpoc.communication;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.WearableListenerService;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.WearGoogleApiModule;
 import com.artyom.androidwearpoc.measurement.MeasurementServiceController;
+import com.artyom.androidwearpoc.shared.models.ConnectivityStatus;
 import com.artyom.androidwearpoc.shared.models.UpdateChunkLimitMessage;
 import com.artyom.androidwearpoc.shared.models.UpdateSamplingRateMessage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
 import com.artyom.androidwearpoc.util.WearConfigController;
+
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.List;
 
 import timber.log.Timber;
 
@@ -34,15 +42,17 @@ public class WearDataReceiverService extends WearableListenerService
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-    private static final long CLIENT_CONNECTION_TIMEOUT = 15;
+    private static final String
+            POC_MOBILE_CAPABILITY = "fox_mobile_capability";
 
     private GoogleApiClient mGoogleApiClient;
 
     private WearConfigController mConfigController;
 
-    private String mLocalNodeId;
-
     private MeasurementServiceController mMeasurementServiceController;
+
+    private EventBus mEventBus;
+
 
     @Override
     public void onCreate() {
@@ -53,11 +63,14 @@ public class WearDataReceiverService extends WearableListenerService
                 .build()
                 .googleApiClient();
 
-        mConfigController = ((MyWearApplication)getApplication()).getApplicationComponent()
+        mConfigController = ((MyWearApplication) getApplication()).getApplicationComponent()
                 .getWearConfigController();
 
-        mMeasurementServiceController = ((MyWearApplication)getApplication()).getApplicationComponent()
+        mMeasurementServiceController = ((MyWearApplication) getApplication()).getApplicationComponent()
                 .getMeasurementServiceController();
+
+        mEventBus = ((MyWearApplication) getApplication()).getApplicationComponent()
+                .getEventBus();
     }
 
     @Override
@@ -70,8 +83,7 @@ public class WearDataReceiverService extends WearableListenerService
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
-
-        switch (messageEvent.getPath()){
+        switch (messageEvent.getPath()) {
             case UPDATE_SAMPLING_RATE_PATH:
                 int newSamplingRate = getRate(messageEvent.getData());
                 mConfigController.updateSamplingRate(newSamplingRate);
@@ -86,6 +98,27 @@ public class WearDataReceiverService extends WearableListenerService
             case RESET_MEASUREMENT_PATH:
                 mMeasurementServiceController.resetMeasurementService();
                 break;
+        }
+    }
+
+
+    @Override
+    public void onCapabilityChanged(CapabilityInfo capabilityInfo) {
+        if (capabilityInfo.getName().equals(POC_MOBILE_CAPABILITY)) {
+            Node directlyConnectedNode = null;
+            for (Node node : capabilityInfo.getNodes()) {
+                if (node.isNearby()) {
+                    directlyConnectedNode = node;
+                }
+            }
+
+            if (directlyConnectedNode == null) {
+                Timber.i("not connected to mobile");
+                mEventBus.postSticky(new ConnectivityStatus(false));
+            } else {
+                Timber.i("Connected to mobile: %s", directlyConnectedNode.getDisplayName());
+                mEventBus.postSticky(new ConnectivityStatus(true));
+            }
         }
     }
 

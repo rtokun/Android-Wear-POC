@@ -105,7 +105,7 @@ public class MeasurementService extends Service implements SensorEventListener {
 
     private void startForeground() {
         Notification.Builder builder = new Notification.Builder(this);
-        builder.setContentTitle("Sensor Dashboard");
+        builder.setContentTitle("Measurement Service");
         builder.setContentText("Collecting sensor data..");
         builder.setSmallIcon(R.drawable.ic_play_circle_outline_black_48dp);
         startForeground(1, builder.build());
