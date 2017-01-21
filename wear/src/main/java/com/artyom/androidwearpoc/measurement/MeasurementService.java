@@ -158,7 +158,10 @@ public class MeasurementService extends Service implements SensorEventListener {
         Timber.d("initiating sensors");
 
         if (mAccelerometerSensor == null) {
-            mAccelerometerSensor = mSensorManager.getDefaultSensor(SENS_ACCELEROMETER);
+            mAccelerometerSensor = mSensorManager.getDefaultSensor(SENS_ACCELEROMETER, true);
+            if (mAccelerometerSensor == null){
+                mAccelerometerSensor = mSensorManager.getDefaultSensor(SENS_ACCELEROMETER);
+            }
         }
 
     }

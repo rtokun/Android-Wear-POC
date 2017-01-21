@@ -36,13 +36,10 @@ import com.artyom.androidwearpoc.shared.models.MessagePackage;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
 import com.artyom.androidwearpoc.util.ConfigController;
 import com.artyom.androidwearpoc.util.SharedPrefsController;
-import com.bytesizebit.androidutils.DateUtils;
 
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -51,7 +48,6 @@ import timber.log.Timber;
 
 import static com.artyom.androidwearpoc.shared.CommonConstants.SENSORS_MESSAGE;
 import static com.artyom.androidwearpoc.shared.DefaultConfiguration.MAX_ALLOWED_DIFF_BETWEEN_PACKAGES_IN_MILLIS;
-import static com.artyom.androidwearpoc.shared.DefaultConfiguration.DEFAULT_SAMPLES_PER_PACKAGE_LIMIT;
 import static com.artyom.androidwearpoc.shared.enums.DataTransferType.ASSET;
 
 /**
@@ -166,7 +162,8 @@ public class DataReceiverService extends WearableListenerService
 
         if (messagePackage != null) {
 
-            mMyLogger.logChunkToFile(messagePackage);
+            mMyLogger.logChunkDataToFile(messagePackage);
+            mMyLogger.logSampleGaps(messagePackage);
 
             Timber.d("received package, package index: %s, package amount: %s", messagePackage
                     .getIndex(), messagePackage.getAccelerometerSamples().size());
