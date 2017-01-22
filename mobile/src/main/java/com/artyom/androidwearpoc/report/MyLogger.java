@@ -3,10 +3,10 @@ package com.artyom.androidwearpoc.report;
 import android.os.AsyncTask;
 import android.os.Environment;
 
-import com.artyom.androidwearpoc.model.MessageData;
+import com.artyom.androidwearpoc.shared.models.ChunkData;
 import com.artyom.androidwearpoc.shared.DefaultConfiguration;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
-import com.artyom.androidwearpoc.shared.models.MessagePackage;
+import com.artyom.androidwearpoc.shared.models.SamplesChunk;
 import com.artyom.androidwearpoc.util.SharedPrefsController;
 import com.bytesizebit.androidutils.DateUtils;
 
@@ -21,15 +21,14 @@ import java.util.Locale;
 
 import timber.log.Timber;
 
+import static com.artyom.androidwearpoc.shared.CommonConstants.CHUNKS_LOG_FILE_NAME;
+import static com.artyom.androidwearpoc.shared.CommonConstants.SAMPLE_GAPS_LOG_FILE_NAME;
+
 /**
  * Created by Artyom-IDEO on 16-Jan-17.
  */
 
 public class MyLogger {
-
-    private static final String CHUNKS_LOG_FILE_NAME = "chunks_data";
-
-    private static final String SAMPLE_GAPS_LOG_FILE_NAME = "sample_gaps";
 
     private SharedPrefsController mSharedPrefsController;
 
@@ -48,7 +47,7 @@ public class MyLogger {
         return chunksFile.delete() && samplesFile.delete();
     }
 
-    public void logChunkDataToFile(MessagePackage messagePackage) {
+    public void logChunkDataToFile(SamplesChunk samplesChunk) {
         long currentTime = System.currentTimeMillis();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM-dd:HH:mm:ss:SSS", Locale
                 .getDefault());
@@ -57,37 +56,37 @@ public class MyLogger {
                 .append(DateUtils.millisecondsToString(currentTime, simpleDateFormat))
 
                 .append(" first sample at: ")
-                .append(DateUtils.millisecondsToString(messagePackage
+                .append(DateUtils.millisecondsToString(samplesChunk
                                 .getAccelerometerSamples()
                                 .get(0)
                                 .getTimestamp()
                         , simpleDateFormat))
 
                 .append(", last sample at: ")
-                .append(DateUtils.millisecondsToString(messagePackage
+                .append(DateUtils.millisecondsToString(samplesChunk
                                 .getAccelerometerSamples()
-                                .get(messagePackage.getAccelerometerSamples().size() - 1)
+                                .get(samplesChunk.getAccelerometerSamples().size() - 1)
                                 .getTimestamp()
                         , simpleDateFormat))
 
                 .append(", chunk index: ")
-                .append(messagePackage.getIndex())
+                .append(samplesChunk.getIndex())
 
                 .append(", samples: ")
-                .append(messagePackage.getAccelerometerSamples().size())
+                .append(samplesChunk.getAccelerometerSamples().size())
 
                 .append(", battery: ")
-                .append(messagePackage.getBatteryPercentage());
+                .append(samplesChunk.getBatteryPercentage());
 
         writeToLogFile(stringBuilder.toString());
     }
 
-    public void logSampleGaps(MessagePackage messagePackage) {
+    public void logSampleGaps(SamplesChunk samplesChunk) {
         LogSampleGapsTask gapsTask = new LogSampleGapsTask();
-        gapsTask.execute(messagePackage);
+        gapsTask.execute(samplesChunk);
     }
 
-    private class LogSampleGapsTask extends AsyncTask<MessagePackage, Void, Void> {
+    private class LogSampleGapsTask extends AsyncTask<SamplesChunk, Void, Void> {
 
         private File file;
 
@@ -99,7 +98,7 @@ public class MyLogger {
         }
 
         @Override
-        protected Void doInBackground(MessagePackage... params) {
+        protected Void doInBackground(SamplesChunk... params) {
             try {
                 List<AccelerometerSampleData> samples = params[0].getAccelerometerSamples();
 
@@ -110,7 +109,7 @@ public class MyLogger {
                     // previous chunk and first sample in the new arrived chunk. After the
                     // comparison we starting iterate on the samples inside new chunk.
                     if (prev == null) {
-                        MessageData lastChunkData = mSharedPrefsController.getLastMessage();
+                        ChunkData lastChunkData = mSharedPrefsController.getLastMessage();
                         if (lastChunkData != null){
                             boolean packagesValidTimesDiff = compareSampleTimes(lastChunkData
                                     .getLastSampleTimestamp(), next.getTimestamp());
@@ -138,7 +137,7 @@ public class MyLogger {
             return null;
         }
 
-        private void writeChunksGapToFile(MessageData lastChunkData,
+        private void writeChunksGapToFile(ChunkData lastChunkData,
                                           AccelerometerSampleData next,
                                           float batteryLevel) throws IOException {
             FileWriter filewriter = new FileWriter(file, true);
@@ -149,7 +148,7 @@ public class MyLogger {
             bw.close();
         }
 
-        private String createChunksGapString(MessageData lastChunkData,
+        private String createChunksGapString(ChunkData lastChunkData,
                                              AccelerometerSampleData next,
                                              float batteryLevel) {
             return "Chunks time gap! last sample in previous chunk at: "

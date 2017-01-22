@@ -6,6 +6,12 @@ package com.artyom.androidwearpoc.shared;
 
 public class CommonConstants {
 
+    public static final String LAST_MESSAGE_DATA = "wearable_message_data";
+
+    public static final String CHUNKS_LOG_FILE_NAME = "chunks_data";
+
+    public static final String SAMPLE_GAPS_LOG_FILE_NAME = "sample_gaps";
+
     public static final String SENSORS_MESSAGE = "sensors_message";
 
     public static final String WATCH_CAPABILITY = "fox_watch_capability";

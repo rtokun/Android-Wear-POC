@@ -6,13 +6,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.artyom.androidwearpoc.model.MessageData;
-import com.artyom.androidwearpoc.shared.models.MessagePackage;
+import com.artyom.androidwearpoc.shared.models.ChunkData;
+import com.artyom.androidwearpoc.shared.models.SamplesChunk;
 
 import javax.inject.Inject;
 
 import timber.log.Timber;
 
+import static com.artyom.androidwearpoc.shared.CommonConstants.LAST_MESSAGE_DATA;
 import static com.artyom.androidwearpoc.shared.CommonConstants.NUMBER_NOT_FOUND;
 import static com.artyom.androidwearpoc.shared.CommonConstants.STRING_NOT_FOUND;
 
@@ -23,16 +24,14 @@ public class SharedPrefsController {
 
     private Context mApplicationContext;
 
-    public static final String LAST_MESSAGE_DATA = "wearable_message_data";
-
     @Inject
     public SharedPrefsController(Context mApplicationContext) {
         this.mApplicationContext = mApplicationContext;
     }
 
-    public void saveMessage(MessagePackage message) {
-        MessageData messageData = mapWearPackageToMessageData(message);
-        String serializedMessageData = serializeToString(messageData);
+    public void saveMessage(SamplesChunk message) {
+        ChunkData chunkData = mapWearPackageToMessageData(message);
+        String serializedMessageData = serializeToString(chunkData);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences
                 (mApplicationContext);
         Timber.d("saving message data to shared preferences, message data: %s", serializedMessageData);
@@ -40,17 +39,17 @@ public class SharedPrefsController {
                 .putString(LAST_MESSAGE_DATA, serializedMessageData).commit();
     }
 
-    public MessageData getLastMessage() {
-        MessageData messageData = null;
+    public ChunkData getLastMessage() {
+        ChunkData chunkData = null;
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences
                 (mApplicationContext);
 
         String serializedMessageData = sharedPreferences.getString(LAST_MESSAGE_DATA, null);
         if (serializedMessageData != null) {
-            messageData = deserializeFromString(serializedMessageData, MessageData.class);
+            chunkData = deserializeFromString(serializedMessageData, ChunkData.class);
         }
 
-        return messageData;
+        return chunkData;
     }
 
     private <T> T deserializeFromString(String serializedMessageData, Class<T> type) {
@@ -58,25 +57,25 @@ public class SharedPrefsController {
         return gson.fromJson(serializedMessageData, type);
     }
 
-    private String serializeToString(MessageData messageData) {
+    private String serializeToString(ChunkData chunkData) {
         Gson gson = new Gson();
-        return gson.toJson(messageData);
+        return gson.toJson(chunkData);
     }
 
-    private MessageData mapWearPackageToMessageData(MessagePackage message) {
+    private ChunkData mapWearPackageToMessageData(SamplesChunk message) {
         int samplesAmount = message.getAccelerometerSamples().size();
 
-        MessageData messageData = new MessageData();
-        messageData.setPackageSize(samplesAmount);
-        messageData.setFirstSampleTimestamp(message.getAccelerometerSamples()
+        ChunkData chunkData = new ChunkData();
+        chunkData.setPackageSize(samplesAmount);
+        chunkData.setFirstSampleTimestamp(message.getAccelerometerSamples()
                 .get(0)
                 .getTimestamp());
-        messageData.setLastSampleTimestamp(message.getAccelerometerSamples()
+        chunkData.setLastSampleTimestamp(message.getAccelerometerSamples()
                 .get(samplesAmount - 1)
                 .getTimestamp());
-        messageData.setPackageIndex(message.getIndex());
+        chunkData.setPackageIndex(message.getIndex());
 
-        return messageData;
+        return chunkData;
     }
 
     public String getStringPreference(String key) {

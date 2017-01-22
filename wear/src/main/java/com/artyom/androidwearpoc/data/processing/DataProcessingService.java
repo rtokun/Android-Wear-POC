@@ -20,7 +20,7 @@ import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.WearGoogleApiModule;
 import com.artyom.androidwearpoc.data.DataTransferHolder;
 import com.artyom.androidwearpoc.shared.enums.DataTransferType;
-import com.artyom.androidwearpoc.shared.models.MessagePackage;
+import com.artyom.androidwearpoc.shared.models.SamplesChunk;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
 import com.artyom.androidwearpoc.util.WearSharedPrefsController;
 
@@ -78,14 +78,14 @@ public class DataProcessingService extends IntentService implements GoogleApiCli
             long messagePackageId = bundle.getLong(MESSAGE_PACKAGE_ID, -1);
 
             // Retrieving message package from data holder matching the ID
-            MessagePackage messagePackage = mDataTransferHolder
+            SamplesChunk samplesChunk = mDataTransferHolder
                     .getQueueOfMessagePackages()
                     .get(messagePackageId);
 
-            if (messagePackageId != -1 && messagePackage != null) {
+            if (messagePackageId != -1 && samplesChunk != null) {
 
                 Timber.d("message package id received successfully");
-                processData(messagePackage);
+                processData(samplesChunk);
 
                 deleteProcessedPackageFromHolder(messagePackageId);
             } else {
@@ -100,7 +100,7 @@ public class DataProcessingService extends IntentService implements GoogleApiCli
         mDataTransferHolder.getQueueOfMessagePackages().remove(messagePackageId);
     }
 
-    private void processData(MessagePackage messagePackage) {
+    private void processData(SamplesChunk samplesChunk) {
 
         PutDataRequest dataRequest;
 
@@ -108,35 +108,35 @@ public class DataProcessingService extends IntentService implements GoogleApiCli
         // message is sent to mobile. That way we can track if any of messages wasn't received on
         // mobile side
         int index = getIndex();
-        messagePackage.setIndex(index);
+        samplesChunk.setIndex(index);
         Timber.d("attached index %s to package", index);
         index++;
         updateIndex(index);
 
         if (DATA_TRANSFER_TYPE.equals(DataTransferType.ASSET)) {
-            dataRequest = packAssetData(messagePackage);
+            dataRequest = packAssetData(samplesChunk);
         } else {
-            dataRequest = packRegularData(messagePackage);
+            dataRequest = packRegularData(samplesChunk);
         }
 
         if (dataRequest != null && validateConnection()) {
-            Timber.d("sending package, package index: %s, package amount: %s", messagePackage
-                    .getIndex(), messagePackage.getAccelerometerSamples().size());
+            Timber.d("sending package, package index: %s, package amount: %s", samplesChunk
+                    .getIndex(), samplesChunk.getAccelerometerSamples().size());
             sendData(dataRequest);
         }
     }
 
     private void updateIndex(int index) {
-        mSharedPrefsController.setMessagePackageIndex(index);
+        mSharedPrefsController.setChunkIndex(index);
     }
 
     private int getIndex() {
-        return mSharedPrefsController.getMessagePackageIndex();
+        return mSharedPrefsController.getChunkIndex();
     }
 
-    private PutDataRequest packAssetData(MessagePackage messagePackage) {
+    private PutDataRequest packAssetData(SamplesChunk samplesChunk) {
 
-        Asset assetMessage = createAssetFromMessagePackage(messagePackage);
+        Asset assetMessage = createAssetFromMessagePackage(samplesChunk);
 
         PutDataMapRequest dataMap = PutDataMapRequest.create("/sensors/" + System.currentTimeMillis());
         dataMap.getDataMap().putAsset(SENSORS_MESSAGE, assetMessage);
@@ -145,8 +145,8 @@ public class DataProcessingService extends IntentService implements GoogleApiCli
 
     }
 
-    private Asset createAssetFromMessagePackage(MessagePackage messagePackage) {
-        byte[] messageInBytes = ParcelableUtil.marshall(messagePackage);
+    private Asset createAssetFromMessagePackage(SamplesChunk samplesChunk) {
+        byte[] messageInBytes = ParcelableUtil.marshall(samplesChunk);
         return Asset.createFromBytes(messageInBytes);
     }
 
@@ -168,9 +168,9 @@ public class DataProcessingService extends IntentService implements GoogleApiCli
                 });
     }
 
-    private PutDataRequest packRegularData(MessagePackage messagePackage) {
+    private PutDataRequest packRegularData(SamplesChunk samplesChunk) {
 
-        byte[] sensorsMessageByteArray = ParcelableUtil.marshall(messagePackage);
+        byte[] sensorsMessageByteArray = ParcelableUtil.marshall(samplesChunk);
 
         PutDataMapRequest dataMap = PutDataMapRequest.create("/sensors/" + System.currentTimeMillis());
         dataMap.getDataMap().putByteArray(SENSORS_MESSAGE, sensorsMessageByteArray);

@@ -1,6 +1,6 @@
 package com.artyom.androidwearpoc.data;
 
-import com.artyom.androidwearpoc.shared.models.MessagePackage;
+import com.artyom.androidwearpoc.shared.models.SamplesChunk;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,17 +10,17 @@ import java.util.Map;
  */
 public class DataTransferHolder {
 
-    private Map<Long, MessagePackage> queueOfMessagePackagesToSend;
+    private Map<Long, SamplesChunk> queueOfMessagePackagesToSend;
 
     public DataTransferHolder() {
         queueOfMessagePackagesToSend = new HashMap<>();
     }
 
-    public Map<Long, MessagePackage> getQueueOfMessagePackages() {
+    public Map<Long, SamplesChunk> getQueueOfMessagePackages() {
         return queueOfMessagePackagesToSend;
     }
 
-    public void setQueueOfMessagePackages(Map<Long, MessagePackage> queueOfMessagePackages) {
+    public void setQueueOfMessagePackages(Map<Long, SamplesChunk> queueOfMessagePackages) {
         this.queueOfMessagePackagesToSend = queueOfMessagePackages;
     }
 }

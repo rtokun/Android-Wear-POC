@@ -9,7 +9,6 @@ import com.google.android.gms.wearable.Wearable;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import com.artyom.androidwearpoc.error.ErrorProcessingService;
 import com.artyom.androidwearpoc.shared.CommonConstants;
 import com.artyom.androidwearpoc.shared.models.ConnectivityStatus;
 

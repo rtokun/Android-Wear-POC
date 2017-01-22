@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import java.util.List;
 
-public class MessagePackage implements Parcelable {
+public class SamplesChunk implements Parcelable {
 
     private float mBatteryPercentage;
 
@@ -13,25 +13,25 @@ public class MessagePackage implements Parcelable {
 
     private List<AccelerometerSampleData> mAccelerometerSamples;
 
-    public MessagePackage() {
+    public SamplesChunk() {
     }
 
-    protected MessagePackage(Parcel in) {
+    protected SamplesChunk(Parcel in) {
         mBatteryPercentage = in.readFloat();
         mAccelerometerSamples = in.createTypedArrayList(AccelerometerSampleData.CREATOR);
         mIndex = in.readInt();
     }
 
-    public static final Creator<MessagePackage> CREATOR = new Creator<MessagePackage>() {
+    public static final Creator<SamplesChunk> CREATOR = new Creator<SamplesChunk>() {
 
         @Override
-        public MessagePackage createFromParcel(Parcel in) {
-            return new MessagePackage(in);
+        public SamplesChunk createFromParcel(Parcel in) {
+            return new SamplesChunk(in);
         }
 
         @Override
-        public MessagePackage[] newArray(int size) {
-            return new MessagePackage[size];
+        public SamplesChunk[] newArray(int size) {
+            return new SamplesChunk[size];
         }
     };
 

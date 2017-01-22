@@ -25,14 +25,14 @@ import com.artyom.androidwearpoc.db.AccelerometerSamplesRepo;
 import com.artyom.androidwearpoc.db.BatteryLevelSamplesRepo;
 import com.artyom.androidwearpoc.model.AccelerometerSampleTEMPORAL;
 import com.artyom.androidwearpoc.model.BatteryLevelSample;
-import com.artyom.androidwearpoc.model.MessageData;
+import com.artyom.androidwearpoc.shared.models.ChunkData;
 import com.artyom.androidwearpoc.model.converter.AccelerometerSamplesConverter;
 import com.artyom.androidwearpoc.report.MyLogger;
 import com.artyom.androidwearpoc.report.ReportController;
 import com.artyom.androidwearpoc.report.log.DataMismatchEvent;
 import com.artyom.androidwearpoc.shared.DefaultConfiguration;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
-import com.artyom.androidwearpoc.shared.models.MessagePackage;
+import com.artyom.androidwearpoc.shared.models.SamplesChunk;
 import com.artyom.androidwearpoc.shared.utils.ParcelableUtil;
 import com.artyom.androidwearpoc.util.ConfigController;
 import com.artyom.androidwearpoc.util.SharedPrefsController;
@@ -152,40 +152,40 @@ public class DataReceiverService extends WearableListenerService
     private void processData(DataEvent event) {
         Timber.d("New package arrived from wearable, processing data...");
 
-        MessagePackage messagePackage;
+        SamplesChunk samplesChunk;
 
         if (DefaultConfiguration.DATA_TRANSFER_TYPE == ASSET) {
-            messagePackage = getMessageFromAsset(event);
+            samplesChunk = getMessageFromAsset(event);
         } else {
-            messagePackage = getMessageFromDefaultEvent(event);
+            samplesChunk = getMessageFromDefaultEvent(event);
         }
 
-        if (messagePackage != null) {
+        if (samplesChunk != null) {
 
-            mMyLogger.logChunkDataToFile(messagePackage);
-            mMyLogger.logSampleGaps(messagePackage);
+            mMyLogger.logChunkDataToFile(samplesChunk);
+            mMyLogger.logSampleGaps(samplesChunk);
 
-            Timber.d("received package, package index: %s, package amount: %s", messagePackage
-                    .getIndex(), messagePackage.getAccelerometerSamples().size());
+            Timber.d("received package, package index: %s, package amount: %s", samplesChunk
+                    .getIndex(), samplesChunk.getAccelerometerSamples().size());
 
-            MessageData lastSavedMessageData = mSharedPrefsController.getLastMessage();
+            ChunkData lastSavedChunkData = mSharedPrefsController.getLastMessage();
 
-            if (lastSavedMessageData != null) {
-                verifyValues(lastSavedMessageData, messagePackage);
+            if (lastSavedChunkData != null) {
+                verifyValues(lastSavedChunkData, samplesChunk);
             }
 
-            int messageIndex = messagePackage.getIndex();
+            int messageIndex = samplesChunk.getIndex();
 
             //TODO: revert back to - List<AccelerometerSample> converted =
             // AccelerometerSamplesConverter.convert(messagePackage.getAccelerometerSamples());
             List<AccelerometerSampleTEMPORAL> converted =
-                    AccelerometerSamplesConverter.convert(messagePackage.getAccelerometerSamples(), messageIndex);
+                    AccelerometerSamplesConverter.convert(samplesChunk.getAccelerometerSamples(), messageIndex);
             mAccelerometerSamplesRepo.saveSamples(converted);
 
-            float batteryPercentage = messagePackage.getBatteryPercentage();
+            float batteryPercentage = samplesChunk.getBatteryPercentage();
             mBatteryLevelSamplesRepo.saveSample(new BatteryLevelSample(batteryPercentage, new Date()));
 
-            mSharedPrefsController.saveMessage(messagePackage);
+            mSharedPrefsController.saveMessage(samplesChunk);
 
             Timber.d("Wearable message arrived, message index: %s battery level: %s", messageIndex,
                     batteryPercentage);
@@ -194,7 +194,7 @@ public class DataReceiverService extends WearableListenerService
         }
     }
 
-    private MessagePackage getMessageFromAsset(DataEvent event) {
+    private SamplesChunk getMessageFromAsset(DataEvent event) {
 
         DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
         Asset messageAsset = dataMapItem.getDataMap().getAsset(SENSORS_MESSAGE);
@@ -204,29 +204,29 @@ public class DataReceiverService extends WearableListenerService
 
         try {
             byte[] messageBytes = ByteStreams.toByteArray(messageAssetInputStream);
-            return ParcelableUtil.unmarshall(messageBytes, MessagePackage.CREATOR);
+            return ParcelableUtil.unmarshall(messageBytes, SamplesChunk.CREATOR);
         } catch (Exception e) {
             Timber.e("failed to convert input stream to byte array, reason: %s", e);
             return null;
         }
     }
 
-    private MessagePackage getMessageFromDefaultEvent(DataEvent event) {
+    private SamplesChunk getMessageFromDefaultEvent(DataEvent event) {
 
         byte[] data = DataMapItem
                 .fromDataItem(event.getDataItem())
                 .getDataMap()
                 .getByteArray(SENSORS_MESSAGE);
 
-        return ParcelableUtil.unmarshall(data, MessagePackage.CREATOR);
+        return ParcelableUtil.unmarshall(data, SamplesChunk.CREATOR);
     }
 
-    private void verifyValues(@NonNull MessageData lastSavedMessageData,
-                              @NonNull MessagePackage newMessagePackage) {
+    private void verifyValues(@NonNull ChunkData lastSavedChunkData,
+                              @NonNull SamplesChunk newSamplesChunk) {
 
         // Retrieving important data from new arrived package
-        int newPackageSize = newMessagePackage.getAccelerometerSamples().size();
-        AccelerometerSampleData firstSampleInNewPackage = newMessagePackage.getAccelerometerSamples().get(0);
+        int newPackageSize = newSamplesChunk.getAccelerometerSamples().size();
+        AccelerometerSampleData firstSampleInNewPackage = newSamplesChunk.getAccelerometerSamples().get(0);
 
         // Creating custom crashlytics event to be sent if any mismatch prsents in new arrived
         // data from wearable
@@ -239,7 +239,7 @@ public class DataReceiverService extends WearableListenerService
         }
 
         long firstSampleTime = firstSampleInNewPackage.getTimestamp();
-        long lastSampleTime = lastSavedMessageData.getLastSampleTimestamp();
+        long lastSampleTime = lastSavedChunkData.getLastSampleTimestamp();
 
         if (!packagesTimeDifferenceValid(lastSampleTime, firstSampleTime)) {
             dataMismatchEvent.updatePackagesTimesMismatch(lastSampleTime, firstSampleTime);

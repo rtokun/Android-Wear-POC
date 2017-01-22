@@ -25,7 +25,7 @@ import com.artyom.androidwearpoc.log.MyWearLogger;
 import com.artyom.androidwearpoc.shared.DefaultConfiguration;
 import com.artyom.androidwearpoc.shared.models.AccelerometerSampleData;
 import com.artyom.androidwearpoc.shared.models.MeasurementServiceStatus;
-import com.artyom.androidwearpoc.shared.models.MessagePackage;
+import com.artyom.androidwearpoc.shared.models.SamplesChunk;
 import com.artyom.androidwearpoc.shared.models.UpdateChunkLimitMessage;
 import com.artyom.androidwearpoc.shared.models.UpdateSamplingRateMessage;
 import com.artyom.androidwearpoc.util.WearConfigController;
@@ -42,7 +42,6 @@ import javax.inject.Inject;
 import timber.log.Timber;
 
 import static com.artyom.androidwearpoc.shared.CommonConstants.MESSAGE_PACKAGE_ID;
-import static com.artyom.androidwearpoc.shared.DefaultConfiguration.DEFAULT_SAMPLES_PER_PACKAGE_LIMIT;
 
 /**
  * Created by Artyom-IDEO on 25-Dec-16. Serive in charge of measure the accelerometer and pack the
@@ -52,9 +51,6 @@ import static com.artyom.androidwearpoc.shared.DefaultConfiguration.DEFAULT_SAMP
 public class MeasurementService extends Service implements SensorEventListener {
 
     public final static int SENS_ACCELEROMETER = Sensor.TYPE_ACCELEROMETER;
-
-    // For test only
-//    public static final int SAMPLING_RATE_IN_MILLIS = 200000;
 
     private static int mCounter;
 
@@ -96,8 +92,8 @@ public class MeasurementService extends Service implements SensorEventListener {
         mEventBus.register(this);
         startThread();
         acquireWakeLock();
-        resetPackageValues();
-        mSharedPrefsController.setMessagePackageIndex(0);
+        resetChunkValues();
+        mSharedPrefsController.setChunkIndex(0);
         startForeground();
         startMeasurement();
         mEventBus.postSticky(new MeasurementServiceStatus(true));
@@ -149,7 +145,7 @@ public class MeasurementService extends Service implements SensorEventListener {
         }
     }
 
-    private void resetPackageValues() {
+    private void resetChunkValues() {
         mCounter = 0;
         mAccelerometerSensorSamples = new ArrayList<>();
     }
@@ -237,36 +233,39 @@ public class MeasurementService extends Service implements SensorEventListener {
             logData(newEventData, calculateTimeDiff(newEventData));
         }
 
-        addNewEventToPackage(newEventData);
+        addNewEventToChunk(newEventData);
         updateCurrentValues(newEventData);
 
         if (mCounter >= mConfigController.getSamplesPerChunk()) {
-            float batteryPercentage = getBatteryStatus();
-            sendPackageToMobileDevice(batteryPercentage);
-            resetPackageValues();
+//            sendPackageToMobileDevice(batteryPercentage);
+            SamplesChunk chunk = createChunk(mAccelerometerSensorSamples);
+            mMyWearLogger.logChunkDataToFile(chunk);
+            mMyWearLogger.logSamples(chunk);
+            resetChunkValues();
         }
     }
 
-    private void sendPackageToMobileDevice(float batteryPercentage) {
+    private void sendPackageToMobileDevice() {
         Timber.i("sending package to processing service");
 
         long messagePackageId = System.currentTimeMillis();
-        MessagePackage messagePackage = createMessagePackage(mAccelerometerSensorSamples, batteryPercentage);
-        mMyWearLogger.logChunkToFile(messagePackage);
+        SamplesChunk samplesChunk = createChunk(mAccelerometerSensorSamples);
+        mMyWearLogger.logChunkDataToFile(samplesChunk);
 
         // Sending package in singleton holder
-        mDataTransferHolder.getQueueOfMessagePackages().put(messagePackageId, messagePackage);
+        mDataTransferHolder.getQueueOfMessagePackages().put(messagePackageId, samplesChunk);
 
         Intent sendPackageIntent = new Intent(this, DataProcessingService.class);
         sendPackageIntent.putExtra(MESSAGE_PACKAGE_ID, messagePackageId);
         startService(sendPackageIntent);
     }
 
-    private MessagePackage createMessagePackage(ArrayList<AccelerometerSampleData> mAccelerometerSensorSamples, float batteryPercentage) {
-        MessagePackage messagePackage = new MessagePackage();
-        messagePackage.setAccelerometerSamples(mAccelerometerSensorSamples);
-        messagePackage.setBatteryPercentage(batteryPercentage);
-        return messagePackage;
+    private SamplesChunk createChunk(ArrayList<AccelerometerSampleData> mAccelerometerSensorSamples) {
+        float batteryPercentage = getBatteryStatus();
+        SamplesChunk samplesChunk = new SamplesChunk();
+        samplesChunk.setAccelerometerSamples(mAccelerometerSensorSamples);
+        samplesChunk.setBatteryPercentage(batteryPercentage);
+        return samplesChunk;
     }
 
     private float getBatteryStatus() {
@@ -287,7 +286,7 @@ public class MeasurementService extends Service implements SensorEventListener {
         return batteryPercentage;
     }
 
-    private void addNewEventToPackage(AccelerometerSampleData newEventData) {
+    private void addNewEventToChunk(AccelerometerSampleData newEventData) {
         mAccelerometerSensorSamples.add(newEventData);
     }
 

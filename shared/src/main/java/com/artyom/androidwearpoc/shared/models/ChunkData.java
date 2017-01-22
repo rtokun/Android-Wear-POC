@@ -1,10 +1,10 @@
-package com.artyom.androidwearpoc.model;
+package com.artyom.androidwearpoc.shared.models;
 
 /**
  * Created by Artyom-IDEO on 10-Jan-17.
  */
 
-public class MessageData {
+public class ChunkData {
 
     private int packageSize;
 
