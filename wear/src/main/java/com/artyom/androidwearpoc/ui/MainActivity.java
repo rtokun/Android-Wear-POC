@@ -3,9 +3,7 @@ package com.artyom.androidwearpoc.ui;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -16,14 +14,10 @@ import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.R;
 import com.artyom.androidwearpoc.base.BaseEventActivity;
 import com.artyom.androidwearpoc.connectivity.ConnectivityController;
-import com.artyom.androidwearpoc.measurement.MeasurementServiceController;
 import com.artyom.androidwearpoc.shared.models.ConnectivityStatus;
-import com.artyom.androidwearpoc.util.WearConfigController;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
-import javax.inject.Inject;
 
 public class MainActivity extends BaseEventActivity {
 
@@ -47,7 +41,7 @@ public class MainActivity extends BaseEventActivity {
         mConnectivityController = ((MyWearApplication) getApplication())
                 .getApplicationComponent()
                 .getConnectivityController();
-        setContentView(R.layout.activity_main_new);
+        setContentView(R.layout.activity_main);
         findViews();
         updateAppVersion();
         setLoadingUI(true);
