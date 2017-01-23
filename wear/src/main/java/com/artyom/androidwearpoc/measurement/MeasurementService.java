@@ -237,10 +237,10 @@ public class MeasurementService extends Service implements SensorEventListener {
         updateCurrentValues(newEventData);
 
         if (mCounter >= mConfigController.getSamplesPerChunk()) {
-//            sendPackageToMobileDevice(batteryPercentage);
-            SamplesChunk chunk = createChunk(mAccelerometerSensorSamples);
-            mMyWearLogger.logChunkDataToFile(chunk);
-            mMyWearLogger.logSamples(chunk);
+            sendPackageToMobileDevice();
+//            SamplesChunk chunk = createChunk(mAccelerometerSensorSamples);
+//            mMyWearLogger.logChunkDataToFile(chunk);
+//            mMyWearLogger.logSamples(chunk);
             resetChunkValues();
         }
     }

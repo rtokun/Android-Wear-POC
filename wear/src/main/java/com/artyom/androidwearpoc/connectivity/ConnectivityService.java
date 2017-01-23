@@ -16,6 +16,7 @@ import com.artyom.androidwearpoc.MyWearApplication;
 import com.artyom.androidwearpoc.dagger.components.DaggerGoogleComponent;
 import com.artyom.androidwearpoc.dagger.modules.WearGoogleApiModule;
 import com.artyom.androidwearpoc.measurement.MeasurementServiceController;
+import com.artyom.androidwearpoc.shared.CommonConstants;
 import com.artyom.androidwearpoc.shared.models.ConnectivityStatus;
 import com.artyom.androidwearpoc.shared.models.UpdateChunkLimitMessage;
 import com.artyom.androidwearpoc.shared.models.UpdateSamplingRateMessage;
@@ -39,9 +40,6 @@ public class ConnectivityService extends WearableListenerService
         implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
-
-    private static final String
-            POC_MOBILE_CAPABILITY = "fox_mobile_capability";
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -102,7 +100,7 @@ public class ConnectivityService extends WearableListenerService
 
     @Override
     public void onCapabilityChanged(CapabilityInfo capabilityInfo) {
-        if (capabilityInfo.getName().equals(POC_MOBILE_CAPABILITY)) {
+        if (capabilityInfo.getName().equals(CommonConstants.MOBILE_CAPABILITY)) {
             Node directlyConnectedNode = null;
             for (Node node : capabilityInfo.getNodes()) {
                 if (node.isNearby()) {
