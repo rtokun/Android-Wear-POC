@@ -33,9 +33,9 @@ public class MyWearLogger {
 
     private static final String DELIMETER = ",";
 
-    private static final String CSV = "CSV";
+    private static final String CSV_EXTENSION = "csv";
 
-    private static final String LOG = "log";
+    private static final String LOG_EXTENSION = "log";
 
     private Context appContext;
 
@@ -101,7 +101,7 @@ public class MyWearLogger {
         private File logsFile;
 
         public LogChunkDataTask() {
-            logsFile = createFile(LOG, CHUNKS_LOG_FILE_NAME);
+            logsFile = createFile(CHUNKS_LOG_FILE_NAME, LOG_EXTENSION);
         }
 
         @Override
@@ -127,7 +127,7 @@ public class MyWearLogger {
         private SimpleDateFormat simpleDateFormat;
 
         public LogSamplesTask() {
-            file = createFile(CSV, SAMPLE_GAPS_LOG_FILE_NAME);
+            file = createFile(SAMPLE_GAPS_LOG_FILE_NAME, CSV_EXTENSION);
             simpleDateFormat = new SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.getDefault());
         }
 
@@ -222,9 +222,9 @@ public class MyWearLogger {
 
     }
 
-    private File createFile(String name, String format) {
+    private File createFile(String name, String extension) {
         String date = new SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(new Date());
-        String fileName = name + "_" + date + "." + format;
+        String fileName = name + "_" + date + "." + extension;
 
         File externalStorageDirectory = appContext.getExternalFilesDir(Environment.DIRECTORY_DCIM);
         File androidPoCDir = new File(externalStorageDirectory, "WearPoC");
@@ -232,7 +232,7 @@ public class MyWearLogger {
         logsDir.mkdirs();
 
         File file = new File(logsDir, fileName);
-        if (format.equals(CSV) && !file.exists()) {
+        if (extension.equals(CSV_EXTENSION) && !file.exists()) {
             createTitles(file);
         }
         return file;
